@@ -57,8 +57,8 @@
 
 :root {
   /* CallistheniX brand colors */
-  --cx-orange: oklch(0.65 0.22 40);       /* #FF5C00 electric orange */
-  --cx-orange-dim: oklch(0.55 0.18 40);   /* dimmer orange for hover */
+  --cx-green: oklch(0.68 0.18 142);       /* #4ADE80 light green */
+  --cx-green-dim: oklch(0.58 0.14 142);   /* dimmer green for hover */
   --cx-bone: oklch(0.96 0.008 80);        /* #F5F0E8 bone white */
   --cx-charcoal: oklch(0.12 0.005 285);   /* #0D0D0D near-black */
   --cx-slate-dark: oklch(0.17 0.006 285); /* #1A1A1A dark slate */
@@ -71,32 +71,32 @@
   --card-foreground: oklch(0.96 0.008 80);
   --popover: oklch(0.15 0.006 285);
   --popover-foreground: oklch(0.96 0.008 80);
-  --primary: oklch(0.65 0.22 40);
+  --primary: oklch(0.68 0.18 142);
   --primary-foreground: oklch(0.10 0.005 285);
   --secondary: oklch(0.20 0.006 285);
   --secondary-foreground: oklch(0.96 0.008 80);
   --muted: oklch(0.20 0.006 285);
   --muted-foreground: oklch(0.65 0.01 285);
-  --accent: oklch(0.65 0.22 40);
+  --accent: oklch(0.68 0.18 142);
   --accent-foreground: oklch(0.10 0.005 285);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.65 0.22 40);
-  --chart-1: oklch(0.65 0.22 40);
-  --chart-2: oklch(0.55 0.18 40);
-  --chart-3: oklch(0.45 0.14 40);
-  --chart-4: oklch(0.35 0.10 40);
-  --chart-5: oklch(0.25 0.06 40);
+  --ring: oklch(0.68 0.18 142);
+  --chart-1: oklch(0.68 0.18 142);
+  --chart-2: oklch(0.60 0.16 142);
+  --chart-3: oklch(0.52 0.14 142);
+  --chart-4: oklch(0.44 0.12 142);
+  --chart-5: oklch(0.36 0.10 142);
   --sidebar: oklch(0.12 0.005 285);
   --sidebar-foreground: oklch(0.96 0.008 80);
-  --sidebar-primary: oklch(0.65 0.22 40);
+  --sidebar-primary: oklch(0.68 0.18 142);
   --sidebar-primary-foreground: oklch(0.10 0.005 285);
   --sidebar-accent: oklch(0.20 0.006 285);
   --sidebar-accent-foreground: oklch(0.96 0.008 80);
   --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.65 0.22 40);
+  --sidebar-ring: oklch(0.68 0.18 142);
 }
 
 @layer base {
@@ -123,8 +123,8 @@
   /* Custom scrollbar */
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: oklch(0.10 0.005 285); }
-  ::-webkit-scrollbar-thumb { background: oklch(0.65 0.22 40 / 60%); border-radius: 2px; }
-  ::-webkit-scrollbar-thumb:hover { background: oklch(0.65 0.22 40); }
+  ::-webkit-scrollbar-thumb { background: oklch(0.68 0.18 142 / 60%); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: oklch(0.68 0.18 142); }
 }
 
 @layer components {
@@ -174,7 +174,7 @@
   }
 
   .cx-btn-primary {
-    background: oklch(0.65 0.22 40);
+    background: oklch(0.68 0.18 142);
     color: oklch(0.10 0.005 285);
     font-family: 'Barlow Condensed', sans-serif;
     font-weight: 700;
@@ -187,8 +187,8 @@
     transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
   }
   .cx-btn-primary:hover {
-    background: oklch(0.55 0.18 40);
-    box-shadow: 0 4px 20px oklch(0.65 0.22 40 / 40%);
+    background: oklch(0.58 0.14 142);
+    box-shadow: 0 4px 20px oklch(0.68 0.18 142 / 40%);
   }
   .cx-btn-primary:active {
     transform: scale(0.97);
@@ -208,8 +208,8 @@
     transition: border-color 0.15s, color 0.15s;
   }
   .cx-btn-ghost:hover {
-    border-color: oklch(0.65 0.22 40);
-    color: oklch(0.65 0.22 40);
+    border-color: oklch(0.68 0.18 142);
+    color: oklch(0.68 0.18 142);
   }
 
   .cx-label {
@@ -218,7 +218,7 @@
     font-size: 0.75rem;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: oklch(0.65 0.22 40);
+    color: oklch(0.68 0.18 142);
   }
 
   .cx-section-title {
@@ -237,7 +237,7 @@
   }
   .cx-progress-fill {
     height: 100%;
-    background: oklch(0.65 0.22 40);
+    background: oklch(0.68 0.18 142);
     border-radius: 2px;
     transition: width 0.5s ease;
   }
@@ -250,9 +250,9 @@
     text-transform: uppercase;
     padding: 0.2rem 0.6rem;
     border-radius: 2px;
-    background: oklch(0.65 0.22 40 / 15%);
-    color: oklch(0.65 0.22 40);
-    border: 1px solid oklch(0.65 0.22 40 / 30%);
+    background: oklch(0.68 0.18 142 / 15%);
+    color: oklch(0.68 0.18 142);
+    border: 1px solid oklch(0.68 0.18 142 / 30%);
   }
 
   .cx-input {
@@ -268,19 +268,19 @@
   }
   .cx-input:focus {
     outline: none;
-    border-color: oklch(0.65 0.22 40);
+    border-color: oklch(0.68 0.18 142);
   }
   .cx-input::placeholder {
     color: oklch(0.50 0.01 285);
   }
 
-  /* Diagonal orange accent line */
+  /* Diagonal green accent line */
   .cx-accent-line::after {
     content: '';
     display: block;
     width: 3rem;
     height: 3px;
-    background: oklch(0.65 0.22 40);
+    background: oklch(0.68 0.18 142);
     margin-top: 0.5rem;
   }
 
