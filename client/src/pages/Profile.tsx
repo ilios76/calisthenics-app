@@ -71,7 +71,7 @@ export default function ProfilePage() {
         <div className="flex items-center gap-5 mb-8 p-5 cx-card">
           <div
             className="w-16 h-16 rounded flex items-center justify-center text-2xl font-black flex-shrink-0"
-            style={{ background: 'oklch(0.65 0.22 40)', color: 'oklch(0.10 0.005 285)', fontFamily: 'Barlow Condensed, sans-serif' }}
+            style={{ background: 'oklch(0.68 0.18 142)', color: 'oklch(0.10 0.005 285)', fontFamily: 'Barlow Condensed, sans-serif' }}
           >
             {profile.name.charAt(0).toUpperCase()}
           </div>
@@ -93,7 +93,7 @@ export default function ProfilePage() {
             { label: 'BMI Status', value: bmiCat },
           ].map(s => (
             <div key={s.label} className="cx-card p-4 text-center">
-              <p style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '2rem', color: 'oklch(0.65 0.22 40)', lineHeight: 1 }}>{s.value}</p>
+              <p style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '2rem', color: 'oklch(0.68 0.18 142)', lineHeight: 1 }}>{s.value}</p>
               <p className="cx-label" style={{ fontSize: '0.6rem', marginTop: '4px' }}>{s.label}</p>
             </div>
           ))}
@@ -136,9 +136,9 @@ export default function ProfilePage() {
                         className="py-2 rounded"
                         style={{
                           fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.9rem', letterSpacing: '0.1em', textTransform: 'uppercase',
-                          background: form.sex === s ? 'oklch(0.65 0.22 40)' : 'oklch(0.17 0.006 285)',
+                          background: form.sex === s ? 'oklch(0.68 0.18 142)' : 'oklch(0.17 0.006 285)',
                           color: form.sex === s ? 'oklch(0.10 0.005 285)' : 'oklch(0.70 0.008 80)',
-                          border: '1px solid ' + (form.sex === s ? 'oklch(0.65 0.22 40)' : 'oklch(1 0 0 / 10%)'),
+                          border: '1px solid ' + (form.sex === s ? 'oklch(0.68 0.18 142)' : 'oklch(1 0 0 / 10%)'),
                         }}
                       >
                         {s}
@@ -174,8 +174,8 @@ export default function ProfilePage() {
                         style={{
                           fontFamily: 'DM Sans, sans-serif', fontSize: '0.85rem',
                           background: form.goal === g ? 'oklch(0.65 0.22 40 / 12%)' : 'oklch(0.17 0.006 285)',
-                          color: form.goal === g ? 'oklch(0.65 0.22 40)' : 'oklch(0.70 0.008 80)',
-                          border: '1px solid ' + (form.goal === g ? 'oklch(0.65 0.22 40)' : 'oklch(1 0 0 / 10%)'),
+                          color: form.goal === g ? 'oklch(0.68 0.18 142)' : 'oklch(0.70 0.008 80)',
+                          border: '1px solid ' + (form.goal === g ? 'oklch(0.68 0.18 142)' : 'oklch(1 0 0 / 10%)'),
                         }}
                       >
                         {getGoalLabel(g)}
@@ -193,9 +193,9 @@ export default function ProfilePage() {
                         className="py-2 rounded"
                         style={{
                           fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.08em', textTransform: 'uppercase',
-                          background: form.fitnessLevel === l ? 'oklch(0.65 0.22 40)' : 'oklch(0.17 0.006 285)',
+                          background: form.fitnessLevel === l ? 'oklch(0.68 0.18 142)' : 'oklch(0.17 0.006 285)',
                           color: form.fitnessLevel === l ? 'oklch(0.10 0.005 285)' : 'oklch(0.70 0.008 80)',
-                          border: '1px solid ' + (form.fitnessLevel === l ? 'oklch(0.65 0.22 40)' : 'oklch(1 0 0 / 10%)'),
+                          border: '1px solid ' + (form.fitnessLevel === l ? 'oklch(0.68 0.18 142)' : 'oklch(1 0 0 / 10%)'),
                         }}
                       >
                         {l}

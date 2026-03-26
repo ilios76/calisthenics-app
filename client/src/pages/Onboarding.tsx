@@ -74,7 +74,7 @@ export default function OnboardingPage() {
           </div>
           <h2 className="cx-section-title text-5xl text-white mb-4" style={{ fontFamily: 'Barlow Condensed, sans-serif' }}>
             TRAIN LIKE<br />
-            <span style={{ color: 'oklch(0.65 0.22 40)' }}>AN ATHLETE</span>
+            <span style={{ color: 'oklch(0.68 0.18 142)' }}>AN ATHLETE</span>
           </h2>
           <p style={{ color: 'oklch(0.70 0.008 80)', fontFamily: 'DM Sans, sans-serif', maxWidth: '360px' }}>
             Personalized calisthenics programs built around your body, your goals, and your schedule.
@@ -86,11 +86,11 @@ export default function OnboardingPage() {
       <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 py-12 md:px-16">
         {/* Logo */}
         <div className="flex items-center gap-2 mb-12">
-          <div className="w-8 h-8 flex items-center justify-center" style={{ background: 'oklch(0.65 0.22 40)', borderRadius: '2px' }}>
+          <div className="w-8 h-8 flex items-center justify-center" style={{ background: 'oklch(0.68 0.18 142)', borderRadius: '2px' }}>
             <Dumbbell size={16} style={{ color: 'oklch(0.10 0.005 285)' }} />
           </div>
           <span className="text-xl font-black tracking-wider uppercase" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
-            Callistheni<span style={{ color: 'oklch(0.65 0.22 40)' }}>X</span>
+            Callistheni<span style={{ color: 'oklch(0.68 0.18 142)' }}>X</span>
           </span>
         </div>
 
@@ -113,7 +113,7 @@ export default function OnboardingPage() {
             <span className="cx-label mb-4 block">Welcome to CallistheniX</span>
             <h1 className="cx-section-title text-6xl mb-6" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
               YOUR BODY.<br />
-              <span style={{ color: 'oklch(0.65 0.22 40)' }}>YOUR RULES.</span>
+              <span style={{ color: 'oklch(0.68 0.18 142)' }}>YOUR RULES.</span>
             </h1>
             <p className="mb-8" style={{ color: 'oklch(0.70 0.008 80)', fontFamily: 'DM Sans, sans-serif', lineHeight: 1.7, maxWidth: '420px' }}>
               In 2 minutes, we'll build a fully personalized calisthenics program and nutrition plan — tailored to your body, your goal, and your current fitness level.
@@ -125,7 +125,7 @@ export default function OnboardingPage() {
                 { icon: <Flame size={20} />, label: 'Live Trainer Mode' },
               ].map(f => (
                 <div key={f.label} className="cx-card p-4 text-center" style={{ borderRadius: '4px' }}>
-                  <div className="flex justify-center mb-2" style={{ color: 'oklch(0.65 0.22 40)' }}>{f.icon}</div>
+                  <div className="flex justify-center mb-2" style={{ color: 'oklch(0.68 0.18 142)' }}>{f.icon}</div>
                   <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'oklch(0.80 0.008 80)' }}>{f.label}</p>
                 </div>
               ))}
@@ -172,9 +172,9 @@ export default function OnboardingPage() {
                         fontSize: '1rem',
                         letterSpacing: '0.1em',
                         textTransform: 'uppercase',
-                        background: form.sex === s ? 'oklch(0.65 0.22 40)' : 'oklch(0.17 0.006 285)',
+                        background: form.sex === s ? 'oklch(0.68 0.18 142)' : 'oklch(0.17 0.006 285)',
                         color: form.sex === s ? 'oklch(0.10 0.005 285)' : 'oklch(0.70 0.008 80)',
-                        border: form.sex === s ? '1px solid oklch(0.65 0.22 40)' : '1px solid oklch(1 0 0 / 12%)',
+                        border: form.sex === s ? '1px solid oklch(0.68 0.18 142)' : '1px solid oklch(1 0 0 / 12%)',
                       }}
                     >
                       {s === 'male' ? '♂ Male' : '♀ Female'}
@@ -282,13 +282,13 @@ export default function OnboardingPage() {
                   className="w-full p-4 rounded text-left transition-all duration-150"
                   style={{
                     background: form.goal === g.value ? 'oklch(0.65 0.22 40 / 12%)' : 'oklch(0.17 0.006 285)',
-                    border: form.goal === g.value ? '1px solid oklch(0.65 0.22 40)' : '1px solid oklch(1 0 0 / 10%)',
+                    border: form.goal === g.value ? '1px solid oklch(0.68 0.18 142)' : '1px solid oklch(1 0 0 / 10%)',
                   }}
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{g.icon}</span>
                     <div>
-                      <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '1.1rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: form.goal === g.value ? 'oklch(0.65 0.22 40)' : 'oklch(0.90 0.008 80)' }}>
+                      <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '1.1rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: form.goal === g.value ? 'oklch(0.68 0.18 142)' : 'oklch(0.90 0.008 80)' }}>
                         {g.label}
                       </p>
                       <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.82rem', color: 'oklch(0.60 0.008 80)', marginTop: '2px' }}>
@@ -337,12 +337,12 @@ export default function OnboardingPage() {
                   className="w-full p-4 rounded text-left transition-all duration-150"
                   style={{
                     background: form.fitnessLevel === l.value ? 'oklch(0.65 0.22 40 / 12%)' : 'oklch(0.17 0.006 285)',
-                    border: form.fitnessLevel === l.value ? '1px solid oklch(0.65 0.22 40)' : '1px solid oklch(1 0 0 / 10%)',
+                    border: form.fitnessLevel === l.value ? '1px solid oklch(0.68 0.18 142)' : '1px solid oklch(1 0 0 / 10%)',
                   }}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '1.1rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: form.fitnessLevel === l.value ? 'oklch(0.65 0.22 40)' : 'oklch(0.90 0.008 80)' }}>
+                      <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '1.1rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: form.fitnessLevel === l.value ? 'oklch(0.68 0.18 142)' : 'oklch(0.90 0.008 80)' }}>
                         {l.label}
                       </p>
                       <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.82rem', color: 'oklch(0.60 0.008 80)', marginTop: '2px' }}>

@@ -61,7 +61,7 @@ export default function DashboardPage() {
             { label: 'Sessions Done', value: completedSessions.toString(), unit: 'workouts', icon: <Zap size={16} /> },
           ].map(stat => (
             <div key={stat.label} className="cx-card p-5">
-              <div className="flex items-center gap-2 mb-3" style={{ color: 'oklch(0.65 0.22 40)' }}>
+              <div className="flex items-center gap-2 mb-3" style={{ color: 'oklch(0.68 0.18 142)' }}>
                 {stat.icon}
                 <span className="cx-label" style={{ fontSize: '0.65rem' }}>{stat.label}</span>
               </div>
@@ -96,7 +96,7 @@ export default function DashboardPage() {
                 className="relative overflow-hidden rounded"
                 style={{ background: 'oklch(0.15 0.006 285)', border: '1px solid oklch(1 0 0 / 8%)' }}
               >
-                <div className="absolute top-0 left-0 w-1 h-full" style={{ background: 'oklch(0.65 0.22 40)' }} />
+                <div className="absolute top-0 left-0 w-1 h-full" style={{ background: 'oklch(0.68 0.18 142)' }} />
                 <div className="p-6 pl-8">
                   <div className="flex items-start justify-between mb-4">
                     <div>
@@ -119,7 +119,7 @@ export default function DashboardPage() {
                       { label: 'Per Session', value: `${topProgram.sessionDurationMin}`, unit: 'minutes' },
                     ].map(s => (
                       <div key={s.label}>
-                        <p className="font-number text-3xl" style={{ fontFamily: 'Bebas Neue, cursive', color: 'oklch(0.65 0.22 40)' }}>{s.value}</p>
+                        <p className="font-number text-3xl" style={{ fontFamily: 'Bebas Neue, cursive', color: 'oklch(0.68 0.18 142)' }}>{s.value}</p>
                         <p className="cx-label" style={{ fontSize: '0.65rem' }}>{s.label}</p>
                         <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.008 80)' }}>{s.unit}</p>
                       </div>
@@ -163,7 +163,7 @@ export default function DashboardPage() {
               >
                 <div
                   className="w-10 h-10 flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'oklch(0.65 0.22 40 / 15%)', borderRadius: '4px', color: 'oklch(0.65 0.22 40)' }}
+                  style={{ background: 'oklch(0.65 0.22 40 / 15%)', borderRadius: '4px', color: 'oklch(0.68 0.18 142)' }}
                 >
                   {action.icon}
                 </div>
@@ -186,7 +186,7 @@ export default function DashboardPage() {
                 style={{ background: 'oklch(0.15 0.006 285)', border: '1px solid oklch(1 0 0 / 8%)' }}
               >
                 <span className="cx-label mb-2 block" style={{ fontSize: '0.65rem' }}>Today's Nutrition Target</span>
-                <p className="font-number text-4xl mb-1" style={{ fontFamily: 'Bebas Neue, cursive', color: 'oklch(0.65 0.22 40)' }}>
+                <p className="font-number text-4xl mb-1" style={{ fontFamily: 'Bebas Neue, cursive', color: 'oklch(0.68 0.18 142)' }}>
                   {dailyCals} <span style={{ fontSize: '1.5rem', color: 'oklch(0.60 0.008 80)' }}>kcal</span>
                 </p>
                 <div className="grid grid-cols-3 gap-2 mt-3">
@@ -222,7 +222,7 @@ export default function DashboardPage() {
                 return (
                   <div key={exId} className="cx-card p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="font-number text-2xl" style={{ fontFamily: 'Bebas Neue, cursive', color: 'oklch(0.65 0.22 40)' }}>
+                      <span className="font-number text-2xl" style={{ fontFamily: 'Bebas Neue, cursive', color: 'oklch(0.68 0.18 142)' }}>
                         {String(i + 1).padStart(2, '0')}
                       </span>
                     </div>

@@ -49,9 +49,9 @@ export default function ProgramsPage() {
                 fontSize: '0.85rem',
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',
-                background: filter === f ? 'oklch(0.65 0.22 40)' : 'oklch(0.17 0.006 285)',
+                background: filter === f ? 'oklch(0.68 0.18 142)' : 'oklch(0.17 0.006 285)',
                 color: filter === f ? 'oklch(0.10 0.005 285)' : 'oklch(0.65 0.008 80)',
-                border: '1px solid ' + (filter === f ? 'oklch(0.65 0.22 40)' : 'oklch(1 0 0 / 10%)'),
+                border: '1px solid ' + (filter === f ? 'oklch(0.68 0.18 142)' : 'oklch(1 0 0 / 10%)'),
               }}
             >
               {f === 'recommended' ? `For You (${recommended.length})` : `All Programs (${programs.length})`}
@@ -69,7 +69,7 @@ export default function ProgramsPage() {
               style={{ borderRadius: '4px', overflow: 'hidden' }}
             >
               {/* Color accent top bar */}
-              <div style={{ height: '3px', background: 'oklch(0.65 0.22 40)' }} />
+              <div style={{ height: '3px', background: 'oklch(0.68 0.18 142)' }} />
               <div className="p-5">
                 <div className="flex gap-2 mb-3 flex-wrap">
                   {p.tags.slice(0, 2).map(t => <span key={t} className="cx-tag">{t}</span>)}
@@ -88,7 +88,7 @@ export default function ProgramsPage() {
                     { icon: <Dumbbell size={12} />, val: p.difficulty },
                   ].map((s, i) => (
                     <div key={i} className="flex items-center gap-1.5">
-                      <span style={{ color: 'oklch(0.65 0.22 40)' }}>{s.icon}</span>
+                      <span style={{ color: 'oklch(0.68 0.18 142)' }}>{s.icon}</span>
                       <span style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'oklch(0.65 0.008 80)' }}>
                         {s.val}
                       </span>
@@ -121,7 +121,7 @@ export default function ProgramsPage() {
             style={{ background: 'oklch(0.13 0.005 285)', border: '1px solid oklch(1 0 0 / 10%)' }}
             onClick={e => e.stopPropagation()}
           >
-            <div style={{ height: '3px', background: 'oklch(0.65 0.22 40)' }} />
+            <div style={{ height: '3px', background: 'oklch(0.68 0.18 142)' }} />
             <div className="p-6">
               <div className="flex items-start justify-between mb-4">
                 <div>
@@ -149,7 +149,7 @@ export default function ProgramsPage() {
                   { label: 'Per Session', value: `${selected.sessionDurationMin} min` },
                 ].map(s => (
                   <div key={s.label} className="text-center">
-                    <p style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '1.8rem', color: 'oklch(0.65 0.22 40)', lineHeight: 1 }}>{s.value}</p>
+                    <p style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '1.8rem', color: 'oklch(0.68 0.18 142)', lineHeight: 1 }}>{s.value}</p>
                     <p className="cx-label" style={{ fontSize: '0.65rem', marginTop: '4px' }}>{s.label}</p>
                   </div>
                 ))}

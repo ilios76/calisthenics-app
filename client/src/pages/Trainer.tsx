@@ -1,36 +1,13 @@
 // ============================================================
 // CallistheniX – Live Trainer Page
-// Full-screen exercise mode with timer, sets, GIF demo, instructions
+// Full-screen exercise mode with timer, sets, YouTube video, instructions
 // ============================================================
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { getExercisesByIds } from '@/lib/data';
+import { getRandomQuote } from '@/lib/quotes';
 import { Play, Pause, SkipForward, ChevronLeft, CheckCircle, Info } from 'lucide-react';
 import { toast } from 'sonner';
-
-
-
-// Animated GIF demos from public fitness sources
-const EXERCISE_ANIMATED: Record<string, string> = {
-  push_up: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcHVwdnVhZzJ2MzZtNHBhcGJlZzBtNXZtNXZtNXZtNXZtNXZtNQ/3oKIPrc2ngFZ6BTyww/giphy.gif',
-  pull_up: 'https://media.giphy.com/media/l0HlBO7eyXzSZkJri/giphy.gif',
-  squat: 'https://media.giphy.com/media/26BRv0ThflsHCqDrG/giphy.gif',
-  burpee: 'https://media.giphy.com/media/3oKIPrc2ngFZ6BTyww/giphy.gif',
-  plank: 'https://media.giphy.com/media/3oKIPrc2ngFZ6BTyww/giphy.gif',
-  lunge: 'https://media.giphy.com/media/3oKIPrc2ngFZ6BTyww/giphy.gif',
-  jumping_jack: 'https://media.giphy.com/media/3oKIPrc2ngFZ6BTyww/giphy.gif',
-  mountain_climber: 'https://media.giphy.com/media/3oKIPrc2ngFZ6BTyww/giphy.gif',
-  high_knees: 'https://media.giphy.com/media/3oKIPrc2ngFZ6BTyww/giphy.gif',
-  dip: 'https://media.giphy.com/media/3oKIPrc2ngFZ6BTyww/giphy.gif',
-  pike_push_up: 'https://media.giphy.com/media/3oKIPrc2ngFZ6BTyww/giphy.gif',
-  leg_raise: 'https://media.giphy.com/media/3oKIPrc2ngFZ6BTyww/giphy.gif',
-  diamond_push_up: 'https://media.giphy.com/media/3oKIPrc2ngFZ6BTyww/giphy.gif',
-  glute_bridge: 'https://media.giphy.com/media/3oKIPrc2ngFZ6BTyww/giphy.gif',
-  tricep_dip: 'https://media.giphy.com/media/3oKIPrc2ngFZ6BTyww/giphy.gif',
-  superman: 'https://media.giphy.com/media/3oKIPrc2ngFZ6BTyww/giphy.gif',
-};
-
-
 
 type Phase = 'preview' | 'exercise' | 'rest' | 'complete';
 
@@ -43,6 +20,8 @@ export default function TrainerPage() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [showTips, setShowTips] = useState(false);
+  const [currentQuote, setCurrentQuote] = useState(getRandomQuote());
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   if (!selectedProgram) {
     return (
@@ -77,13 +56,25 @@ export default function TrainerPage() {
     return () => clearTimeout(t);
   }, [isRunning, timeLeft, phase]);
 
+  // Play sound when timer ends
+  const playTimerSound = () => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {
+        console.log('Timer finished!');
+      });
+    }
+  };
+
   const handleTimerEnd = useCallback(() => {
+    playTimerSound();
     setIsRunning(false);
     if (phase === 'exercise') {
       if (setNumber < totalSets) {
         setPhase('rest');
         setTimeLeft(currentEx?.restSeconds ?? 60);
         setIsRunning(true);
+        setCurrentQuote(getRandomQuote());
       } else {
         // Move to next exercise
         if (exIndex < totalExercises - 1) {
@@ -91,6 +82,7 @@ export default function TrainerPage() {
           setSetNumber(1);
           setPhase('preview');
           setIsRunning(false);
+          setCurrentQuote(getRandomQuote());
         } else {
           setPhase('complete');
           setCompletedSessions(completedSessions + 1);
@@ -131,6 +123,7 @@ export default function TrainerPage() {
       setSetNumber(1);
       setPhase('preview');
       setIsRunning(false);
+      setCurrentQuote(getRandomQuote());
     } else {
       setPhase('complete');
       setCompletedSessions(completedSessions + 1);
@@ -158,37 +151,20 @@ export default function TrainerPage() {
   if (phase === 'complete') {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'oklch(0.10 0.005 285)' }}>
-        <div className="text-center max-w-md px-6 animate-cx-slide-up">
-          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style={{ background: 'oklch(0.65 0.22 40 / 15%)', border: '2px solid oklch(0.65 0.22 40)' }}>
-            <CheckCircle size={40} style={{ color: 'oklch(0.65 0.22 40)' }} />
-          </div>
-          <h2 className="cx-section-title text-5xl mb-3" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
-            WORKOUT<br /><span style={{ color: 'oklch(0.65 0.22 40)' }}>COMPLETE!</span>
-          </h2>
-          <p style={{ fontFamily: 'DM Sans, sans-serif', color: 'oklch(0.65 0.008 80)', marginBottom: '32px' }}>
-            You crushed {currentDay.name} — {currentDay.focus}. Rest up and come back stronger.
+        <div className="text-center">
+          <CheckCircle size={80} style={{ color: 'oklch(0.68 0.18 142)', marginBottom: '24px' }} />
+          <h1 style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '2.5rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'oklch(0.96 0.008 80)', marginBottom: '16px' }}>
+            Workout Complete!
+          </h1>
+          <p style={{ color: 'oklch(0.65 0.01 285)', fontFamily: 'DM Sans, sans-serif', marginBottom: '32px' }}>
+            You crushed it! Keep up the momentum.
           </p>
-          <div className="grid grid-cols-2 gap-4 mb-8">
-            <div className="cx-card p-4 text-center">
-              <p style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '2.5rem', color: 'oklch(0.65 0.22 40)', lineHeight: 1 }}>{totalExercises}</p>
-              <p className="cx-label" style={{ fontSize: '0.65rem' }}>Exercises</p>
-            </div>
-            <div className="cx-card p-4 text-center">
-              <p style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '2.5rem', color: 'oklch(0.65 0.22 40)', lineHeight: 1 }}>{completedSessions}</p>
-              <p className="cx-label" style={{ fontSize: '0.65rem' }}>Total Sessions</p>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <button className="cx-btn-ghost flex-1" onClick={() => setCurrentView('dashboard')}>
-              Dashboard
-            </button>
-            <button className="cx-btn-primary flex-1" onClick={() => {
-              setExIndex(0); setSetNumber(1); setPhase('preview'); setIsRunning(false);
-              if (dayIndex < selectedProgram.days.length - 1) setDayIndex(d => d + 1);
-            }}>
-              Next Day
-            </button>
-          </div>
+          <button
+            className="cx-btn-primary"
+            onClick={() => setCurrentView('dashboard')}
+          >
+            Back to Dashboard
+          </button>
         </div>
       </div>
     );
@@ -196,251 +172,200 @@ export default function TrainerPage() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'oklch(0.10 0.005 285)' }}>
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid oklch(1 0 0 / 8%)' }}>
-        <button
-          className="flex items-center gap-2"
-          onClick={() => setCurrentView('programs')}
-          style={{ color: 'oklch(0.60 0.008 80)', fontFamily: 'DM Sans, sans-serif', fontSize: '0.85rem' }}
-        >
-          <ChevronLeft size={16} /> Back
-        </button>
-        <div className="text-center">
-          <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.85rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'oklch(0.65 0.22 40)' }}>
-            {currentDay.name}
-          </p>
-          <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.008 80)' }}>
-            {currentDay.focus}
-          </p>
+      {/* Header */}
+      <div style={{ background: 'oklch(0.12 0.005 285)', borderBottom: '1px solid oklch(1 0 0 / 8%)', padding: '16px 24px' }}>
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={() => setCurrentView('programs')}
+            className="flex items-center gap-2"
+            style={{ color: 'oklch(0.68 0.18 142)', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.85rem' }}
+          >
+            <ChevronLeft size={18} /> Back
+          </button>
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'oklch(0.65 0.01 285)', marginBottom: '4px' }}>
+              {currentDay.name}
+            </p>
+            <p style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '1.2rem', color: 'oklch(0.96 0.008 80)' }}>
+              {currentEx?.name}
+            </p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'oklch(0.65 0.01 285)' }}>
+              {exIndex + 1} / {totalExercises}
+            </p>
+            <p style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '1.2rem', color: 'oklch(0.68 0.18 142)' }}>
+              Set {setNumber} / {totalSets}
+            </p>
+          </div>
         </div>
-        <div style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.82rem', color: 'oklch(0.55 0.008 80)' }}>
-          {exIndex + 1}/{totalExercises}
+        {/* Progress bar */}
+        <div className="cx-progress-bar">
+          <div className="cx-progress-fill" style={{ width: `${overallProgress}%` }} />
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="cx-progress-bar" style={{ borderRadius: 0, height: '3px' }}>
-        <div className="cx-progress-fill" style={{ width: `${overallProgress}%`, borderRadius: 0 }} />
-      </div>
-
-      <div className="flex-1 flex flex-col lg:flex-row">
-        {/* Left: Exercise GIF + Info */}
-        <div className="lg:w-1/2 flex flex-col">
-          {/* GIF display */}
-          <div
-            className="relative flex items-center justify-center"
-            style={{ background: 'oklch(0.08 0.004 285)', minHeight: '280px', flex: 1 }}
-          >
-            {phase === 'rest' ? (
-              <div className="text-center animate-cx-fade">
-                <p className="font-number text-8xl animate-cx-pulse" style={{ fontFamily: 'Bebas Neue, cursive', color: 'oklch(0.65 0.22 40)' }}>
-                  REST
+      {/* Main content */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
+        {/* Exercise video/GIF */}
+        <div className="relative w-full max-w-2xl mb-8" style={{ aspectRatio: '16/9', background: 'oklch(0.12 0.005 285)', borderRadius: '8px', overflow: 'hidden', border: '1px solid oklch(1 0 0 / 8%)' }}>
+          {phase === 'preview' ? (
+            <div className="w-full h-full flex items-center justify-center" style={{ background: 'oklch(0.15 0.006 285)' }}>
+              <div className="text-center">
+                <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'oklch(0.68 0.18 142)', marginBottom: '16px' }}>
+                  GET READY
                 </p>
-                <p style={{ fontFamily: 'DM Sans, sans-serif', color: 'oklch(0.60 0.008 80)', marginTop: '8px' }}>
-                  Catch your breath
-                </p>
-              </div>
-            ) : (
-              <>
-                <img
-                  key={currentEx?.id}
-                  src={EXERCISE_ANIMATED[currentEx?.id] || EXERCISE_ANIMATED.push_up}
-                  alt={currentEx?.name}
-                  className="max-h-64 object-contain animate-cx-fade"
-                  style={{ maxWidth: '100%' }}
-                  onError={e => {
-                    // Fallback to a placeholder exercise illustration
-                    (e.target as HTMLImageElement).style.display = 'none';
-                  }}
-                />
-                {phase === 'preview' && (
-                  <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'oklch(0 0 0 / 40%)' }}>
-                    <div className="text-center">
-                      <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'oklch(0.65 0.22 40)', marginBottom: '8px' }}>
-                        GET READY
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Exercise name + tags */}
-          <div className="p-5" style={{ borderTop: '1px solid oklch(1 0 0 / 8%)' }}>
-            <div className="flex gap-2 mb-2 flex-wrap">
-              {currentEx?.muscleGroups.map(mg => (
-                <span key={mg} className="cx-tag">{mg.replace('_', ' ')}</span>
-              ))}
-              <span className="cx-tag">{currentEx?.difficulty}</span>
-            </div>
-            <h2 className="cx-section-title text-4xl" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
-              {currentEx?.name.toUpperCase()}
-            </h2>
-          </div>
-        </div>
-
-        {/* Right: Timer + Controls + Instructions */}
-        <div className="lg:w-1/2 flex flex-col p-6 gap-6">
-          {/* Set tracker */}
-          <div className="flex gap-2 items-center">
-            <span className="cx-label" style={{ fontSize: '0.7rem' }}>Sets:</span>
-            {Array.from({ length: totalSets }).map((_, i) => (
-              <div
-                key={i}
-                className="w-8 h-8 flex items-center justify-center rounded"
-                style={{
-                  background: i < setNumber - 1 ? 'oklch(0.65 0.22 40)' : i === setNumber - 1 ? 'oklch(0.65 0.22 40 / 20%)' : 'oklch(0.17 0.006 285)',
-                  border: i === setNumber - 1 ? '1px solid oklch(0.65 0.22 40)' : '1px solid oklch(1 0 0 / 10%)',
-                  fontFamily: 'Bebas Neue, cursive',
-                  fontSize: '1rem',
-                  color: i < setNumber - 1 ? 'oklch(0.10 0.005 285)' : i === setNumber - 1 ? 'oklch(0.65 0.22 40)' : 'oklch(0.50 0.008 80)',
-                }}
-              >
-                {i + 1}
-              </div>
-            ))}
-            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.8rem', color: 'oklch(0.55 0.008 80)', marginLeft: '4px' }}>
-              Set {setNumber} of {totalSets}
-            </span>
-          </div>
-
-          {/* Main timer / rep display */}
-          <div
-            className="flex-1 flex flex-col items-center justify-center rounded py-8"
-            style={{ background: 'oklch(0.13 0.005 285)', border: '1px solid oklch(1 0 0 / 8%)' }}
-          >
-            {phase === 'rest' ? (
-              <>
-                <span className="cx-label mb-2">Rest Time</span>
-                <p className="font-number animate-cx-pulse" style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '6rem', color: 'oklch(0.65 0.22 40)', lineHeight: 1 }}>
-                  {formatTime(timeLeft)}
-                </p>
-                <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.85rem', color: 'oklch(0.55 0.008 80)', marginTop: '8px' }}>
-                  Next: Set {setNumber + 1} of {totalSets}
+                <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '1rem', color: 'oklch(0.65 0.01 285)', marginBottom: '24px' }}>
+                  {currentEx?.name}
                 </p>
                 <button
-                  className="cx-btn-ghost mt-4"
-                  onClick={() => { setIsRunning(false); startExercise(); setSetNumber(s => s + 1); }}
-                  style={{ fontSize: '0.8rem', padding: '0.5rem 1.5rem' }}
+                  onClick={startExercise}
+                  className="cx-btn-primary"
                 >
-                  Skip Rest
+                  Start Exercise
                 </button>
-              </>
-            ) : isTimeBased && phase === 'exercise' ? (
-              <>
-                <span className="cx-label mb-2">Time Remaining</span>
-                <p className="font-number animate-cx-pulse" style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '6rem', color: 'oklch(0.65 0.22 40)', lineHeight: 1 }}>
-                  {formatTime(timeLeft)}
-                </p>
-                <div className="flex gap-4 mt-6">
-                  <button
-                    onClick={() => setIsRunning(r => !r)}
-                    className="w-14 h-14 rounded-full flex items-center justify-center"
-                    style={{ background: 'oklch(0.65 0.22 40 / 15%)', border: '1px solid oklch(0.65 0.22 40)', color: 'oklch(0.65 0.22 40)' }}
-                  >
-                    {isRunning ? <Pause size={22} /> : <Play size={22} />}
-                  </button>
-                  <button
-                    onClick={completeSet}
-                    className="w-14 h-14 rounded-full flex items-center justify-center"
-                    style={{ background: 'oklch(0.65 0.22 40)', color: 'oklch(0.10 0.005 285)' }}
-                  >
-                    <SkipForward size={22} />
-                  </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* YouTube video player */}
+              {currentEx?.youtubeVideoId && (
+                <div className="w-full h-full flex items-center justify-center">
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    src={`https://www.youtube.com/embed/${currentEx.youtubeVideoId}?autoplay=0&controls=1`}
+                    title={currentEx.name}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    style={{ maxHeight: '400px' }}
+                  />
                 </div>
-              </>
-            ) : (
-              <>
-                <span className="cx-label mb-2">Target</span>
-                <p className="font-number" style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '6rem', color: 'oklch(0.65 0.22 40)', lineHeight: 1 }}>
-                  {currentEx?.reps}
-                </p>
-                <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '1.2rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'oklch(0.65 0.008 80)', marginTop: '4px' }}>
-                  REPS
-                </p>
-              </>
-            )}
-          </div>
-
-          {/* Action buttons */}
-          {phase === 'preview' && (
-            <button className="cx-btn-primary w-full flex items-center justify-center gap-2" onClick={startExercise}>
-              <Play size={18} /> Start Exercise
-            </button>
+              )}
+            </>
           )}
-          {phase === 'exercise' && !isTimeBased && (
-            <button className="cx-btn-primary w-full flex items-center justify-center gap-2" onClick={completeSet}>
-              <CheckCircle size={18} /> Done — {setNumber < totalSets ? `Rest & Next Set` : 'Next Exercise'}
-            </button>
+        </div>
+
+        {/* Timer and controls */}
+        <div className="w-full max-w-md text-center">
+          {phase === 'preview' ? (
+            <div>
+              <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.9rem', color: 'oklch(0.65 0.01 285)', marginBottom: '24px' }}>
+                {currentEx?.instructions[0]}
+              </p>
+            </div>
+          ) : isTimeBased && phase === 'exercise' ? (
+            <>
+              <span className="cx-label mb-2">Time Remaining</span>
+              <p className="animate-cx-pulse" style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '6rem', color: 'oklch(0.68 0.18 142)', lineHeight: 1 }}>
+                {formatTime(timeLeft)}
+              </p>
+              <div className="flex gap-4 mt-6 justify-center">
+                <button
+                  onClick={() => setIsRunning(r => !r)}
+                  className="w-14 h-14 rounded-full flex items-center justify-center"
+                  style={{ background: 'oklch(0.68 0.18 142 / 15%)', border: '1px solid oklch(0.68 0.18 142)', color: 'oklch(0.68 0.18 142)' }}
+                >
+                  {isRunning ? <Pause size={22} /> : <Play size={22} />}
+                </button>
+                <button
+                  onClick={completeSet}
+                  className="w-14 h-14 rounded-full flex items-center justify-center"
+                  style={{ background: 'oklch(0.68 0.18 142)', color: 'oklch(0.10 0.005 285)' }}
+                >
+                  <SkipForward size={22} />
+                </button>
+              </div>
+            </>
+          ) : !isTimeBased && phase === 'exercise' ? (
+            <>
+              <span className="cx-label mb-2">Reps</span>
+              <p style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '5rem', color: 'oklch(0.68 0.18 142)', lineHeight: 1, marginBottom: '24px' }}>
+                {currentEx?.reps}
+              </p>
+              <div className="flex gap-4 justify-center">
+                <button
+                  onClick={completeSet}
+                  className="cx-btn-primary"
+                >
+                  Set Complete
+                </button>
+              </div>
+            </>
+          ) : phase === 'rest' ? (
+            <>
+              <span className="cx-label mb-2">Rest Time</span>
+              <p className="animate-cx-pulse" style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '5rem', color: 'oklch(0.68 0.18 142)', lineHeight: 1, marginBottom: '24px' }}>
+                {formatTime(timeLeft)}
+              </p>
+              <div className="flex gap-4 justify-center">
+                <button
+                  onClick={() => setIsRunning(r => !r)}
+                  className="w-14 h-14 rounded-full flex items-center justify-center"
+                  style={{ background: 'oklch(0.68 0.18 142 / 15%)', border: '1px solid oklch(0.68 0.18 142)', color: 'oklch(0.68 0.18 142)' }}
+                >
+                  {isRunning ? <Pause size={22} /> : <Play size={22} />}
+                </button>
+              </div>
+            </>
+          ) : null}
+
+          {/* Motivational Quote - shown during rest */}
+          {phase === 'rest' && (
+            <div className="animate-cx-slide-up p-4 rounded mt-6" style={{ background: 'oklch(0.68 0.18 142 / 8%)', border: '1px solid oklch(0.68 0.18 142 / 30%)' }}>
+              <div className="flex items-start gap-2">
+                <span style={{ color: 'oklch(0.68 0.18 142)', fontSize: '1.5rem', flexShrink: 0 }}>💪</span>
+                <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.9rem', color: 'oklch(0.85 0.008 80)', lineHeight: 1.8, fontStyle: 'italic' }}>
+                  "{currentQuote}"
+                </p>
+              </div>
+            </div>
           )}
 
           {/* Instructions */}
-          <div>
+          <div className="mt-8">
             <button
               className="flex items-center gap-2 mb-3"
               onClick={() => setShowTips(t => !t)}
-              style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.85rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'oklch(0.65 0.22 40)' }}
+              style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.85rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'oklch(0.68 0.18 142)' }}
             >
               <Info size={14} /> {showTips ? 'Hide' : 'Show'} Instructions & Tips
             </button>
-
-            {showTips && currentEx && (
-              <div className="animate-cx-slide-up space-y-4">
-                <div className="p-4 rounded" style={{ background: 'oklch(0.13 0.005 285)', border: '1px solid oklch(1 0 0 / 8%)' }}>
-                  <p className="cx-label mb-2" style={{ fontSize: '0.65rem' }}>How To Do It</p>
-                  <ol className="space-y-1">
-                    {currentEx.instructions.map((inst, i) => (
-                      <li key={i} className="flex gap-2" style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.83rem', color: 'oklch(0.70 0.008 80)', lineHeight: 1.6 }}>
-                        <span style={{ color: 'oklch(0.65 0.22 40)', fontFamily: 'Bebas Neue, cursive', fontSize: '1rem', flexShrink: 0 }}>{i + 1}.</span>
-                        {inst}
-                      </li>
-                    ))}
-                  </ol>
+            {showTips && (
+              <div className="animate-cx-slide-up" style={{ background: 'oklch(0.17 0.006 285)', border: '1px solid oklch(1 0 0 / 10%)', borderRadius: '4px', padding: '12px' }}>
+                <div style={{ marginBottom: '12px' }}>
+                  <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'oklch(0.68 0.18 142)', marginBottom: '8px' }}>
+                    How to Perform
+                  </p>
+                  {currentEx?.instructions.map((inst, i) => (
+                    <p key={i} style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.85rem', color: 'oklch(0.80 0.008 80)', lineHeight: 1.6, marginBottom: '4px' }}>
+                      {i + 1}. {inst}
+                    </p>
+                  ))}
                 </div>
-                <div className="p-4 rounded" style={{ background: 'oklch(0.13 0.005 285)', border: '1px solid oklch(0.65 0.22 40 / 20%)' }}>
-                  <p className="cx-label mb-2" style={{ fontSize: '0.65rem' }}>Pro Tips</p>
-                  <ul className="space-y-1">
-                    {currentEx.tips.map((tip, i) => (
-                      <li key={i} className="flex gap-2" style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.83rem', color: 'oklch(0.70 0.008 80)', lineHeight: 1.6 }}>
-                        <span style={{ color: 'oklch(0.65 0.22 40)', flexShrink: 0 }}>→</span>
-                        {tip}
-                      </li>
-                    ))}
-                  </ul>
+                <div>
+                  <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'oklch(0.68 0.18 142)', marginBottom: '8px' }}>
+                    Pro Tips
+                  </p>
+                  {currentEx?.tips.map((tip, i) => (
+                    <p key={i} style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.85rem', color: 'oklch(0.80 0.008 80)', lineHeight: 1.6, marginBottom: '4px' }}>
+                      • {tip}
+                    </p>
+                  ))}
                 </div>
               </div>
             )}
           </div>
-
-          {/* Exercise list */}
-          <div>
-            <p className="cx-label mb-2" style={{ fontSize: '0.65rem' }}>Workout Queue</p>
-            <div className="space-y-1.5">
-              {exercises.map((ex, i) => (
-                <div
-                  key={ex.id}
-                  className="flex items-center gap-3 p-2 rounded"
-                  style={{
-                    background: i === exIndex ? 'oklch(0.65 0.22 40 / 10%)' : 'transparent',
-                    border: i === exIndex ? '1px solid oklch(0.65 0.22 40 / 30%)' : '1px solid transparent',
-                  }}
-                >
-                  <span style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '1rem', color: i < exIndex ? 'oklch(0.65 0.22 40)' : i === exIndex ? 'oklch(0.65 0.22 40)' : 'oklch(0.40 0.008 80)', width: '24px' }}>
-                    {i < exIndex ? '✓' : String(i + 1).padStart(2, '0')}
-                  </span>
-                  <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.82rem', color: i === exIndex ? 'oklch(0.90 0.008 80)' : i < exIndex ? 'oklch(0.50 0.008 80)' : 'oklch(0.65 0.008 80)', textDecoration: i < exIndex ? 'line-through' : 'none' }}>
-                    {ex.name}
-                  </span>
-                  <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.75rem', color: 'oklch(0.45 0.008 80)', marginLeft: 'auto' }}>
-                    {ex.reps ? `${ex.reps} reps` : `${ex.durationSeconds}s`} × {ex.sets}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
+
+      {/* Hidden audio element for timer sound */}
+      <audio
+        ref={audioRef}
+        src="data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAAAA=="
+        preload="auto"
+      />
     </div>
   );
 }

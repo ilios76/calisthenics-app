@@ -40,10 +40,10 @@ export default function DietPage() {
         {/* Macro targets */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           {[
-            { label: 'Daily Calories', value: dailyCals.toString(), unit: 'kcal', color: 'oklch(0.65 0.22 40)' },
-            { label: 'Protein', value: proteinG.toString(), unit: 'g / day', color: 'oklch(0.65 0.22 40)' },
-            { label: 'Carbohydrates', value: carbsG.toString(), unit: 'g / day', color: 'oklch(0.65 0.22 40)' },
-            { label: 'Fats', value: fatG.toString(), unit: 'g / day', color: 'oklch(0.65 0.22 40)' },
+            { label: 'Daily Calories', value: dailyCals.toString(), unit: 'kcal', color: 'oklch(0.68 0.18 142)' },
+            { label: 'Protein', value: proteinG.toString(), unit: 'g / day', color: 'oklch(0.68 0.18 142)' },
+            { label: 'Carbohydrates', value: carbsG.toString(), unit: 'g / day', color: 'oklch(0.68 0.18 142)' },
+            { label: 'Fats', value: fatG.toString(), unit: 'g / day', color: 'oklch(0.68 0.18 142)' },
           ].map(s => (
             <div key={s.label} className="cx-card p-5">
               <p className="cx-label mb-2" style={{ fontSize: '0.65rem' }}>{s.label}</p>
@@ -57,7 +57,7 @@ export default function DietPage() {
         <div className="cx-card p-5 mb-8">
           <p className="cx-label mb-4" style={{ fontSize: '0.7rem' }}>Macro Split</p>
           <div className="flex rounded overflow-hidden mb-3" style={{ height: '12px' }}>
-            <div style={{ width: `${plan.macros.protein}%`, background: 'oklch(0.65 0.22 40)' }} />
+            <div style={{ width: `${plan.macros.protein}%`, background: 'oklch(0.68 0.18 142)' }} />
             <div style={{ width: `${plan.macros.carbs}%`, background: 'oklch(0.55 0.18 40 / 70%)' }} />
             <div style={{ width: `${plan.macros.fat}%`, background: 'oklch(0.45 0.14 40 / 50%)' }} />
           </div>
@@ -68,7 +68,7 @@ export default function DietPage() {
               { label: 'Fat', pct: plan.macros.fat, g: fatG },
             ].map(m => (
               <div key={m.label} className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full" style={{ background: 'oklch(0.65 0.22 40)' }} />
+                <div className="w-2 h-2 rounded-full" style={{ background: 'oklch(0.68 0.18 142)' }} />
                 <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.82rem', color: 'oklch(0.70 0.008 80)' }}>
                   {m.label} <strong style={{ color: 'oklch(0.90 0.008 80)' }}>{m.pct}%</strong> ({m.g}g)
                 </span>
@@ -87,7 +87,7 @@ export default function DietPage() {
               {plan.meals.map((meal, i) => (
                 <div key={meal.name} className="cx-card p-4">
                   <div className="flex items-center gap-3 mb-2">
-                    <span style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '1.5rem', color: 'oklch(0.65 0.22 40)', lineHeight: 1, minWidth: '28px' }}>
+                    <span style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '1.5rem', color: 'oklch(0.68 0.18 142)', lineHeight: 1, minWidth: '28px' }}>
                       {String(i + 1).padStart(2, '0')}
                     </span>
                     <div>
@@ -121,7 +121,7 @@ export default function DietPage() {
               <div className="space-y-2">
                 {plan.tips.map((tip, i) => (
                   <div key={i} className="flex gap-3 p-3 rounded" style={{ background: 'oklch(0.15 0.006 285)', border: '1px solid oklch(1 0 0 / 8%)' }}>
-                    <span style={{ color: 'oklch(0.65 0.22 40)', fontFamily: 'Bebas Neue, cursive', fontSize: '1.1rem', flexShrink: 0, lineHeight: 1.4 }}>
+                    <span style={{ color: 'oklch(0.68 0.18 142)', fontFamily: 'Bebas Neue, cursive', fontSize: '1.1rem', flexShrink: 0, lineHeight: 1.4 }}>
                       {String(i + 1).padStart(2, '0')}
                     </span>
                     <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.83rem', color: 'oklch(0.70 0.008 80)', lineHeight: 1.6 }}>
@@ -147,7 +147,7 @@ export default function DietPage() {
                       </p>
                     </div>
                     <div className="mb-2">
-                      <p className="cx-label mb-1.5" style={{ fontSize: '0.6rem', color: 'oklch(0.65 0.22 40)' }}>EAT</p>
+                      <p className="cx-label mb-1.5" style={{ fontSize: '0.6rem', color: 'oklch(0.68 0.18 142)' }}>EAT</p>
                       <div className="flex flex-wrap gap-1.5">
                         {cat.items.map(item => (
                           <span key={item} style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.72rem', color: 'oklch(0.70 0.008 80)', background: 'oklch(0.65 0.22 40 / 10%)', border: '1px solid oklch(0.65 0.22 40 / 20%)', padding: '2px 8px', borderRadius: '2px' }}>
