@@ -57,7 +57,8 @@ export interface DietPlan {
   description: string;
   dailyCalories: (weight: number, goal: Goal) => number;
   macros: { protein: number; carbs: number; fat: number }; // percentages
-  meals: Meal[];
+  meals: Meal[]; // fallback single day meals
+  weeklyPlan?: DayMeal[]; // 7-day meal plan
   tips: string[];
   foods: FoodCategory[];
 }
@@ -67,6 +68,11 @@ export interface Meal {
   time: string;
   description: string;
   examples: string[];
+}
+
+export interface DayMeal {
+  day: string; // Monday, Tuesday, etc.
+  meals: Meal[];
 }
 
 export interface FoodCategory {
