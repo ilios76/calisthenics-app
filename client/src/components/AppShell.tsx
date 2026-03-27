@@ -9,6 +9,7 @@ import ProgramsPage from '@/pages/Programs';
 import TrainerPage from '@/pages/Trainer';
 import DietPage from '@/pages/Diet';
 import ProfilePage from '@/pages/Profile';
+import ProgressPage from '@/pages/Progress';
 import Navbar from '@/components/Navbar';
 
 export default function AppShell() {
@@ -27,6 +28,7 @@ export default function AppShell() {
         {currentView === 'trainer' && <TrainerPage />}
         {currentView === 'diet' && <DietPage />}
         {currentView === 'profile' && <ProfilePage />}
+        {currentView === 'progress' && <ProgressPage />}
       </main>
     </div>
   );
