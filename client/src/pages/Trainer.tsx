@@ -1,10 +1,12 @@
 // ============================================================
 // CallistheniX – Live Trainer Page
-// Full-screen exercise mode with timer, sets, YouTube video, instructions
+// Full-screen exercise mode with timer, sets, GIF demonstrations
 // ============================================================
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useUser } from '@/contexts/UserContext';
+import { useProgress } from '@/contexts/ProgressContext';
 import { getExercisesByIds } from '@/lib/data';
+import { getExerciseGifUrl } from '@/lib/gifUrls';
 import { getRandomQuote } from '@/lib/quotes';
 import { playDoubleBeepSound } from '@/lib/soundUtils';
 import { Play, Pause, SkipForward, ChevronLeft, CheckCircle, Info } from 'lucide-react';
@@ -223,23 +225,18 @@ export default function TrainerPage() {
             </div>
           ) : (
             <>
-              {/* YouTube video player */}
-              {currentEx?.youtubeVideoId ? (
+              {/* GIF demonstration */}
+              {currentEx && getExerciseGifUrl(currentEx.name) ? (
                 <div className="w-full h-full flex items-center justify-center" style={{ background: 'oklch(0 0 0)' }}>
-                  <iframe
-                    width="100%"
-                    height="100%"
-                    src={`https://www.youtube.com/embed/${currentEx.youtubeVideoId}?autoplay=0&controls=1&modestbranding=1`}
-                    title={currentEx.name}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    style={{ width: '100%', height: '100%', minHeight: '300px' }}
+                  <img
+                    src={getExerciseGifUrl(currentEx.name) || ''}
+                    alt={currentEx.name}
+                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                   />
                 </div>
               ) : (
                 <div className="w-full h-full flex items-center justify-center" style={{ background: 'oklch(0.15 0.006 285)' }}>
-                  <p style={{ color: 'oklch(0.65 0.01 285)', fontFamily: 'DM Sans, sans-serif' }}>Video not available</p>
+                  <p style={{ color: 'oklch(0.65 0.01 285)', fontFamily: 'DM Sans, sans-serif' }}>GIF demonstration not available</p>
                 </div>
               )}
             </>
