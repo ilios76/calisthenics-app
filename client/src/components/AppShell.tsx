@@ -10,6 +10,7 @@ import TrainerPage from '@/pages/Trainer';
 import DietPage from '@/pages/Diet';
 import ProfilePage from '@/pages/Profile';
 import ProgressPage from '@/pages/Progress';
+import SettingsPage from '@/pages/Settings';
 import Navbar from '@/components/Navbar';
 
 export default function AppShell() {
@@ -29,6 +30,7 @@ export default function AppShell() {
         {currentView === 'diet' && <DietPage />}
         {currentView === 'profile' && <ProfilePage />}
         {currentView === 'progress' && <ProgressPage />}
+        {currentView === 'settings' && <SettingsPage />}
       </main>
     </div>
   );

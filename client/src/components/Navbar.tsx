@@ -4,7 +4,7 @@
 // ============================================================
 import { useUser, type AppView } from '@/contexts/UserContext';
 import { useI18n } from '@/contexts/I18nContext';
-import { Dumbbell, LayoutDashboard, Utensils, User, BookOpen, Globe, TrendingUp } from 'lucide-react';
+import { Dumbbell, LayoutDashboard, Utensils, User, BookOpen, Globe, TrendingUp, Settings } from 'lucide-react';
 
 const navItems: { view: AppView; label: string; icon: React.ReactNode }[] = [
   { view: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard size={16} /> },
@@ -12,6 +12,7 @@ const navItems: { view: AppView; label: string; icon: React.ReactNode }[] = [
   { view: 'progress', label: 'Progress', icon: <TrendingUp size={16} /> },
   { view: 'diet', label: 'Nutrition', icon: <Utensils size={16} /> },
   { view: 'profile', label: 'Profile', icon: <User size={16} /> },
+  { view: 'settings', label: 'Settings', icon: <Settings size={16} /> },
 ];
 
 export default function Navbar() {

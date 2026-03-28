@@ -15,7 +15,7 @@ import AppShell from "./components/AppShell";
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark">
+      <ThemeProvider>
         <I18nProvider>
           <TooltipProvider>
             <ProgressProvider>
