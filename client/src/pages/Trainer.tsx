@@ -223,6 +223,20 @@ export default function TrainerPage() {
                 </button>
               </div>
             </div>
+          ) : phase === 'rest' ? (
+            <div className="w-full h-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, oklch(0.15 0.006 285) 0%, oklch(0.12 0.005 285) 100%)' }}>
+              <div className="text-center">
+                <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '1.5rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'oklch(0.68 0.18 142)', marginBottom: '24px' }}>
+                  Rest Time
+                </p>
+                <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '1.3rem', color: 'oklch(0.85 0.008 80)', marginBottom: '16px', fontWeight: 500 }}>
+                  Stay healthy — drink water, only!
+                </p>
+                <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.9rem', color: 'oklch(0.65 0.01 285)' }}>
+                  Prepare for the next set
+                </p>
+              </div>
+            </div>
           ) : (
             <>
               {/* GIF demonstration */}
@@ -240,8 +254,9 @@ export default function TrainerPage() {
                 </div>
               )}
             </>
-          )}
-        </div>
+          )
+        }
+      </div>
 
         {/* Timer and controls */}
         <div className="w-full max-w-md text-center">
