@@ -1,0 +1,493 @@
+// ============================================================
+// CallistheniX – Firebase Authentication Service
+// Google Sign-In | Apple Sign-In | Progress Persistence
+// ============================================================
+
+import {
+  initializeApp,
+  getApp,
+  FirebaseApp,
+} from 'firebase/app';
+import {
+  getAuth,
+  Auth,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  GoogleAuthProvider,
+  OAuthProvider,
+  signOut,
+  onAuthStateChanged,
+  User,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
+} from 'firebase/auth';
+import {
+  getFirestore,
+  Firestore,
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  serverTimestamp,
+  Timestamp,
+} from 'firebase/firestore';
+
+// ============================================================
+// FIREBASE CONFIGURATION
+// ============================================================
+
+const firebaseConfig = {
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+};
+
+// Initialize Firebase
+let firebaseApp: FirebaseApp;
+let auth: Auth;
+let db: Firestore;
+
+try {
+  firebaseApp = getApp();
+  auth = getAuth(firebaseApp);
+  db = getFirestore(firebaseApp);
+} catch (error) {
+  firebaseApp = initializeApp(firebaseConfig);
+  auth = getAuth(firebaseApp);
+  db = getFirestore(firebaseApp);
+}
+
+// ============================================================
+// USER PROFILE INTERFACE
+// ============================================================
+
+export interface UserProfile {
+  uid: string;
+  email: string;
+  displayName: string;
+  photoURL?: string;
+  tier: 'free' | 'premium';
+  goal: 'lose_weight' | 'gain_muscle' | 'stay_slim';
+  sex: 'male' | 'female';
+  weight: number;
+  age: number;
+  height: number;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  authProvider: 'google' | 'apple' | 'email';
+  lastLoginAt: Timestamp;
+}
+
+export interface WorkoutProgress {
+  uid: string;
+  workoutId: string;
+  programId: string;
+  currentDay: number;
+  currentWeek: number;
+  completedWorkouts: number;
+  totalWorkouts: number;
+  startDate: Timestamp;
+  lastWorkoutDate: Timestamp;
+  completionPercentage: number;
+  exerciseProgress: Record<string, ExerciseProgress>;
+  updatedAt: Timestamp;
+}
+
+export interface ExerciseProgress {
+  exerciseId: string;
+  totalRepsCompleted: number;
+  totalSetsCompleted: number;
+  formChecksPassed: number;
+  formChecksFailed: number;
+  averageRepsPerSet: number;
+  readyToProgress: boolean;
+}
+
+export interface MealPlanProgress {
+  uid: string;
+  mealPlanId: string;
+  currentDay: number;
+  mealsLogged: Record<number, Record<string, boolean>>;
+  caloriesLogged: Record<number, number>;
+  completionPercentage: number;
+  startDate: Timestamp;
+  endDate: Timestamp;
+  updatedAt: Timestamp;
+}
+
+// ============================================================
+// AUTHENTICATION FUNCTIONS
+// ============================================================
+
+/**
+ * Initialize persistence (Local or Session)
+ */
+export async function initializePersistence(rememberMe: boolean = true): Promise<void> {
+  try {
+    const persistence = rememberMe ? browserLocalPersistence : browserSessionPersistence;
+    await setPersistence(auth, persistence);
+  } catch (error) {
+    console.error('Failed to set persistence:', error);
+  }
+}
+
+/**
+ * Sign in with Google
+ */
+export async function signInWithGoogle(): Promise<User | null> {
+  try {
+    const provider = new GoogleAuthProvider();
+    provider.addScope('profile');
+    provider.addScope('email');
+
+    // Use popup for web, redirect for mobile
+    const isWeb = typeof window !== 'undefined' && !navigator.userAgent.includes('Mobile');
+
+    let result;
+    if (isWeb) {
+      result = await signInWithPopup(auth, provider);
+    } else {
+      await signInWithRedirect(auth, provider);
+      result = await getRedirectResult(auth);
+    }
+
+    if (result?.user) {
+      await createOrUpdateUserProfile(result.user, 'google');
+      return result.user;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Google sign-in error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Sign in with Apple
+ */
+export async function signInWithApple(): Promise<User | null> {
+  try {
+    const provider = new OAuthProvider('apple.com');
+    provider.addScope('email');
+    provider.addScope('name');
+
+    // Use popup for web, redirect for mobile
+    const isWeb = typeof window !== 'undefined' && !navigator.userAgent.includes('Mobile');
+
+    let result;
+    if (isWeb) {
+      result = await signInWithPopup(auth, provider);
+    } else {
+      await signInWithRedirect(auth, provider);
+      result = await getRedirectResult(auth);
+    }
+
+    if (result?.user) {
+      await createOrUpdateUserProfile(result.user, 'apple');
+      return result.user;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Apple sign-in error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Sign out
+ */
+export async function signOutUser(): Promise<void> {
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error('Sign out error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get current user
+ */
+export function getCurrentUser(): User | null {
+  return auth.currentUser;
+}
+
+/**
+ * Listen to auth state changes
+ */
+export function onAuthStateChange(callback: (user: User | null) => void): () => void {
+  return onAuthStateChanged(auth, callback);
+}
+
+// ============================================================
+// USER PROFILE FUNCTIONS
+// ============================================================
+
+/**
+ * Create or update user profile
+ */
+export async function createOrUpdateUserProfile(
+  firebaseUser: User,
+  authProvider: 'google' | 'apple' | 'email'
+): Promise<UserProfile> {
+  try {
+    const userRef = doc(db, 'users', firebaseUser.uid);
+    const userSnap = await getDoc(userRef);
+
+    let userProfile: UserProfile;
+
+    if (userSnap.exists()) {
+      // Update existing user
+      await updateDoc(userRef, {
+        lastLoginAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
+      userProfile = userSnap.data() as UserProfile;
+    } else {
+      // Create new user profile
+      userProfile = {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email || '',
+        displayName: firebaseUser.displayName || 'User',
+        photoURL: firebaseUser.photoURL || undefined,
+        tier: 'free',
+        goal: 'stay_slim',
+        sex: 'male',
+        weight: 70,
+        age: 25,
+        height: 175,
+        createdAt: serverTimestamp() as Timestamp,
+        updatedAt: serverTimestamp() as Timestamp,
+        authProvider,
+        lastLoginAt: serverTimestamp() as Timestamp,
+      };
+
+      await setDoc(userRef, userProfile);
+    }
+
+    return userProfile;
+  } catch (error) {
+    console.error('Failed to create/update user profile:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get user profile
+ */
+export async function getUserProfile(uid: string): Promise<UserProfile | null> {
+  try {
+    const userRef = doc(db, 'users', uid);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      return userSnap.data() as UserProfile;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Failed to get user profile:', error);
+    return null;
+  }
+}
+
+/**
+ * Update user profile
+ */
+export async function updateUserProfile(
+  uid: string,
+  updates: Partial<UserProfile>
+): Promise<void> {
+  try {
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error('Failed to update user profile:', error);
+    throw error;
+  }
+}
+
+// ============================================================
+// WORKOUT PROGRESS FUNCTIONS
+// ============================================================
+
+/**
+ * Create or get workout progress
+ */
+export async function getOrCreateWorkoutProgress(
+  uid: string,
+  programId: string
+): Promise<WorkoutProgress> {
+  try {
+    const progressRef = doc(db, `users/${uid}/workoutProgress`, programId);
+    const progressSnap = await getDoc(progressRef);
+
+    if (progressSnap.exists()) {
+      return progressSnap.data() as WorkoutProgress;
+    }
+
+    // Create new progress
+    const newProgress: WorkoutProgress = {
+      uid,
+      workoutId: `${uid}-${programId}`,
+      programId,
+      currentDay: 1,
+      currentWeek: 1,
+      completedWorkouts: 0,
+      totalWorkouts: 0,
+      startDate: serverTimestamp() as Timestamp,
+      lastWorkoutDate: serverTimestamp() as Timestamp,
+      completionPercentage: 0,
+      exerciseProgress: {},
+      updatedAt: serverTimestamp() as Timestamp,
+    };
+
+    await setDoc(progressRef, newProgress);
+    return newProgress;
+  } catch (error) {
+    console.error('Failed to get/create workout progress:', error);
+    throw error;
+  }
+}
+
+/**
+ * Update workout progress
+ */
+export async function updateWorkoutProgress(
+  uid: string,
+  programId: string,
+  updates: Partial<WorkoutProgress>
+): Promise<void> {
+  try {
+    const progressRef = doc(db, `users/${uid}/workoutProgress`, programId);
+    await updateDoc(progressRef, {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error('Failed to update workout progress:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get all workout progress for user
+ */
+export async function getUserWorkoutProgress(uid: string): Promise<WorkoutProgress[]> {
+  try {
+  const progressQuery = query(
+    collection(db, `users/${uid}/workoutProgress`),
+    where('uid', '==', uid)
+  );
+  const progressSnap = await getDocs(progressQuery);
+
+  return progressSnap.docs.map((doc: any) => doc.data() as WorkoutProgress);
+  } catch (error) {
+    console.error('Failed to get user workout progress:', error);
+    return [];
+  }
+}
+
+// ============================================================
+// MEAL PLAN PROGRESS FUNCTIONS
+// ============================================================
+
+/**
+ * Create or get meal plan progress
+ */
+export async function getOrCreateMealPlanProgress(
+  uid: string,
+  mealPlanId: string,
+  duration: number
+): Promise<MealPlanProgress> {
+  try {
+    const progressRef = doc(db, `users/${uid}/mealPlanProgress`, mealPlanId);
+    const progressSnap = await getDoc(progressRef);
+
+    if (progressSnap.exists()) {
+      return progressSnap.data() as MealPlanProgress;
+    }
+
+    // Create new progress
+    const startDate = new Date();
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + duration);
+
+    const newProgress: MealPlanProgress = {
+      uid,
+      mealPlanId,
+      currentDay: 1,
+      mealsLogged: {},
+      caloriesLogged: {},
+      completionPercentage: 0,
+      startDate: Timestamp.fromDate(startDate),
+      endDate: Timestamp.fromDate(endDate),
+      updatedAt: serverTimestamp() as Timestamp,
+    };
+
+    await setDoc(progressRef, newProgress);
+    return newProgress;
+  } catch (error) {
+    console.error('Failed to get/create meal plan progress:', error);
+    throw error;
+  }
+}
+
+/**
+ * Update meal plan progress
+ */
+export async function updateMealPlanProgress(
+  uid: string,
+  mealPlanId: string,
+  updates: Partial<MealPlanProgress>
+): Promise<void> {
+  try {
+    const progressRef = doc(db, `users/${uid}/mealPlanProgress`, mealPlanId);
+    await updateDoc(progressRef, {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error('Failed to update meal plan progress:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get all meal plan progress for user
+ */
+export async function getUserMealPlanProgress(uid: string): Promise<MealPlanProgress[]> {
+  try {
+  const progressQuery = query(
+    collection(db, `users/${uid}/mealPlanProgress`),
+    where('uid', '==', uid)
+  );
+  const progressSnap = await getDocs(progressQuery);
+
+  return progressSnap.docs.map((doc: any) => doc.data() as MealPlanProgress);
+  } catch (error) {
+    console.error('Failed to get user meal plan progress:', error);
+    return [];
+  }
+}
+
+// ============================================================
+// EXPORT FIREBASE INSTANCES
+// ============================================================
+
+export { auth, db, firebaseApp };

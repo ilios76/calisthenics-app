@@ -4,6 +4,7 @@
 // ============================================================
 import { useUser, type AppView } from '@/contexts/UserContext';
 import { useI18n } from '@/contexts/I18nContext';
+import { UserMenu } from '@/components/UserMenu';
 import { Dumbbell, LayoutDashboard, Utensils, User, BookOpen, Globe, TrendingUp, Settings } from 'lucide-react';
 
 const navItems: { view: AppView; label: string; icon: React.ReactNode }[] = [
@@ -99,7 +100,7 @@ export default function Navbar() {
         ))}
       </div>
 
-      {/* Language toggle + Profile pill */}
+      {/* Language toggle + User Menu */}
       <div className="hidden md:flex items-center gap-2">
         <button
           onClick={() => setLanguage(language === 'el' ? 'en' : 'el')}
@@ -119,27 +120,7 @@ export default function Navbar() {
           <Globe size={14} />
           {language === 'el' ? 'ΕΛ' : 'EN'}
         </button>
-
-        {profile && (
-          <button
-            onClick={() => setCurrentView('profile')}
-            className="flex items-center gap-2 px-3 py-1.5 rounded"
-            style={{
-              background: 'oklch(0.17 0.006 285)',
-              border: '1px solid oklch(1 0 0 / 10%)',
-            }}
-          >
-            <div
-              className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-              style={{ background: 'oklch(0.68 0.18 142)', color: 'oklch(0.10 0.005 285)', fontFamily: 'Barlow Condensed, sans-serif' }}
-            >
-              {profile.name.charAt(0).toUpperCase()}
-            </div>
-            <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.85rem', color: 'oklch(0.80 0.008 80)' }}>
-              {profile.name}
-            </span>
-          </button>
-        )}
+        <UserMenu />
       </div>
     </nav>
   );
