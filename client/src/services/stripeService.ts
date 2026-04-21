@@ -52,7 +52,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
   monthly: {
     id: 'monthly',
     name: 'Pro Monthly',
-    price: 9.99,
+    price: 5.99,
     currency: 'EUR',
     billingPeriod: 'month',
     description: 'Perfect for trying out premium features',
@@ -67,10 +67,10 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
   yearly: {
     id: 'yearly',
     name: 'Pro Yearly',
-    price: 69.99,
+    price: 59.99,
     currency: 'EUR',
     billingPeriod: 'year',
-    description: 'Best value - save 42%',
+    description: 'Best value - save 58% vs monthly',
     features: [
       '30-day meal plans',
       'Unlimited skill paths',
@@ -79,7 +79,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
       'No ads',
       'Exclusive yearly badge',
     ],
-    savings: 50, // ~€50 saved per year
+    savings: 12, // ~€12 saved per year (€5.99*12 = €71.88 vs €59.99)
   },
 };
 

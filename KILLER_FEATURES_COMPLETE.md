@@ -162,7 +162,7 @@ Offline mode removes a critical barrier to adoption. Users can train without wor
 | **Gamification** | ✅ Full System | ⚠️ Basic | ✅ Full | ✅ Full |
 | **Social Features** | ✅ Complete | ⚠️ Basic | ✅ Complete | ✅ Complete |
 | **Offline Mode** | ✅ Full Support | ⚠️ Limited | ⚠️ Limited | ❌ None |
-| **Meal Plans** | ✅ 7-day Free / 30-day Paid | ✅ 7-day | ❌ None | ❌ None |
+| **Meal Plans** | ✅ 7-day Free / 30-day Paid (€5.99/mo) | ✅ 7-day | ❌ None | ❌ None |
 | **Firebase Auth** | ✅ Google/Apple | ✅ Email | ✅ Email | ✅ Email |
 | **200+ Exercises** | ✅ Yes | ✅ 500+ | ✅ 1000+ | ✅ Limited |
 | **Beginner Focus** | ✅ 6-Level System | ✅ Yes | ⚠️ Some | ✅ Yes |
@@ -199,13 +199,13 @@ Offline mode removes a critical barrier to adoption. Users can train without wor
 
 ### Financial Projections
 
-Based on competitive analysis and market benchmarks, CallistheniX can realistically achieve:
+With the new aggressive pricing (€5.99/month, €59.99/year), CallistheniX can realistically achieve:
 
-- **Year 1**: €50,000-100,000 revenue (assuming 1000-2000 paying users)
-- **Year 2**: €300,000-500,000 revenue (assuming 5000-8000 paying users)
-- **Year 3**: €1,000,000+ revenue (assuming 15,000+ paying users)
+- **Year 1**: €80,000-150,000 revenue (assuming 1500-3000 paying users with higher conversion)
+- **Year 2**: €400,000-700,000 revenue (assuming 7000-12000 paying users)
+- **Year 3**: €1,500,000+ revenue (assuming 20,000+ paying users)
 
-These projections assume a 2-3% conversion rate from free to premium, which is achievable with the implemented features.
+These projections assume a 3-5% conversion rate from free to premium (higher due to lower entry price), with 60% choosing yearly plans for better LTV. The lower monthly price significantly increases conversion while yearly plan discounts maximize lifetime value.
 
 ---
 
