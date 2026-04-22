@@ -15,7 +15,6 @@ import {
   signInWithRedirect,
   getRedirectResult,
   GoogleAuthProvider,
-  OAuthProvider,
   signOut,
   onAuthStateChanged,
   User,
@@ -155,6 +154,15 @@ export async function signInWithGoogle(): Promise<User | null> {
     const provider = new GoogleAuthProvider();
     provider.addScope('profile');
     provider.addScope('email');
+    
+    // Configure custom domain for development
+    const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isDevelopment) {
+      // For localhost development, we need to configure the provider
+      provider.setCustomParameters({
+        'prompt': 'select_account'
+      });
+    }
 
     // Always use redirect to avoid popup blocking issues
     await signInWithRedirect(auth, provider);
@@ -165,23 +173,7 @@ export async function signInWithGoogle(): Promise<User | null> {
   }
 }
 
-/**
- * Sign in with Apple
- */
-export async function signInWithApple(): Promise<User | null> {
-  try {
-    const provider = new OAuthProvider('apple.com');
-    provider.addScope('email');
-    provider.addScope('name');
 
-    // Always use redirect to avoid popup blocking issues
-    await signInWithRedirect(auth, provider);
-    return null; // User will be redirected
-  } catch (error) {
-    console.error('Apple sign-in error:', error);
-    throw error;
-  }
-}
 
 /**
  * Sign out

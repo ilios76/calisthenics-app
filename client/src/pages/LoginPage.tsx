@@ -1,6 +1,5 @@
-// ============================================================
 // CallistheniX – Login Page
-// Google Sign-In | Apple Sign-In
+// Google Sign-In Only
 // ============================================================
 
 import React, { useState, useEffect } from 'react';
@@ -11,7 +10,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import {
   signInWithGoogle,
-  signInWithApple,
   initializePersistence,
 } from '@/services/firebaseAuth';
 import { getRedirectResult } from 'firebase/auth';
@@ -51,20 +49,6 @@ export function LoginPage() {
     } catch (err) {
       console.error('Google sign-in error:', err);
       setError('Failed to sign in with Google. Please try again.');
-      setIsLoading(false);
-    }
-  }
-
-  async function handleAppleSignIn() {
-    try {
-      setIsLoading(true);
-      setError(null);
-      await initializePersistence(rememberMe);
-      await signInWithApple();
-      // User will be redirected to Apple, then back to this page
-    } catch (err) {
-      console.error('Apple sign-in error:', err);
-      setError('Failed to sign in with Apple. Please try again.');
       setIsLoading(false);
     }
   }
@@ -116,19 +100,6 @@ export function LoginPage() {
               />
             </svg>
             {isLoading ? 'Signing in...' : 'Sign in with Google'}
-          </Button>
-
-          {/* Apple Sign-In Button */}
-          <Button
-            onClick={handleAppleSignIn}
-            disabled={isLoading}
-            variant="outline"
-            className="w-full h-12 text-base font-medium"
-          >
-            <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17.05 13.5c-.91 0-1.82.55-2.25 1.51.93.64 1.54 1.89 1.54 3.22 0 .5-.05 1-.15 1.46.99-.29 1.73-1.3 1.73-2.46 0-1.49-1.21-2.73-2.87-2.73zm-5.5 0c-1.66 0-2.87 1.24-2.87 2.73 0 1.16.74 2.17 1.73 2.46-.1-.46-.15-.96-.15-1.46 0-1.33.61-2.58 1.54-3.22-.43-.96-1.34-1.51-2.25-1.51zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
-            </svg>
-            {isLoading ? 'Signing in...' : 'Sign in with Apple'}
           </Button>
 
           {/* Remember Me Checkbox */}
