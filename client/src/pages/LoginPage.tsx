@@ -3,7 +3,7 @@
 // Google Sign-In | Apple Sign-In
 // ============================================================
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +14,8 @@ import {
   signInWithApple,
   initializePersistence,
 } from '@/services/firebaseAuth';
+import { getRedirectResult } from 'firebase/auth';
+import { auth } from '@/services/firebaseAuth';
 
 export function LoginPage() {
   const [, navigate] = useLocation();
@@ -21,21 +23,34 @@ export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Handle redirect result on page load
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result?.user) {
+          console.log('✓ Successfully signed in after redirect:', result.user.displayName);
+          navigate('/setup');
+        }
+      } catch (err) {
+        console.error('Redirect result error:', err);
+        setError('Failed to complete sign-in. Please try again.');
+      }
+    };
+
+    handleRedirectResult();
+  }, [navigate]);
+
   async function handleGoogleSignIn() {
     try {
       setIsLoading(true);
       setError(null);
       await initializePersistence(rememberMe);
-      const user = await signInWithGoogle();
-
-      if (user) {
-        console.log('✓ Successfully signed in with Google:', user.displayName);
-        navigate('/setup');
-      }
+      await signInWithGoogle();
+      // User will be redirected to Google, then back to this page
     } catch (err) {
       console.error('Google sign-in error:', err);
       setError('Failed to sign in with Google. Please try again.');
-    } finally {
       setIsLoading(false);
     }
   }
@@ -45,16 +60,11 @@ export function LoginPage() {
       setIsLoading(true);
       setError(null);
       await initializePersistence(rememberMe);
-      const user = await signInWithApple();
-
-      if (user) {
-        console.log('✓ Successfully signed in with Apple:', user.displayName);
-        navigate('/setup');
-      }
+      await signInWithApple();
+      // User will be redirected to Apple, then back to this page
     } catch (err) {
       console.error('Apple sign-in error:', err);
       setError('Failed to sign in with Apple. Please try again.');
-    } finally {
       setIsLoading(false);
     }
   }

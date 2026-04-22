@@ -43,12 +43,12 @@ import {
 // ============================================================
 
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
@@ -149,23 +149,9 @@ export async function signInWithGoogle(): Promise<User | null> {
     provider.addScope('profile');
     provider.addScope('email');
 
-    // Use popup for web, redirect for mobile
-    const isWeb = typeof window !== 'undefined' && !navigator.userAgent.includes('Mobile');
-
-    let result;
-    if (isWeb) {
-      result = await signInWithPopup(auth, provider);
-    } else {
-      await signInWithRedirect(auth, provider);
-      result = await getRedirectResult(auth);
-    }
-
-    if (result?.user) {
-      await createOrUpdateUserProfile(result.user, 'google');
-      return result.user;
-    }
-
-    return null;
+    // Always use redirect to avoid popup blocking issues
+    await signInWithRedirect(auth, provider);
+    return null; // User will be redirected
   } catch (error) {
     console.error('Google sign-in error:', error);
     throw error;
@@ -181,23 +167,9 @@ export async function signInWithApple(): Promise<User | null> {
     provider.addScope('email');
     provider.addScope('name');
 
-    // Use popup for web, redirect for mobile
-    const isWeb = typeof window !== 'undefined' && !navigator.userAgent.includes('Mobile');
-
-    let result;
-    if (isWeb) {
-      result = await signInWithPopup(auth, provider);
-    } else {
-      await signInWithRedirect(auth, provider);
-      result = await getRedirectResult(auth);
-    }
-
-    if (result?.user) {
-      await createOrUpdateUserProfile(result.user, 'apple');
-      return result.user;
-    }
-
-    return null;
+    // Always use redirect to avoid popup blocking issues
+    await signInWithRedirect(auth, provider);
+    return null; // User will be redirected
   } catch (error) {
     console.error('Apple sign-in error:', error);
     throw error;
