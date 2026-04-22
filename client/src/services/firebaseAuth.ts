@@ -43,13 +43,20 @@ import {
 // ============================================================
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyAoXRGEe5X32rbGH-iWwkKgDaEYIOVo4p4',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'callisthenix-a7431.firebaseapp.com',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'callisthenix-a7431',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'callisthenix-a7431.firebasestorage.app',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '236823176042',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:236823176042:web:3b18c06632d76b67237b13',
 };
+
+// Validate Firebase config
+if (!firebaseConfig.apiKey || firebaseConfig.apiKey === 'undefined') {
+  console.error('Firebase configuration is missing or invalid!');
+} else {
+  console.log('Firebase configuration loaded successfully');
+}
 
 // Initialize Firebase
 let firebaseApp: FirebaseApp;
