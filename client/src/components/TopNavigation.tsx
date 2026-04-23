@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { Button } from '@/components/ui/button';
-import { Menu, X, LogOut, Settings, User, LogIn, Trophy } from 'lucide-react';
+import { Menu, X, LogOut, Settings, User, LogIn, Trophy, Camera } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { signInWithGoogle } from '@/services/firebaseAuth';
 
@@ -115,6 +115,16 @@ export function TopNavigation() {
                     >
                       <Trophy className="w-4 h-4" />
                       Achievements
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCurrentView('challenge');
+                        setProfileMenuOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2"
+                    >
+                      <Camera className="w-4 h-4" />
+                      Before/After Challenge
                     </button>
                     <button
                       onClick={() => {

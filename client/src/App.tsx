@@ -17,13 +17,15 @@ import AppShell from "./components/AppShell";
 import { FloatingMusicWidget } from "./components/FloatingMusicWidget";
 import { CoachProvider } from "./contexts/CoachContext";
 import { CoachWidget } from "./components/CoachWidget";
+import { ChallengeProvider } from "./contexts/ChallengeContext";
 
 function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <CoachProvider>
-          <WorkoutCompletionProvider>
+        <ChallengeProvider>
+          <CoachProvider>
+            <WorkoutCompletionProvider>
             <MusicProvider>
               <ThemeProvider>
                 <I18nProvider>
@@ -50,7 +52,8 @@ function App() {
               </ThemeProvider>
             </MusicProvider>
           </WorkoutCompletionProvider>
-        </CoachProvider>
+            </CoachProvider>
+          </ChallengeProvider>
       </AuthProvider>
     </ErrorBoundary>
   );
