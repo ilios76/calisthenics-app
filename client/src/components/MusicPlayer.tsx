@@ -1,4 +1,3 @@
-// ============================================================
 // CallistheniX – Music Player Component
 // Genre selector with play/pause and volume controls
 // ============================================================
@@ -20,14 +19,35 @@ export function MusicPlayer({ compact = false, onGenreChange }: MusicPlayerProps
 
   useEffect(() => {
     // Load saved preferences
-    const prefs = musicService.getPreferences();
-    if (prefs?.preferredGenre) {
-      const genre = musicService.getGenre(prefs.preferredGenre);
-      if (genre) {
-        setSelectedGenre(genre);
+    try {
+      const prefs = musicService.getPreferences();
+      if (prefs && prefs.lastGenre) {
+        const genre = musicService.getGenre(prefs.lastGenre);
+        if (genre) {
+          setSelectedGenre(genre);
+        } else {
+          // Default to pop if saved genre not found
+          const popGenre = musicService.getGenre('pop');
+          if (popGenre) {
+            setSelectedGenre(popGenre);
+          }
+        }
+      } else {
+        // Default to pop
+        const popGenre = musicService.getGenre('pop');
+        if (popGenre) {
+          setSelectedGenre(popGenre);
+        }
+      }
+      setVolume(prefs?.volume || 70);
+    } catch (error) {
+      console.error('Error loading music preferences:', error);
+      // Default to pop
+      const popGenre = musicService.getGenre('pop');
+      if (popGenre) {
+        setSelectedGenre(popGenre);
       }
     }
-    setVolume(prefs?.volume || 70);
   }, []);
 
   const handlePlayPause = async () => {
@@ -40,7 +60,7 @@ export function MusicPlayer({ compact = false, onGenreChange }: MusicPlayerProps
         setIsPlaying(true);
       }
     } else {
-      musicService.toggleMusic(selectedGenre.id);
+      musicService.toggleMusic();
       setIsPlaying(!isPlaying);
     }
   };
@@ -50,17 +70,12 @@ export function MusicPlayer({ compact = false, onGenreChange }: MusicPlayerProps
     setShowGenreSelector(false);
     await musicService.playGenre(genre.id);
     setIsPlaying(true);
-    musicService.savePreferences({
-      preferredGenre: genre.id,
-      musicEnabled: true
-    });
     onGenreChange?.(genre.id);
   };
 
   const handleVolumeChange = (newVolume: number) => {
     setVolume(newVolume);
     musicService.setVolume(newVolume);
-    musicService.savePreferences({ volume: newVolume });
   };
 
   if (compact) {
@@ -122,20 +137,24 @@ export function MusicPlayer({ compact = false, onGenreChange }: MusicPlayerProps
           <div className="absolute bottom-20 right-0 bg-popover border border-border rounded-lg shadow-lg p-3 w-64">
             <p className="text-sm font-semibold mb-3">Choose Music Genre</p>
             <div className="grid grid-cols-2 gap-2">
-              {MUSIC_GENRES.map((genre) => (
-                <button
-                  key={genre.id}
-                  onClick={() => handleGenreSelect(genre)}
-                  className={`p-3 rounded-lg transition-all text-center ${
-                    selectedGenre?.id === genre.id
-                      ? 'bg-primary text-white'
-                      : 'bg-accent hover:bg-accent/80'
-                  }`}
-                >
-                  <div className="text-xl mb-1">{genre.icon}</div>
-                  <div className="text-xs font-medium">{genre.name}</div>
-                </button>
-              ))}
+              {MUSIC_GENRES && MUSIC_GENRES.length > 0 ? (
+                MUSIC_GENRES.map((genre) => (
+                  <button
+                    key={genre.id}
+                    onClick={() => handleGenreSelect(genre)}
+                    className={`p-3 rounded-lg transition-all text-center ${
+                      selectedGenre?.id === genre.id
+                        ? 'bg-primary text-white'
+                        : 'bg-accent hover:bg-accent/80'
+                    }`}
+                  >
+                    <div className="text-xl mb-1">{genre.icon}</div>
+                    <div className="text-xs font-medium">{genre.name}</div>
+                  </button>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground col-span-2">No genres available</p>
+              )}
             </div>
           </div>
         )}
@@ -166,40 +185,18 @@ export function MusicPlayer({ compact = false, onGenreChange }: MusicPlayerProps
 
       {/* Current Genre */}
       {selectedGenre && (
-        <div className="bg-accent rounded-lg p-4 text-center">
-          <div className="text-4xl mb-2">{selectedGenre.icon}</div>
-          <p className="font-semibold text-lg">{selectedGenre.name}</p>
-          <p className="text-sm text-muted-foreground mt-1">{selectedGenre.mood}</p>
-          <p className="text-xs text-muted-foreground mt-2">
-            BPM: {selectedGenre.bpmRange[0]}-{selectedGenre.bpmRange[1]}
-          </p>
+        <div className="bg-accent/50 rounded-lg p-4 flex items-center gap-3">
+          <span className="text-4xl">{selectedGenre.icon}</span>
+          <div>
+            <p className="font-semibold">{selectedGenre.name}</p>
+            <p className="text-sm text-muted-foreground">{selectedGenre.description}</p>
+          </div>
         </div>
       )}
 
-      {/* Genre Selector Grid */}
-      <div>
-        <p className="text-sm font-medium mb-3">Select Genre</p>
-        <div className="grid grid-cols-4 gap-2">
-          {MUSIC_GENRES.map((genre) => (
-            <button
-              key={genre.id}
-              onClick={() => handleGenreSelect(genre)}
-              className={`p-3 rounded-lg transition-all text-center ${
-                selectedGenre?.id === genre.id
-                  ? 'bg-primary text-white'
-                  : 'bg-accent hover:bg-accent/80'
-              }`}
-            >
-              <div className="text-2xl mb-1">{genre.icon}</div>
-              <div className="text-xs font-medium">{genre.name}</div>
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Volume Control */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
           <label className="text-sm font-medium">Volume</label>
           <span className="text-sm text-muted-foreground">{volume}%</span>
         </div>
@@ -209,19 +206,33 @@ export function MusicPlayer({ compact = false, onGenreChange }: MusicPlayerProps
           max="100"
           value={volume}
           onChange={(e) => handleVolumeChange(Number(e.target.value))}
-          className="w-full h-2 bg-accent rounded-full appearance-none cursor-pointer"
+          className="w-full h-2 bg-accent rounded-lg appearance-none cursor-pointer"
         />
       </div>
 
-      {/* Status */}
-      <div className="bg-accent rounded-lg p-3 text-center">
-        <p className="text-sm">
-          {isPlaying ? (
-            <span className="text-green-600 font-medium">🎵 Music Playing</span>
+      {/* Genre Selector */}
+      <div className="space-y-3">
+        <p className="text-sm font-medium">Choose Genre</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {MUSIC_GENRES && MUSIC_GENRES.length > 0 ? (
+            MUSIC_GENRES.map((genre) => (
+              <button
+                key={genre.id}
+                onClick={() => handleGenreSelect(genre)}
+                className={`p-3 rounded-lg transition-all text-center ${
+                  selectedGenre?.id === genre.id
+                    ? 'bg-primary text-white'
+                    : 'bg-accent hover:bg-accent/80'
+                }`}
+              >
+                <div className="text-2xl mb-1">{genre.icon}</div>
+                <div className="text-xs font-medium">{genre.name}</div>
+              </button>
+            ))
           ) : (
-            <span className="text-muted-foreground">Music Off</span>
+            <p className="text-sm text-muted-foreground col-span-4">No genres available</p>
           )}
-        </p>
+        </div>
       </div>
     </div>
   );
