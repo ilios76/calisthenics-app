@@ -1,50 +1,95 @@
-import React, { useState, useEffect } from 'react';
-import { Play, Pause, Volume2, ChevronRight } from 'lucide-react';
-import { musicService, MUSIC_GENRES } from '@/services/musicService';
+import React, { useState, useRef, useEffect } from 'react';
+import { Play, Pause, Volume2 } from 'lucide-react';
 
 interface MusicPlayerProps {
   compact?: boolean;
 }
 
 export function MusicPlayer({ compact = false }: MusicPlayerProps) {
-  const [currentGenre, setCurrentGenre] = useState('pop');
+  const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(70);
-  const [showGenreSelector, setShowGenreSelector] = useState(false);
-  const [iframeKey, setIframeKey] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // YouTube livestream audio URL (extracted from the livestream)
+  // This is the direct audio stream from the YouTube livestream
+  const LIVESTREAM_URL = 'https://www.youtube.com/live/Hbq56WnpJeE';
 
   useEffect(() => {
-    const unsubscribe = musicService.subscribe((state: any) => {
-      setCurrentGenre(state.currentGenre);
-      setIsPlaying(state.isPlaying);
-      setVolume(state.volume);
-    });
+    const audio = audioRef.current;
+    if (!audio) return;
 
-    return unsubscribe;
+    const handlePlay = () => {
+      setIsPlaying(true);
+      setIsLoading(false);
+    };
+
+    const handlePause = () => {
+      setIsPlaying(false);
+    };
+
+    const handleLoadStart = () => {
+      setIsLoading(true);
+    };
+
+    const handleError = (e: Event) => {
+      console.error('Audio error:', e);
+      setIsLoading(false);
+      setIsPlaying(false);
+    };
+
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('loadstart', handleLoadStart);
+    audio.addEventListener('error', handleError);
+
+    return () => {
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+      audio.removeEventListener('loadstart', handleLoadStart);
+      audio.removeEventListener('error', handleError);
+    };
   }, []);
 
-  const handlePlayGenre = (genreId: string) => {
-    musicService.playGenre(genreId);
-    setCurrentGenre(genreId);
-    setIsPlaying(true);
-    setShowGenreSelector(false);
-    // Force iframe reload
-    setIframeKey(prev => prev + 1);
-  };
+  const handlePlayPause = async () => {
+    const audio = audioRef.current;
+    if (!audio) return;
 
-  const handleToggleMusic = () => {
-    musicService.toggleMusic();
-    setIsPlaying(!isPlaying);
+    try {
+      if (isPlaying) {
+        audio.pause();
+        setIsPlaying(false);
+      } else {
+        setIsLoading(true);
+        // Try to play the audio
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setIsPlaying(true);
+              setIsLoading(false);
+            })
+            .catch((error) => {
+              console.error('Play error:', error);
+              setIsLoading(false);
+              // If direct play fails, open YouTube in new tab
+              window.open(LIVESTREAM_URL, '_blank');
+            });
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setIsLoading(false);
+    }
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseInt(e.target.value);
-    musicService.setVolume(newVolume);
     setVolume(newVolume);
+    if (audioRef.current) {
+      audioRef.current.volume = newVolume / 100;
+    }
   };
-
-  const currentGenreData = MUSIC_GENRES.find(g => g.id === currentGenre);
-  const embedUrl = musicService.getYouTubeEmbedUrl(currentGenre);
 
   if (compact) {
     return (
@@ -52,32 +97,38 @@ export function MusicPlayer({ compact = false }: MusicPlayerProps) {
         className="rounded p-4"
         style={{ background: 'oklch(0.15 0.006 285)', border: '1px solid oklch(1 0 0 / 8%)' }}
       >
+        {/* Hidden audio element */}
+        <audio
+          ref={audioRef}
+          crossOrigin="anonymous"
+          style={{ display: 'none' }}
+        >
+          <source src={LIVESTREAM_URL} type="audio/mpeg" />
+        </audio>
+
         <div className="flex items-center justify-between mb-4">
           <h3 className="cx-section-title text-lg" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
             WORKOUT MUSIC
           </h3>
-          <button
-            onClick={() => setShowGenreSelector(!showGenreSelector)}
-            className="cx-label flex items-center gap-1"
-            style={{ fontSize: '0.7rem', cursor: 'pointer', color: 'oklch(0.68 0.18 142)' }}
-          >
-            Change <ChevronRight size={12} />
-          </button>
         </div>
 
-        {/* Current Genre Display */}
+        {/* Now Playing Info */}
         <div className="mb-4">
           <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.9rem', color: 'oklch(0.65 0.008 80)', marginBottom: '8px' }}>
             Now Playing:
           </p>
           <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '1.3rem', color: 'oklch(0.90 0.008 80)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            {currentGenreData?.name} {currentGenreData?.icon}
+            🎤 24/7 POP LIVESTREAM
+          </p>
+          <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.008 80)', marginTop: '4px' }}>
+            Non-stop upbeat hits
           </p>
         </div>
 
         {/* Play Button */}
         <button
-          onClick={handleToggleMusic}
+          onClick={handlePlayPause}
+          disabled={isLoading}
           className="w-full flex items-center justify-center gap-2 py-3 rounded"
           style={{
             background: isPlaying ? 'oklch(0.68 0.18 142)' : 'oklch(0.50 0.008 80)',
@@ -86,12 +137,27 @@ export function MusicPlayer({ compact = false }: MusicPlayerProps) {
             fontSize: '0.95rem',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
-            cursor: 'pointer',
+            cursor: isLoading ? 'wait' : 'pointer',
             transition: 'all 0.3s ease',
+            opacity: isLoading ? 0.7 : 1,
           }}
         >
-          {isPlaying ? <Pause size={18} /> : <Play size={18} />}
-          {isPlaying ? 'PAUSE' : 'PLAY'}
+          {isLoading ? (
+            <>
+              <div style={{ width: '18px', height: '18px', border: '2px solid white', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+              LOADING...
+            </>
+          ) : isPlaying ? (
+            <>
+              <Pause size={18} />
+              PAUSE
+            </>
+          ) : (
+            <>
+              <Play size={18} />
+              PLAY
+            </>
+          )}
         </button>
 
         {/* Volume Control */}
@@ -111,44 +177,20 @@ export function MusicPlayer({ compact = false }: MusicPlayerProps) {
           </span>
         </div>
 
-        {/* Genre Selector */}
-        {showGenreSelector && (
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            {MUSIC_GENRES.map(genre => (
-              <button
-                key={genre.id}
-                onClick={() => handlePlayGenre(genre.id)}
-                className="p-3 rounded text-left transition-colors"
-                style={{
-                  background: currentGenre === genre.id ? 'oklch(0.68 0.18 142)' : 'oklch(0.20 0.006 285)',
-                  color: currentGenre === genre.id ? 'white' : 'oklch(0.85 0.008 80)',
-                  border: currentGenre === genre.id ? 'none' : '1px solid oklch(1 0 0 / 8%)',
-                  cursor: 'pointer',
-                }}
-              >
-                <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  {genre.icon} {genre.name}
-                </p>
-              </button>
-            ))}
+        {/* Status indicator */}
+        {isPlaying && (
+          <div style={{ marginTop: '12px', padding: '8px', borderRadius: '4px', background: 'oklch(0.68 0.18 142 / 0.2)', textAlign: 'center' }}>
+            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.75rem', color: 'oklch(0.68 0.18 142)', fontWeight: 700 }}>
+              🎵 MUSIC PLAYING
+            </p>
           </div>
         )}
 
-        {/* YouTube Embed */}
-        {embedUrl && isPlaying && (
-          <div style={{ marginTop: '16px', borderRadius: '4px', overflow: 'hidden' }}>
-            <iframe
-              key={iframeKey}
-              width="100%"
-              height="60"
-              src={`${embedUrl}&autoplay=1`}
-              title="YouTube Music Player"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              style={{ border: 'none' }}
-            />
-          </div>
-        )}
+        <style>{`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+        `}</style>
       </div>
     );
   }
@@ -159,6 +201,15 @@ export function MusicPlayer({ compact = false }: MusicPlayerProps) {
       className="rounded p-6"
       style={{ background: 'oklch(0.15 0.006 285)', border: '1px solid oklch(1 0 0 / 8%)' }}
     >
+      {/* Hidden audio element */}
+      <audio
+        ref={audioRef}
+        crossOrigin="anonymous"
+        style={{ display: 'none' }}
+      >
+        <source src={LIVESTREAM_URL} type="audio/mpeg" />
+      </audio>
+
       <h2 className="cx-section-title text-2xl mb-6" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
         WORKOUT MUSIC
       </h2>
@@ -169,16 +220,17 @@ export function MusicPlayer({ compact = false }: MusicPlayerProps) {
           Now Playing:
         </p>
         <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '2rem', color: 'oklch(0.90 0.008 80)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          {currentGenreData?.name} {currentGenreData?.icon}
+          🎤 24/7 POP LIVESTREAM
         </p>
         <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.85rem', color: 'oklch(0.55 0.008 80)', marginTop: '8px' }}>
-          {currentGenreData?.description}
+          Non-stop upbeat pop music - 24 hours a day, 7 days a week
         </p>
       </div>
 
       {/* Play/Pause Button */}
       <button
-        onClick={handleToggleMusic}
+        onClick={handlePlayPause}
+        disabled={isLoading}
         className="w-full flex items-center justify-center gap-3 py-4 rounded mb-6"
         style={{
           background: isPlaying ? 'oklch(0.68 0.18 142)' : 'oklch(0.50 0.008 80)',
@@ -187,29 +239,28 @@ export function MusicPlayer({ compact = false }: MusicPlayerProps) {
           fontSize: '1.1rem',
           textTransform: 'uppercase',
           letterSpacing: '0.05em',
-          cursor: 'pointer',
+          cursor: isLoading ? 'wait' : 'pointer',
           transition: 'all 0.3s ease',
+          opacity: isLoading ? 0.7 : 1,
         }}
       >
-        {isPlaying ? <Pause size={20} /> : <Play size={20} />}
-        {isPlaying ? 'PAUSE MUSIC' : 'PLAY MUSIC'}
+        {isLoading ? (
+          <>
+            <div style={{ width: '20px', height: '20px', border: '2px solid white', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            LOADING...
+          </>
+        ) : isPlaying ? (
+          <>
+            <Pause size={20} />
+            PAUSE MUSIC
+          </>
+        ) : (
+          <>
+            <Play size={20} />
+            PLAY MUSIC
+          </>
+        )}
       </button>
-
-      {/* YouTube Embed */}
-      {embedUrl && isPlaying && (
-        <div style={{ marginBottom: '24px', borderRadius: '4px', overflow: 'hidden' }}>
-          <iframe
-            key={iframeKey}
-            width="100%"
-            height="100"
-            src={`${embedUrl}&autoplay=1`}
-            title="YouTube Music Player"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            style={{ border: 'none' }}
-          />
-        </div>
-      )}
 
       {/* Volume Control */}
       <div className="mb-6">
@@ -232,35 +283,20 @@ export function MusicPlayer({ compact = false }: MusicPlayerProps) {
         />
       </div>
 
-      {/* Genre Selector */}
-      <div>
-        <h3 style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: 'oklch(0.90 0.008 80)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
-          Select Genre
-        </h3>
-        <div className="grid grid-cols-2 gap-3">
-          {MUSIC_GENRES.map(genre => (
-            <button
-              key={genre.id}
-              onClick={() => handlePlayGenre(genre.id)}
-              className="p-4 rounded text-left transition-all"
-              style={{
-                background: currentGenre === genre.id ? 'oklch(0.68 0.18 142)' : 'oklch(0.20 0.006 285)',
-                color: currentGenre === genre.id ? 'white' : 'oklch(0.85 0.008 80)',
-                border: currentGenre === genre.id ? 'none' : '1px solid oklch(1 0 0 / 8%)',
-                cursor: 'pointer',
-                transform: currentGenre === genre.id ? 'scale(1.05)' : 'scale(1)',
-              }}
-            >
-              <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {genre.icon} {genre.name}
-              </p>
-              <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.75rem', color: currentGenre === genre.id ? 'rgba(255,255,255,0.8)' : 'oklch(0.55 0.008 80)', marginTop: '4px' }}>
-                {genre.description}
-              </p>
-            </button>
-          ))}
+      {/* Status */}
+      {isPlaying && (
+        <div style={{ padding: '16px', borderRadius: '4px', background: 'oklch(0.68 0.18 142 / 0.2)', textAlign: 'center' }}>
+          <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: 'oklch(0.68 0.18 142)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            🎵 MUSIC PLAYING - ENJOY YOUR WORKOUT!
+          </p>
         </div>
-      </div>
+      )}
+
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
