@@ -3,13 +3,13 @@
 // Multi-step profile setup: name, sex, age, weight, goal
 // Industrial Athletic dark design
 // ============================================================
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useUser, type UserProfile } from '@/contexts/UserContext';
 import type { Goal, Sex } from '@/lib/data';
 import { getGoalDescription } from '@/lib/data';
-import { ChevronRight, ChevronLeft, Dumbbell, Zap, Target, Flame } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Dumbbell, Zap, Target, Flame, Hourglass } from 'lucide-react';
 
-type Step = 'welcome' | 'name' | 'body' | 'goal' | 'level';
+type Step = 'welcome' | 'name' | 'body' | 'goal' | 'level' | 'loading';
 
 const HERO_MALE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/hero-bg-C5GENbhHcAmSh8V2dzFSZc.webp';
 const HERO_FEMALE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/hero-female-ZWPp8YEB9EFQPcEGvYzBjN.webp';
@@ -27,6 +27,15 @@ export default function OnboardingPage() {
     goal: '' as Goal | '',
     fitnessLevel: '' as 'beginner' | 'intermediate' | 'advanced' | '',
   });
+
+  useEffect(() => {
+    if (step === 'loading') {
+      const timer = setTimeout(() => {
+        handleSubmit();
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [step]);
 
   const steps: Step[] = ['welcome', 'name', 'body', 'goal', 'level'];
   const stepIndex = steps.indexOf(step);
@@ -110,13 +119,13 @@ export default function OnboardingPage() {
         {/* Step: Welcome */}
         {step === 'welcome' && (
           <div className="animate-cx-slide-up">
-            <span className="cx-label mb-4 block">Welcome to CallistheniX</span>
+            <span className="cx-label mb-4 block">Welcome to CallistheniX App</span>
             <h1 className="cx-section-title text-6xl mb-6" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
-              SYSTEM THAT<br />
+              THE ROUTE THAT<br />
               <span style={{ color: 'oklch(0.68 0.18 142)' }}>GETS RESULTS</span>
             </h1>
             <p className="mb-8" style={{ color: 'oklch(0.70 0.008 80)', fontFamily: 'DM Sans, sans-serif', lineHeight: 1.7, maxWidth: '420px' }}>
-              Without this system, you won't progress. In 2 minutes, we'll build your personalized roadmap—proven to deliver results in 90 days.
+              Follow a clear roadmap from beginner to advanced, step by step — proven to deliver results in 90 days.
             </p>
             <div className="grid grid-cols-3 gap-4 mb-10">
               {[
@@ -314,6 +323,28 @@ export default function OnboardingPage() {
           </div>
         )}
 
+        {/* Step: Loading */}
+        {step === 'loading' && (
+          <div className="animate-cx-slide-up flex flex-col items-center justify-center py-20">
+            <div className="mb-8 flex justify-center">
+              <Hourglass size={64} style={{ color: 'oklch(0.68 0.18 142)', animation: 'spin 2s linear infinite' }} />
+            </div>
+            <h2 className="cx-section-title text-4xl mb-4 text-center" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
+              WE ARE PREPARING<br />
+              <span style={{ color: 'oklch(0.68 0.18 142)' }}>YOUR OWN PLAN</span>
+            </h2>
+            <p className="text-center" style={{ color: 'oklch(0.70 0.008 80)', fontFamily: 'DM Sans, sans-serif', maxWidth: '320px' }}>
+              Building your personalized workout program based on your profile...
+            </p>
+            <style>{`
+              @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+              }
+            `}</style>
+          </div>
+        )}
+
         {/* Step: Level */}
         {step === 'level' && (
           <div className="animate-cx-slide-up">
@@ -359,7 +390,7 @@ export default function OnboardingPage() {
               <button className="cx-btn-ghost flex-1" onClick={back}><ChevronLeft size={16} /> Back</button>
               <button
                 className="cx-btn-primary flex-1 flex items-center justify-center gap-2"
-                onClick={handleSubmit}
+                onClick={() => setStep('loading')}
                 disabled={!form.fitnessLevel}
                 style={{ opacity: !form.fitnessLevel ? 0.4 : 1 }}
               >
