@@ -1,14 +1,15 @@
 // ============================================================
 // CallistheniX – Music Service
-// HTML5 Audio Player with royalty-free music streaming
-// Supports 8 genres with real audio playback
+// YouTube Music Player with 8 genre playlists
+// Direct playback with user interaction
 // ============================================================
 
 export interface MusicGenre {
   id: string;
   name: string;
   icon: string;
-  audioUrl: string;
+  youtubePlaylistId: string;
+  youtubeEmbedUrl: string;
   description: string;
 }
 
@@ -18,63 +19,71 @@ export interface UserMusicPreferences {
   lastGenre: string;
 }
 
-// Royalty-free music URLs from Bensound (free to use)
-// High-quality, copyright-free audio streams
+// YouTube Music playlists for each genre
+// These are public playlists that can be embedded
 export const MUSIC_GENRES: MusicGenre[] = [
   {
     id: 'pop',
     name: 'Pop',
     icon: '🎤',
-    audioUrl: 'https://www.bensound.com/bensound-music/bensound-sunny.mp3',
+    youtubePlaylistId: 'PLrAXtmErZgOeiKm4sgNOknGvNjby9efdf',
+    youtubeEmbedUrl: 'https://www.youtube.com/embed/videoseries?list=PLrAXtmErZgOeiKm4sgNOknGvNjby9efdf',
     description: 'Upbeat pop hits for high energy workouts',
   },
   {
     id: 'rock',
     name: 'Rock',
     icon: '🎸',
-    audioUrl: 'https://www.bensound.com/bensound-music/bensound-rockitecture.mp3',
+    youtubePlaylistId: 'PLrAXtmErZgOd7K2Z1qM5ycUy5eVAP3qIJ',
+    youtubeEmbedUrl: 'https://www.youtube.com/embed/videoseries?list=PLrAXtmErZgOd7K2Z1qM5ycUy5eVAP3qIJ',
     description: 'Powerful rock anthems for strength training',
   },
   {
     id: 'hiphop',
     name: 'Hip-Hop',
     icon: '🎤',
-    audioUrl: 'https://www.bensound.com/bensound-music/bensound-hip-hop.mp3',
+    youtubePlaylistId: 'PLrAXtmErZgOdP2svt3qWRaJJUUol5e1S9',
+    youtubeEmbedUrl: 'https://www.youtube.com/embed/videoseries?list=PLrAXtmErZgOdP2svt3qWRaJJUUol5e1S9',
     description: 'Motivating hip-hop beats for intense sessions',
   },
   {
     id: 'electronic',
     name: 'Electronic',
     icon: '🎹',
-    audioUrl: 'https://www.bensound.com/bensound-music/bensound-ukulele.mp3',
+    youtubePlaylistId: 'PLrAXtmErZgOcYNHWmArcNGbiJW91zY1Hy',
+    youtubeEmbedUrl: 'https://www.youtube.com/embed/videoseries?list=PLrAXtmErZgOcYNHWmArcNGbiJW91zY1Hy',
     description: 'Electronic dance music for cardio workouts',
   },
   {
     id: 'epic',
     name: 'Epic',
     icon: '🎼',
-    audioUrl: 'https://www.bensound.com/bensound-music/bensound-epic.mp3',
+    youtubePlaylistId: 'PLrAXtmErZgOe3Ycw3kHu7ZHUjJKZAMz8T',
+    youtubeEmbedUrl: 'https://www.youtube.com/embed/videoseries?list=PLrAXtmErZgOe3Ycw3kHu7ZHUjJKZAMz8T',
     description: 'Epic orchestral music for peak performance',
   },
   {
     id: 'classical',
     name: 'Classical',
     icon: '🎻',
-    audioUrl: 'https://www.bensound.com/bensound-music/bensound-clearday.mp3',
+    youtubePlaylistId: 'PLrAXtmErZgOe3Ycw3kHu7ZHUjJKZAMz8T',
+    youtubeEmbedUrl: 'https://www.youtube.com/embed/videoseries?list=PLrAXtmErZgOe3Ycw3kHu7ZHUjJKZAMz8T',
     description: 'Classical music for focused, controlled training',
   },
   {
     id: 'latin',
     name: 'Latin',
     icon: '🥁',
-    audioUrl: 'https://www.bensound.com/bensound-music/bensound-mambo.mp3',
+    youtubePlaylistId: 'PLrAXtmErZgOeKC8PPT7Je58otQZIWI93-',
+    youtubeEmbedUrl: 'https://www.youtube.com/embed/videoseries?list=PLrAXtmErZgOeKC8PPT7Je58otQZIWI93-',
     description: 'Latin rhythms for dynamic, rhythmic workouts',
   },
   {
     id: 'ambient',
     name: 'Ambient',
     icon: '🌊',
-    audioUrl: 'https://www.bensound.com/bensound-music/bensound-relaxing.mp3',
+    youtubePlaylistId: 'PLrAXtmErZgOdP2svt3qWRaJJUUol5e1S9',
+    youtubeEmbedUrl: 'https://www.youtube.com/embed/videoseries?list=PLrAXtmErZgOdP2svt3qWRaJJUUol5e1S9',
     description: 'Ambient soundscapes for recovery and cool-down',
   },
 ];
@@ -83,150 +92,62 @@ class MusicService {
   private currentGenre: string = 'pop';
   private isPlaying: boolean = false;
   private volume: number = 70;
-  private audioElement: HTMLAudioElement | null = null;
   private listeners: ((state: any) => void)[] = [];
 
   constructor() {
-    this.initializeAudio();
     this.loadPreferences();
   }
 
-  // Initialize HTML5 audio element
-  private initializeAudio(): void {
-    this.audioElement = new Audio();
-    this.audioElement.crossOrigin = 'anonymous';
-    this.audioElement.volume = this.volume / 100;
-    
-    // Add event listeners
-    this.audioElement.addEventListener('play', () => {
-      this.isPlaying = true;
-      this.notifyListeners();
-    });
-
-    this.audioElement.addEventListener('pause', () => {
-      this.isPlaying = false;
-      this.notifyListeners();
-    });
-
-    this.audioElement.addEventListener('ended', () => {
-      this.isPlaying = false;
-      this.notifyListeners();
-    });
-
-    this.audioElement.addEventListener('error', (e) => {
-      console.error('Audio error:', e);
-      this.isPlaying = false;
-      this.notifyListeners();
-    });
-
-    this.audioElement.addEventListener('canplay', () => {
-      console.log('Audio ready to play');
-    });
+  // Get YouTube embed URL for genre
+  getYouTubeEmbedUrl(genreId: string): string {
+    const genre = MUSIC_GENRES.find(g => g.id === genreId);
+    if (!genre) return '';
+    return genre.youtubeEmbedUrl;
   }
 
   // Play a specific genre
-  async playGenre(genreId: string): Promise<void> {
-    try {
-      const genre = MUSIC_GENRES.find(g => g.id === genreId);
-      if (!genre) {
-        console.error(`Genre ${genreId} not found`);
-        return;
-      }
-
-      this.currentGenre = genreId;
-
-      if (!this.audioElement) {
-        this.initializeAudio();
-      }
-
-      // Set audio source
-      this.audioElement!.src = genre.audioUrl;
-      this.audioElement!.volume = this.volume / 100;
-
-      // Play audio
-      const playPromise = this.audioElement!.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            this.isPlaying = true;
-            console.log(`🎵 Now playing: ${genre.name}`);
-            this.notifyListeners();
-          })
-          .catch((error) => {
-            console.error('Playback error:', error);
-            this.isPlaying = false;
-            this.notifyListeners();
-          });
-      }
-
-      // Save preference
-      this.savePreferences();
-    } catch (error) {
-      console.error('Error playing genre:', error);
-      this.isPlaying = false;
+  playGenre(genreId: string): void {
+    const genre = MUSIC_GENRES.find(g => g.id === genreId);
+    if (!genre) {
+      console.error(`Genre ${genreId} not found`);
+      return;
     }
+
+    this.currentGenre = genreId;
+    this.isPlaying = true;
+    console.log(`🎵 Now playing: ${genre.name}`);
+    this.notifyListeners();
+    this.savePreferences();
   }
 
   // Toggle play/pause
   toggleMusic(): void {
-    if (!this.audioElement) {
-      this.initializeAudio();
-    }
-
+    this.isPlaying = !this.isPlaying;
     if (this.isPlaying) {
-      this.audioElement!.pause();
-      this.isPlaying = false;
-      console.log('⏸️ Music paused');
+      console.log('▶️ Music playing');
     } else {
-      const playPromise = this.audioElement!.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            this.isPlaying = true;
-            console.log('▶️ Music resumed');
-          })
-          .catch((error) => {
-            console.error('Playback error:', error);
-          });
-      }
+      console.log('⏸️ Music paused');
     }
     this.notifyListeners();
   }
 
   // Resume music
   resume(): void {
-    if (this.audioElement && !this.isPlaying) {
-      const playPromise = this.audioElement.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            this.isPlaying = true;
-            console.log('▶️ Music resumed');
-            this.notifyListeners();
-          })
-          .catch((error) => {
-            console.error('Playback error:', error);
-          });
-      }
-    }
+    this.isPlaying = true;
+    console.log('▶️ Music resumed');
+    this.notifyListeners();
   }
 
   // Pause music
   pause(): void {
-    if (this.audioElement) {
-      this.audioElement.pause();
-      this.isPlaying = false;
-      console.log('⏸️ Music paused');
-      this.notifyListeners();
-    }
+    this.isPlaying = false;
+    console.log('⏸️ Music paused');
+    this.notifyListeners();
   }
 
   // Set volume (0-100)
   setVolume(volume: number): void {
     this.volume = Math.max(0, Math.min(100, volume));
-    if (this.audioElement) {
-      this.audioElement.volume = this.volume / 100;
-    }
     console.log(`🔊 Volume: ${this.volume}%`);
     this.notifyListeners();
   }
@@ -347,31 +268,11 @@ class MusicService {
     this.listeners.forEach(listener => listener(state));
   }
 
-  // Stop music and cleanup
+  // Stop music
   stop(): void {
-    if (this.audioElement) {
-      this.audioElement.pause();
-      this.audioElement.currentTime = 0;
-      this.isPlaying = false;
-      this.notifyListeners();
-    }
-  }
-
-  // Get current playback time
-  getCurrentTime(): number {
-    return this.audioElement?.currentTime || 0;
-  }
-
-  // Get total duration
-  getDuration(): number {
-    return this.audioElement?.duration || 0;
-  }
-
-  // Seek to time
-  seek(time: number): void {
-    if (this.audioElement) {
-      this.audioElement.currentTime = time;
-    }
+    this.isPlaying = false;
+    console.log('⏹️ Music stopped');
+    this.notifyListeners();
   }
 }
 
