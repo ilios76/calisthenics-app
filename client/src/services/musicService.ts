@@ -26,9 +26,9 @@ export const MUSIC_GENRES: MusicGenre[] = [
     id: 'pop',
     name: 'Pop',
     icon: '🎤',
-    youtubePlaylistId: 'PLrAXtmErZgOeiKm4sgNOknGvNjby9efdf',
-    youtubeEmbedUrl: 'https://www.youtube.com/embed/videoseries?list=PLrAXtmErZgOeiKm4sgNOknGvNjby9efdf',
-    description: 'Upbeat pop hits for high energy workouts',
+    youtubePlaylistId: 'Hbq56WnpJeE',
+    youtubeEmbedUrl: 'https://www.youtube.com/embed/Hbq56WnpJeE',
+    description: '24/7 Pop Music Livestream - Non-stop upbeat hits',
   },
   {
     id: 'rock',
