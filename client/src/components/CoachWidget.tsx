@@ -24,10 +24,6 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
 
   if (!isVisible) return null;
 
-  const positionClasses = position === 'bottom-left' 
-    ? 'bottom-6 left-6' 
-    : 'bottom-6 right-6';
-
   const handleGetChallenge = () => {
     const challenge = getDailyChallenge();
     setCurrentMessage(challenge);
@@ -35,14 +31,16 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
   };
 
   return (
-    <div className="fixed bottom-6 right-8 z-40">
-      {/* Chat bubble */}
+    <>
+      {/* Chat bubble - slides in from right at middle-top */}
       {isOpen && currentMessage && (
         <div
-          className="mb-4 p-4 rounded-lg shadow-lg max-w-xs animate-cx-slide-up"
+          className="fixed top-1/3 right-0 z-40 p-4 rounded-lg shadow-lg max-w-xs"
           style={{
             background: 'oklch(0.15 0.006 285)',
             border: '1px solid oklch(0.68 0.18 142)',
+            animation: 'slideInRight 0.3s ease-out forwards',
+            marginRight: '1rem',
           }}
         >
           <div className="flex items-start justify-between mb-3">
@@ -82,20 +80,35 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
         </div>
       )}
 
-      {/* Coach button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="px-4 py-2 rounded-lg flex items-center justify-center gap-2 shadow-lg transition-all hover:scale-105 font-bold text-sm"
-        style={{
-          background: isOpen ? 'oklch(0.68 0.18 142)' : 'oklch(0.68 0.18 142)',
-          color: 'oklch(0.10 0.005 285)',
-          fontFamily: 'Barlow Condensed, sans-serif',
-        }}
-        title="AI Coach"
-      >
-        <MessageCircle size={18} />
-        AI COACH
-      </button>
-    </div>
+      {/* Coach button - fixed at bottom-right */}
+      <div className="fixed bottom-6 right-8 z-40">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="px-4 py-2 rounded-lg flex items-center justify-center gap-2 shadow-lg transition-all hover:scale-105 font-bold text-sm"
+          style={{
+            background: isOpen ? 'oklch(0.68 0.18 142)' : 'oklch(0.68 0.18 142)',
+            color: 'oklch(0.10 0.005 285)',
+            fontFamily: 'Barlow Condensed, sans-serif',
+          }}
+          title="AI Coach"
+        >
+          <MessageCircle size={18} />
+          AI COACH
+        </button>
+      </div>
+
+      <style>{`
+        @keyframes slideInRight {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+      `}</style>
+    </>
   );
 };

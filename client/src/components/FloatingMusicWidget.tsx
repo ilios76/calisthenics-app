@@ -14,7 +14,7 @@ export const FloatingMusicWidget: React.FC = () => {
   };
 
   return (
-    <div className="fixed top-20 right-8 z-50">
+    <div className="fixed bottom-8 right-8 z-50">
       {/* Genre menu */}
       {showGenreMenu && (
         <div className="absolute bottom-20 right-0 bg-gray-800 rounded-lg shadow-lg p-3 mb-2 w-40">
