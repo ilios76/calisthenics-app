@@ -35,7 +35,7 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
   };
 
   return (
-    <div className={`fixed ${positionClasses} z-40`}>
+    <div className="fixed bottom-6 right-8 z-40">
       {/* Chat bubble */}
       {isOpen && currentMessage && (
         <div
@@ -85,14 +85,16 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
       {/* Coach button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110"
+        className="px-4 py-2 rounded-lg flex items-center justify-center gap-2 shadow-lg transition-all hover:scale-105 font-bold text-sm"
         style={{
           background: isOpen ? 'oklch(0.68 0.18 142)' : 'oklch(0.68 0.18 142)',
           color: 'oklch(0.10 0.005 285)',
+          fontFamily: 'Barlow Condensed, sans-serif',
         }}
-        title="Coach"
+        title="AI Coach"
       >
-        <MessageCircle size={24} />
+        <MessageCircle size={18} />
+        AI COACH
       </button>
     </div>
   );
