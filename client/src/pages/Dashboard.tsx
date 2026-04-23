@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { getRecommendedPrograms, getDietPlan, calculateBMI, getBMICategory, getGoalLabel } from '@/lib/data';
 import { Flame, Zap, Target, ChevronRight, Play, Utensils, TrendingUp } from 'lucide-react';
+import { RewardedAdWidget } from '@/components/RewardedAdWidget';
 
 const WORKOUT_BG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/workout-bg-4n6t43em9tdbWJH7YCcGcZ.webp';
 const HERO_MALE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/hero-bg-C5GENbhHcAmSh8V2dzFSZc.webp';
@@ -54,6 +55,14 @@ export default function DashboardPage() {
       </div>
 
       <div className="container pb-16 -mt-4">
+        {/* Mental Trigger Banner */}
+        <div className="mb-8 p-6 rounded-lg" style={{ background: 'oklch(0.68 0.18 142 / 10%)', border: '1px solid oklch(0.68 0.18 142 / 30%)' }}>
+          <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.9rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'oklch(0.68 0.18 142)', marginBottom: '4px' }}>🔥 Key Message</p>
+          <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '1rem', color: 'oklch(0.96 0.008 80)', lineHeight: 1.6 }}>
+            Without this system, you won't progress. Stick to your plan for 90 days and watch your body transform.
+          </p>
+        </div>
+
         {/* Stats row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
           {[
@@ -227,6 +236,15 @@ export default function DashboardPage() {
                 )}
               </div>
             )}
+          </div>
+
+          {/* Rewarded Ads Section */}
+          <div className="space-y-4">
+            <h2 className="cx-section-title text-2xl mt-6" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
+              EARN REWARDS
+            </h2>
+            <RewardedAdWidget adId="xp_boost" />
+            <RewardedAdWidget adId="trial_extension" />
           </div>
 
           {/* Quick Actions */}

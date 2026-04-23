@@ -57,7 +57,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
                 marginBottom: '8px',
               }}
             >
-              Unlock Premium
+              Keep My Plan Active
             </h2>
             <p
               style={{
@@ -66,7 +66,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
                 color: 'oklch(0.65 0.01 285)',
               }}
             >
-              Your trial ends in {completion.trialDaysRemaining} days. Upgrade now to keep training.
+              Without this system, you won't progress. Your trial ends in {completion.trialDaysRemaining} days.
             </p>
           </div>
 
@@ -106,7 +106,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
                     color: 'oklch(0.68 0.18 142)',
                   }}
                 >
-                  €7.99
+                  €5.99
                 </span>
                 <span
                   style={{
@@ -211,7 +211,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
                     color: 'oklch(0.68 0.18 142)',
                   }}
                 >
-                  €39.99
+                  €29.99
                 </span>
                 <span
                   style={{
@@ -239,7 +239,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({ isOpen, onClose, onU
                     textTransform: 'uppercase',
                   }}
                 >
-                  Save 60%
+                  Save 75%
                 </p>
               </div>
               <button

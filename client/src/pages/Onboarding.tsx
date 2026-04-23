@@ -70,14 +70,14 @@ export default function OnboardingPage() {
         <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, oklch(0.10 0.005 285 / 20%), oklch(0.10 0.005 285 / 60%))' }} />
         <div className="relative z-10 flex flex-col justify-end p-12">
           <div className="mb-4">
-            <span className="cx-label">Your Journey Starts Here</span>
+            <span className="cx-label">The System That Works</span>
           </div>
           <h2 className="cx-section-title text-5xl text-white mb-4" style={{ fontFamily: 'Barlow Condensed, sans-serif' }}>
-            TRAIN LIKE<br />
-            <span style={{ color: 'oklch(0.68 0.18 142)' }}>AN ATHLETE</span>
+            RESULTS<br />
+            <span style={{ color: 'oklch(0.68 0.18 142)' }}>NOT EXCUSES</span>
           </h2>
           <p style={{ color: 'oklch(0.70 0.008 80)', fontFamily: 'DM Sans, sans-serif', maxWidth: '360px' }}>
-            Personalized calisthenics programs built around your body, your goals, and your schedule.
+            Without a proven system, you'll stay stuck. CallistheniX gives you the exact roadmap to transform your body in 90 days.
           </p>
         </div>
       </div>
@@ -112,11 +112,11 @@ export default function OnboardingPage() {
           <div className="animate-cx-slide-up">
             <span className="cx-label mb-4 block">Welcome to CallistheniX</span>
             <h1 className="cx-section-title text-6xl mb-6" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
-              YOUR BODY.<br />
-              <span style={{ color: 'oklch(0.68 0.18 142)' }}>YOUR RULES.</span>
+              SYSTEM THAT<br />
+              <span style={{ color: 'oklch(0.68 0.18 142)' }}>GETS RESULTS</span>
             </h1>
             <p className="mb-8" style={{ color: 'oklch(0.70 0.008 80)', fontFamily: 'DM Sans, sans-serif', lineHeight: 1.7, maxWidth: '420px' }}>
-              In 2 minutes, we'll build a fully personalized calisthenics program and nutrition plan — tailored to your body, your goal, and your current fitness level.
+              Without this system, you won't progress. In 2 minutes, we'll build your personalized roadmap—proven to deliver results in 90 days.
             </p>
             <div className="grid grid-cols-3 gap-4 mb-10">
               {[
