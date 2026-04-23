@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useRef, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useRef, ReactNode, useEffect } from 'react';
 
 interface MusicContextType {
   isPlaying: boolean;
@@ -10,14 +10,39 @@ interface MusicContextType {
 
 const MusicContext = createContext<MusicContextType | undefined>(undefined);
 
+// YouTube livestream URL for pop music
+const MUSIC_URL = 'https://www.youtube.com/live/Hbq56WnpJeE';
+
 export const MusicProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
+  useEffect(() => {
+    // Create audio element if it doesn't exist
+    if (!audioRef.current) {
+      const audio = new Audio();
+      audio.crossOrigin = 'anonymous';
+      // For YouTube livestream, we'll use an iframe approach instead
+      audioRef.current = audio;
+    }
+  }, []);
+
   const play = () => {
     if (audioRef.current) {
-      audioRef.current.play().catch(err => console.log('Autoplay prevented:', err));
-      setIsPlaying(true);
+      // Try to play the audio
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+            console.log('Music playing');
+          })
+          .catch(err => {
+            console.log('Playback error:', err);
+            // If direct audio fails, open YouTube in new tab
+            window.open(MUSIC_URL, '_blank');
+          });
+      }
     }
   };
 
@@ -25,6 +50,7 @@ export const MusicProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     if (audioRef.current) {
       audioRef.current.pause();
       setIsPlaying(false);
+      console.log('Music paused');
     }
   };
 
@@ -38,6 +64,14 @@ export const MusicProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   return (
     <MusicContext.Provider value={{ isPlaying, togglePlay, play, pause, audioRef }}>
+      {/* Hidden audio element */}
+      <audio
+        ref={audioRef}
+        crossOrigin="anonymous"
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+        onEnded={() => setIsPlaying(false)}
+      />
       {children}
     </MusicContext.Provider>
   );

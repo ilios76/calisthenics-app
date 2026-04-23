@@ -5,10 +5,18 @@ import { useMusicContext } from '@/contexts/MusicContext';
 export const FloatingMusicWidget: React.FC = () => {
   const { isPlaying, togglePlay } = useMusicContext();
 
+  const handleClick = () => {
+    if (!isPlaying) {
+      // Open YouTube livestream in new tab
+      window.open('https://www.youtube.com/live/Hbq56WnpJeE', '_blank');
+    }
+    togglePlay();
+  };
+
   return (
     <div className="fixed bottom-8 right-8 z-50">
       <button
-        onClick={togglePlay}
+        onClick={handleClick}
         className={`flex items-center justify-center w-16 h-16 rounded-full shadow-lg transition-all duration-300 ${
           isPlaying
             ? 'bg-green-500 hover:bg-green-600'
