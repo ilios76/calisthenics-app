@@ -18,63 +18,63 @@ export interface UserMusicPreferences {
   lastGenre: string;
 }
 
-// Royalty-free music URLs from various sources
-// Using high-quality, copyright-free audio streams
+// Royalty-free music URLs from Bensound (free to use)
+// High-quality, copyright-free audio streams
 export const MUSIC_GENRES: MusicGenre[] = [
   {
     id: 'pop',
     name: 'Pop',
     icon: '🎤',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+    audioUrl: 'https://www.bensound.com/bensound-music/bensound-sunny.mp3',
     description: 'Upbeat pop hits for high energy workouts',
   },
   {
     id: 'rock',
     name: 'Rock',
     icon: '🎸',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+    audioUrl: 'https://www.bensound.com/bensound-music/bensound-rockitecture.mp3',
     description: 'Powerful rock anthems for strength training',
   },
   {
     id: 'hiphop',
     name: 'Hip-Hop',
     icon: '🎤',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+    audioUrl: 'https://www.bensound.com/bensound-music/bensound-hip-hop.mp3',
     description: 'Motivating hip-hop beats for intense sessions',
   },
   {
     id: 'electronic',
     name: 'Electronic',
     icon: '🎹',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
+    audioUrl: 'https://www.bensound.com/bensound-music/bensound-ukulele.mp3',
     description: 'Electronic dance music for cardio workouts',
   },
   {
     id: 'epic',
     name: 'Epic',
     icon: '🎼',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
+    audioUrl: 'https://www.bensound.com/bensound-music/bensound-epic.mp3',
     description: 'Epic orchestral music for peak performance',
   },
   {
     id: 'classical',
     name: 'Classical',
     icon: '🎻',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3',
+    audioUrl: 'https://www.bensound.com/bensound-music/bensound-clearday.mp3',
     description: 'Classical music for focused, controlled training',
   },
   {
     id: 'latin',
     name: 'Latin',
     icon: '🥁',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3',
+    audioUrl: 'https://www.bensound.com/bensound-music/bensound-mambo.mp3',
     description: 'Latin rhythms for dynamic, rhythmic workouts',
   },
   {
     id: 'ambient',
     name: 'Ambient',
     icon: '🌊',
-    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3',
+    audioUrl: 'https://www.bensound.com/bensound-music/bensound-relaxing.mp3',
     description: 'Ambient soundscapes for recovery and cool-down',
   },
 ];
@@ -117,6 +117,10 @@ class MusicService {
       console.error('Audio error:', e);
       this.isPlaying = false;
       this.notifyListeners();
+    });
+
+    this.audioElement.addEventListener('canplay', () => {
+      console.log('Audio ready to play');
     });
   }
 

@@ -49,6 +49,7 @@ export default function AppShell() {
     <div className="min-h-screen flex flex-col" style={{ background: 'oklch(0.10 0.005 285)' }}>
       <TopNavigation />
       <main className="flex-1">
+        {currentView === 'onboarding' && <OnboardingPage />}
         {currentView === 'dashboard' && <DashboardPage />}
         {currentView === 'programs' && <ProgramsPage />}
         {currentView === 'trainer' && <TrainerPage />}
