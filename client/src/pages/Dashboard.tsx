@@ -6,7 +6,6 @@ import { useState } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { getRecommendedPrograms, getDietPlan, calculateBMI, getBMICategory, getGoalLabel } from '@/lib/data';
 import { Flame, Zap, Target, ChevronRight, Play, Utensils, TrendingUp } from 'lucide-react';
-import { MusicPlayer } from '@/components/MusicPlayer';
 
 const WORKOUT_BG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/workout-bg-4n6t43em9tdbWJH7YCcGcZ.webp';
 const HERO_MALE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/hero-bg-C5GENbhHcAmSh8V2dzFSZc.webp';
@@ -230,9 +229,8 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Music Player + Quick Actions */}
+          {/* Quick Actions */}
           <div className="space-y-4">
-            <MusicPlayer compact={false} />
             <h2 className="cx-section-title text-2xl mt-6" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
               QUICK ACTIONS
             </h2>
