@@ -32,63 +32,70 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
 
   return (
     <>
-      {/* Chat bubble - slides in from right at middle-top */}
-      {isOpen && currentMessage && (
-        <div
-          className="fixed top-1/3 right-0 z-40 p-4 rounded-lg shadow-lg max-w-xs"
-          style={{
-            background: 'oklch(0.15 0.006 285)',
-            border: '1px solid oklch(0.68 0.18 142)',
-            animation: 'slideInRight 0.3s ease-out forwards',
-            marginRight: '1rem',
-          }}
-        >
-          <div className="flex items-start justify-between mb-3">
-            <span style={{ fontSize: '1.5rem' }}>{currentMessage.emoji}</span>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="p-1 hover:opacity-70 transition-opacity"
-            >
-              <X size={16} style={{ color: 'oklch(0.65 0.01 285)' }} />
-            </button>
-          </div>
-          <p
+      {/* Coach container - slides in from right at middle-top */}
+      <div
+        className="fixed top-1/3 right-0 z-40 flex flex-col gap-3"
+        style={{
+          animation: isOpen ? 'slideInRight 0.3s ease-out forwards' : 'slideOutRight 0.3s ease-in forwards',
+          pointerEvents: isOpen ? 'auto' : 'none',
+        }}
+      >
+        {/* Chat bubble */}
+        {isOpen && currentMessage && (
+          <div
+            className="p-4 rounded-lg shadow-lg max-w-xs"
             style={{
-              fontFamily: 'DM Sans, sans-serif',
-              fontSize: '0.9rem',
-              color: 'oklch(0.90 0.008 80)',
-              lineHeight: 1.5,
-              marginBottom: '12px',
+              background: 'oklch(0.15 0.006 285)',
+              border: '1px solid oklch(0.68 0.18 142)',
+              marginRight: '1rem',
             }}
           >
-            {currentMessage.content}
-          </p>
-          {!showChallenge && (
-            <button
-              onClick={handleGetChallenge}
-              className="w-full py-2 rounded text-sm transition-all flex items-center justify-center gap-2"
+            <div className="flex items-start justify-between mb-3">
+              <span style={{ fontSize: '1.5rem' }}>{currentMessage.emoji}</span>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-1 hover:opacity-70 transition-opacity"
+              >
+                <X size={16} style={{ color: 'oklch(0.65 0.01 285)' }} />
+              </button>
+            </div>
+            <p
               style={{
-                background: 'oklch(0.68 0.18 142)',
-                color: 'oklch(0.10 0.005 285)',
-                fontFamily: 'Barlow Condensed, sans-serif',
-                fontWeight: 700,
+                fontFamily: 'DM Sans, sans-serif',
+                fontSize: '0.9rem',
+                color: 'oklch(0.90 0.008 80)',
+                lineHeight: 1.5,
+                marginBottom: '12px',
               }}
             >
-              <Zap size={14} /> Today's Challenge
-            </button>
-          )}
-        </div>
-      )}
+              {currentMessage.content}
+            </p>
+            {!showChallenge && (
+              <button
+                onClick={handleGetChallenge}
+                className="w-full py-2 rounded text-sm transition-all flex items-center justify-center gap-2"
+                style={{
+                  background: 'oklch(0.68 0.18 142)',
+                  color: 'oklch(0.10 0.005 285)',
+                  fontFamily: 'Barlow Condensed, sans-serif',
+                  fontWeight: 700,
+                }}
+              >
+                <Zap size={14} /> Today's Challenge
+              </button>
+            )}
+          </div>
+        )}
 
-      {/* Coach button - fixed at bottom-right */}
-      <div className="fixed bottom-6 right-8 z-40">
+        {/* Coach button - slides in with the popup */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="px-4 py-2 rounded-lg flex items-center justify-center gap-2 shadow-lg transition-all hover:scale-105 font-bold text-sm"
+          className="px-4 py-2 rounded-lg flex items-center justify-center gap-2 shadow-lg transition-all hover:scale-105 font-bold text-sm self-end"
           style={{
             background: isOpen ? 'oklch(0.68 0.18 142)' : 'oklch(0.68 0.18 142)',
             color: 'oklch(0.10 0.005 285)',
             fontFamily: 'Barlow Condensed, sans-serif',
+            marginRight: '1rem',
           }}
           title="AI Coach"
         >
@@ -106,6 +113,17 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
           to {
             transform: translateX(0);
             opacity: 1;
+          }
+        }
+        
+        @keyframes slideOutRight {
+          from {
+            transform: translateX(0);
+            opacity: 1;
+          }
+          to {
+            transform: translateX(100%);
+            opacity: 0;
           }
         }
       `}</style>
