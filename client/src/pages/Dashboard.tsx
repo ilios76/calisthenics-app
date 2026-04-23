@@ -217,12 +217,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    <button
-                      className="cx-btn-primary w-full mt-6 flex items-center justify-center gap-2"
-                      onClick={() => setCurrentView('diet')}
-                    >
-                      <Utensils size={16} /> View Full Nutrition Plan
-                    </button>
+
                   </div>
                 ) : (
                   <div className="cx-card p-8 text-center">
