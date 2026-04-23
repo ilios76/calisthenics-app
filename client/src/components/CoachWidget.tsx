@@ -37,10 +37,10 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
           transform: 'translateY(-50%)',
         }}
       >
-        {/* Vertical tab button */}
+        {/* Vertical tab button - compact size */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="px-3 py-8 rounded-l-lg flex items-center justify-center gap-2 shadow-lg transition-all hover:scale-105 font-bold text-xs self-end"
+          className="px-1 py-3 rounded-l-lg flex items-center justify-center gap-1 shadow-lg transition-all hover:scale-105 font-bold text-xs self-end"
           style={{
             background: 'oklch(0.68 0.18 142)',
             color: 'oklch(0.10 0.005 285)',
@@ -50,7 +50,10 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
             transform: 'rotate(180deg)',
             pointerEvents: 'auto',
             cursor: 'pointer',
-            letterSpacing: '2px',
+            letterSpacing: '1px',
+            fontSize: '10px',
+            minHeight: '60px',
+            minWidth: '24px',
           }}
           title="AI Coach"
         >
