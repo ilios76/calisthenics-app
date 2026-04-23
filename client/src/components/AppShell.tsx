@@ -1,58 +1,26 @@
 // ============================================================
 // CallistheniX – AppShell
-// Guest-first routing: Landing → Programs → Auth → Dashboard
+// Original flow: Onboarding → Programs → Dashboard
+// No login screen - guests start with onboarding
 // ============================================================
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import { useUser } from '@/contexts/UserContext';
-import { LandingPage } from '@/pages/LandingPage';
-import { ProgramsPage } from '@/pages/ProgramsPage';
-import { LoginPage } from '@/pages/LoginPage';
-import { ProfileSetupPage } from '@/pages/ProfileSetupPage';
-import { TopNavigation } from '@/components/TopNavigation';
+import { useAuth } from '@/contexts/AuthContext';
+import OnboardingPage from '@/pages/Onboarding';
 import DashboardPage from '@/pages/Dashboard';
+import ProgramsPage from '@/pages/Programs';
 import TrainerPage from '@/pages/Trainer';
 import DietPage from '@/pages/Diet';
 import ProfilePage from '@/pages/Profile';
 import ProgressPage from '@/pages/Progress';
 import SettingsPage from '@/pages/Settings';
-
-type Route = 'landing' | 'programs' | 'about' | 'auth' | 'setup' | 'dashboard' | 'trainer' | 'diet' | 'profile' | 'progress' | 'settings';
+import { TopNavigation } from '@/components/TopNavigation';
 
 export default function AppShell() {
-  const { isAuthenticated, loading } = useAuth();
   const { currentView, hasProfile } = useUser();
-  const [route, setRoute] = useState<Route>('landing');
+  const { loading } = useAuth();
 
-  // Handle routing logic
-  useEffect(() => {
-    if (loading) return;
-
-    // If not authenticated, show guest routes
-    if (!isAuthenticated) {
-      if (route === 'auth' || route === 'setup') {
-        setRoute('auth');
-      } else if (route.startsWith('dashboard') || route === 'trainer' || route === 'diet' || route === 'profile' || route === 'progress' || route === 'settings') {
-        // Redirect protected routes to landing
-        setRoute('landing');
-      }
-      return;
-    }
-
-    // If authenticated but no profile, show setup
-    if (!hasProfile && route !== 'setup') {
-      setRoute('setup');
-      return;
-    }
-
-    // If authenticated with profile, allow dashboard routes
-    if (hasProfile && (route === 'auth' || route === 'setup')) {
-      setRoute('dashboard');
-    }
-  }, [isAuthenticated, hasProfile, loading, route]);
-
-  // Show loading screen
+  // Show loading screen while checking auth
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -64,43 +32,30 @@ export default function AppShell() {
     );
   }
 
-  // Guest routes (no auth required)
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex flex-col bg-background">
-        <TopNavigation />
-        <main className="flex-1">
-          {route === 'landing' && <LandingPage />}
-          {route === 'programs' && <ProgramsPage />}
-          {route === 'auth' && <LoginPage />}
-        </main>
-      </div>
-    );
-  }
-
-  // Auth required: show setup if needed
+  // Show onboarding if no profile (guests or new users)
   if (!hasProfile) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <TopNavigation />
         <main className="flex-1">
-          <ProfileSetupPage />
+          <OnboardingPage />
         </main>
       </div>
     );
   }
 
-  // Authenticated with profile: show dashboard
+  // Show main app with navigation
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'oklch(0.10 0.005 285)' }}>
       <TopNavigation />
       <main className="flex-1">
-        {route === 'dashboard' && <DashboardPage />}
-        {route === 'trainer' && <TrainerPage />}
-        {route === 'diet' && <DietPage />}
-        {route === 'profile' && <ProfilePage />}
-        {route === 'progress' && <ProgressPage />}
-        {route === 'settings' && <SettingsPage />}
+        {currentView === 'dashboard' && <DashboardPage />}
+        {currentView === 'programs' && <ProgramsPage />}
+        {currentView === 'trainer' && <TrainerPage />}
+        {currentView === 'diet' && <DietPage />}
+        {currentView === 'profile' && <ProfilePage />}
+        {currentView === 'progress' && <ProgressPage />}
+        {currentView === 'settings' && <SettingsPage />}
       </main>
     </div>
   );
