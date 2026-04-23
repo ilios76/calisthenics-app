@@ -37,7 +37,6 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
         className="fixed top-1/3 right-0 z-40 flex flex-col gap-3"
         style={{
           animation: isOpen ? 'slideInRight 0.3s ease-out forwards' : 'slideOutRight 0.3s ease-in forwards',
-          pointerEvents: isOpen ? 'auto' : 'none',
         }}
       >
         {/* Chat bubble */}
@@ -96,6 +95,8 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
             color: 'oklch(0.10 0.005 285)',
             fontFamily: 'Barlow Condensed, sans-serif',
             marginRight: '1rem',
+            pointerEvents: 'auto',
+            cursor: 'pointer',
           }}
           title="AI Coach"
         >
