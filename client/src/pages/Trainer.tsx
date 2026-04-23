@@ -11,6 +11,7 @@ import { getRandomQuote } from '@/lib/quotes';
 import { playDoubleBeepSound } from '@/lib/soundUtils';
 import { Play, Pause, SkipForward, ChevronLeft, CheckCircle, Info } from 'lucide-react';
 import { toast } from 'sonner';
+import { WorkoutEndScreen } from '@/components/WorkoutEndScreen';
 
 type Phase = 'preview' | 'exercise' | 'rest' | 'complete';
 
@@ -147,23 +148,9 @@ export default function TrainerPage() {
 
   if (phase === 'complete') {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'oklch(0.10 0.005 285)' }}>
-        <div className="text-center">
-          <CheckCircle size={80} style={{ color: 'oklch(0.68 0.18 142)', marginBottom: '24px' }} />
-          <h1 style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '2.5rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'oklch(0.96 0.008 80)', marginBottom: '16px' }}>
-            Workout Complete!
-          </h1>
-          <p style={{ color: 'oklch(0.65 0.01 285)', fontFamily: 'DM Sans, sans-serif', marginBottom: '32px' }}>
-            You crushed it! Keep up the momentum.
-          </p>
-          <button
-            className="cx-btn-primary"
-            onClick={() => setCurrentView('dashboard')}
-          >
-            Back to Dashboard
-          </button>
-        </div>
-      </div>
+      <WorkoutEndScreen
+        onContinue={() => setCurrentView('dashboard')}
+      />
     );
   }
 

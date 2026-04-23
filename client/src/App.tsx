@@ -11,6 +11,7 @@ import { I18nProvider } from "./contexts/I18nContext";
 import { ProgressProvider } from "./contexts/ProgressContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { MusicProvider } from "./contexts/MusicContext";
+import { WorkoutCompletionProvider } from "./contexts/WorkoutCompletionContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AppShell from "./components/AppShell";
 import { FloatingMusicWidget } from "./components/FloatingMusicWidget";
@@ -19,13 +20,14 @@ function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <MusicProvider>
-          <ThemeProvider>
-            <I18nProvider>
-              <TooltipProvider>
-                <ProgressProvider>
-                  <UserProvider>
-                    <Toaster
+        <WorkoutCompletionProvider>
+          <MusicProvider>
+            <ThemeProvider>
+              <I18nProvider>
+                <TooltipProvider>
+                  <ProgressProvider>
+                    <UserProvider>
+                      <Toaster
                       theme="dark"
                       toastOptions={{
                         style: {
@@ -34,15 +36,16 @@ function App() {
                           color: 'oklch(0.96 0.008 80)',
                         },
                       }}
-                    />
-                    <AppShell />
-                    <FloatingMusicWidget />
-                  </UserProvider>
-                </ProgressProvider>
-              </TooltipProvider>
-            </I18nProvider>
-          </ThemeProvider>
-        </MusicProvider>
+                      />
+                      <AppShell />
+                      <FloatingMusicWidget />
+                    </UserProvider>
+                  </ProgressProvider>
+                </TooltipProvider>
+              </I18nProvider>
+            </ThemeProvider>
+          </MusicProvider>
+        </WorkoutCompletionProvider>
       </AuthProvider>
     </ErrorBoundary>
   );
