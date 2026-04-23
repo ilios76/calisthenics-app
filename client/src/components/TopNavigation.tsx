@@ -1,36 +1,40 @@
 // CallistheniX – Top Navigation
 // Navigation with profile menu in top-right
 // Sign In/Sign Up in profile dropdown for guests
+// Uses UserContext setCurrentView for state-driven navigation
 // ============================================================
 
 import React, { useState } from 'react';
-import { useLocation } from 'wouter';
+import { useUser } from '@/contexts/UserContext';
 import { Button } from '@/components/ui/button';
 import { Menu, X, LogOut, Settings, User, LogIn } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { signInWithGoogle } from '@/services/firebaseAuth';
 
 export function TopNavigation() {
-  const [, navigate] = useLocation();
+  const { setCurrentView, hasProfile } = useUser();
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     setProfileMenuOpen(false);
-    navigate('/');
+    setCurrentView('onboarding');
   };
 
   const handleGoogleSignIn = async () => {
     try {
       await signInWithGoogle();
-      setShowAuthModal(false);
       setProfileMenuOpen(false);
     } catch (error) {
       console.error('Sign in error:', error);
     }
+  };
+
+  const handleNavigation = (view: 'onboarding' | 'programs' | 'dashboard') => {
+    setCurrentView(view);
+    setMobileMenuOpen(false);
   };
 
   return (
@@ -40,7 +44,7 @@ export function TopNavigation() {
           {/* Logo */}
           <div 
             className="flex items-center gap-3 cursor-pointer"
-            onClick={() => navigate('/')}
+            onClick={() => handleNavigation('onboarding')}
           >
             <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/60 rounded-lg flex items-center justify-center">
               <span className="text-xl font-bold text-white">💪</span>
@@ -51,19 +55,19 @@ export function TopNavigation() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
             <button 
-              onClick={() => navigate('/')}
+              onClick={() => handleNavigation('onboarding')}
               className="text-sm font-medium hover:text-primary transition-colors"
             >
               Home
             </button>
             <button 
-              onClick={() => navigate('/programs')}
+              onClick={() => handleNavigation('programs')}
               className="text-sm font-medium hover:text-primary transition-colors"
             >
               Programs
             </button>
             <button 
-              onClick={() => navigate('/about')}
+              onClick={() => setCurrentView('dashboard')}
               className="text-sm font-medium hover:text-primary transition-colors"
             >
               About
@@ -72,7 +76,7 @@ export function TopNavigation() {
 
           {/* Right Side: Auth/Profile */}
           <div className="flex items-center gap-4">
-            {user ? (
+            {user && hasProfile ? (
               // Logged In: Profile Menu
               <div className="relative">
                 <button
@@ -94,7 +98,7 @@ export function TopNavigation() {
                   <div className="absolute right-0 mt-2 w-48 bg-popover border border-border rounded-lg shadow-lg py-2">
                     <button
                       onClick={() => {
-                        navigate('/dashboard');
+                        setCurrentView('dashboard');
                         setProfileMenuOpen(false);
                       }}
                       className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2"
@@ -104,7 +108,7 @@ export function TopNavigation() {
                     </button>
                     <button
                       onClick={() => {
-                        navigate('/settings');
+                        setCurrentView('settings');
                         setProfileMenuOpen(false);
                       }}
                       className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2"
@@ -195,26 +199,20 @@ export function TopNavigation() {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-border py-4 space-y-2">
             <button 
-              onClick={() => {
-                navigate('/');
-                setMobileMenuOpen(false);
-              }}
+              onClick={() => handleNavigation('onboarding')}
               className="block w-full text-left px-4 py-2 hover:bg-accent rounded-lg transition-colors"
             >
               Home
             </button>
             <button 
-              onClick={() => {
-                navigate('/programs');
-                setMobileMenuOpen(false);
-              }}
+              onClick={() => handleNavigation('programs')}
               className="block w-full text-left px-4 py-2 hover:bg-accent rounded-lg transition-colors"
             >
               Programs
             </button>
             <button 
               onClick={() => {
-                navigate('/about');
+                setCurrentView('dashboard');
                 setMobileMenuOpen(false);
               }}
               className="block w-full text-left px-4 py-2 hover:bg-accent rounded-lg transition-colors"
