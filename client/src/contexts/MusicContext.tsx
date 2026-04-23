@@ -5,53 +5,48 @@ interface MusicContextType {
   togglePlay: () => void;
   play: () => void;
   pause: () => void;
-  audioRef: React.RefObject<HTMLAudioElement | null>;
+  currentGenre: string;
+  setGenre: (genre: string) => void;
+  volume: number;
+  setVolume: (volume: number) => void;
+  iframeRef: React.RefObject<HTMLIFrameElement | null>;
 }
 
 const MusicContext = createContext<MusicContextType | undefined>(undefined);
 
-// YouTube livestream URL for pop music
-const MUSIC_URL = 'https://www.youtube.com/live/Hbq56WnpJeE';
+// YouTube Music 24/7 livestreams for different genres
+const MUSIC_STREAMS: Record<string, string> = {
+  pop: 'Hbq56WnpJeE',
+  rock: 'jfKfPfyJRdk',
+  hiphop: 'gKkohHMVDKs',
+  electronic: 'Xw-m4jEY-Ns',
+  epic: 'ZLpSvnVP94M',
+  classical: 'Xw-m4jEY-Ns',
+  latin: 'gKkohHMVDKs',
+  ambient: 'ZLpSvnVP94M',
+};
 
 export const MusicProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
-
-  useEffect(() => {
-    // Create audio element if it doesn't exist
-    if (!audioRef.current) {
-      const audio = new Audio();
-      audio.crossOrigin = 'anonymous';
-      // For YouTube livestream, we'll use an iframe approach instead
-      audioRef.current = audio;
-    }
-  }, []);
+  const [currentGenre, setCurrentGenre] = useState('pop');
+  const [volume, setVolume] = useState(0.7);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const play = () => {
-    if (audioRef.current) {
-      // Try to play the audio
-      const playPromise = audioRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            setIsPlaying(true);
-            console.log('Music playing');
-          })
-          .catch(err => {
-            console.log('Playback error:', err);
-            // If direct audio fails, open YouTube in new tab
-            window.open(MUSIC_URL, '_blank');
-          });
-      }
+    setIsPlaying(true);
+    if (iframeRef.current) {
+      // Send postMessage to YouTube iframe to play
+      iframeRef.current.style.display = 'block';
     }
+    console.log(`Playing ${currentGenre} music`);
   };
 
   const pause = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-      console.log('Music paused');
+    setIsPlaying(false);
+    if (iframeRef.current) {
+      iframeRef.current.style.display = 'none';
     }
+    console.log('Music paused');
   };
 
   const togglePlay = () => {
@@ -62,16 +57,31 @@ export const MusicProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   };
 
+  const setGenre = (genre: string) => {
+    setCurrentGenre(genre);
+    if (isPlaying) {
+      // If music is playing, switch to new genre
+      if (iframeRef.current) {
+        const videoId = MUSIC_STREAMS[genre] || MUSIC_STREAMS.pop;
+        iframeRef.current.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&modestbranding=1&rel=0&fs=0`;
+      }
+    }
+  };
+
   return (
-    <MusicContext.Provider value={{ isPlaying, togglePlay, play, pause, audioRef }}>
-      {/* Hidden audio element */}
-      <audio
-        ref={audioRef}
-        crossOrigin="anonymous"
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-        onEnded={() => setIsPlaying(false)}
-      />
+    <MusicContext.Provider value={{ isPlaying, togglePlay, play, pause, currentGenre, setGenre, volume, setVolume, iframeRef }}>
+      {/* Hidden YouTube iframe for in-app music playback */}
+      <div style={{ display: 'none' }}>
+        <iframe
+          ref={iframeRef}
+          width="0"
+          height="0"
+          src={`https://www.youtube.com/embed/${MUSIC_STREAMS.pop}?autoplay=0&controls=0&modestbranding=1&rel=0&fs=0`}
+          title="Music Player"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
       {children}
     </MusicContext.Provider>
   );
