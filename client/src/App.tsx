@@ -15,18 +15,21 @@ import { WorkoutCompletionProvider } from "./contexts/WorkoutCompletionContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AppShell from "./components/AppShell";
 import { FloatingMusicWidget } from "./components/FloatingMusicWidget";
+import { CoachProvider } from "./contexts/CoachContext";
+import { CoachWidget } from "./components/CoachWidget";
 
 function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <WorkoutCompletionProvider>
-          <MusicProvider>
-            <ThemeProvider>
-              <I18nProvider>
-                <TooltipProvider>
-                  <ProgressProvider>
-                    <UserProvider>
+        <CoachProvider>
+          <WorkoutCompletionProvider>
+            <MusicProvider>
+              <ThemeProvider>
+                <I18nProvider>
+                  <TooltipProvider>
+                    <ProgressProvider>
+                      <UserProvider>
                       <Toaster
                       theme="dark"
                       toastOptions={{
@@ -37,15 +40,17 @@ function App() {
                         },
                       }}
                       />
-                      <AppShell />
-                      <FloatingMusicWidget />
-                    </UserProvider>
-                  </ProgressProvider>
-                </TooltipProvider>
-              </I18nProvider>
-            </ThemeProvider>
-          </MusicProvider>
-        </WorkoutCompletionProvider>
+                        <AppShell />
+                        <FloatingMusicWidget />
+                        <CoachWidget position="bottom-right" />
+                      </UserProvider>
+                    </ProgressProvider>
+                  </TooltipProvider>
+                </I18nProvider>
+              </ThemeProvider>
+            </MusicProvider>
+          </WorkoutCompletionProvider>
+        </CoachProvider>
       </AuthProvider>
     </ErrorBoundary>
   );

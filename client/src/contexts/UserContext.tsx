@@ -37,7 +37,7 @@ interface UserContextType {
   hasProfile: boolean;
 }
 
-export type AppView = 'onboarding' | 'dashboard' | 'programs' | 'exercises' | 'trainer' | 'diet' | 'profile' | 'progress' | 'settings';
+export type AppView = 'onboarding' | 'dashboard' | 'programs' | 'exercises' | 'trainer' | 'diet' | 'profile' | 'progress' | 'achievements' | 'settings';
 
 const UserContext = createContext<UserContextType | null>(null);
 

@@ -12,11 +12,15 @@ import { playDoubleBeepSound } from '@/lib/soundUtils';
 import { Play, Pause, SkipForward, ChevronLeft, CheckCircle, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { WorkoutEndScreen } from '@/components/WorkoutEndScreen';
+import { useCoach } from '@/contexts/CoachContext';
+import { useWorkoutCompletion } from '@/contexts/WorkoutCompletionContext';
 
 type Phase = 'preview' | 'exercise' | 'rest' | 'complete';
 
 export default function TrainerPage() {
   const { selectedProgram, setCurrentView, completedSessions, setCompletedSessions } = useUser();
+  const { generatePreWorkoutMessage, generatePostWorkoutMessage } = useCoach();
+  const { completion } = useWorkoutCompletion();
   const [dayIndex, setDayIndex] = useState(0);
   const [exIndex, setExIndex] = useState(0);
   const [setNumber, setSetNumber] = useState(1);
@@ -84,7 +88,21 @@ export default function TrainerPage() {
         } else {
           setPhase('complete');
           setCompletedSessions(completedSessions + 1);
-          toast.success('Workout Complete! Great job! 💪');
+          const coachMsg = generatePostWorkoutMessage(30, 50, completion.streak);
+          toast.custom((t) => (
+            <div
+              style={{
+                background: 'oklch(0.68 0.18 142)',
+                color: 'oklch(0.10 0.005 285)',
+                padding: '12px 16px',
+                borderRadius: '8px',
+                fontFamily: 'DM Sans, sans-serif',
+                fontSize: '0.9rem',
+              }}
+            >
+              {coachMsg.emoji} {coachMsg.content}
+            </div>
+          ));
         }
       }
     } else if (phase === 'rest') {
