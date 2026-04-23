@@ -10,6 +10,7 @@ import {
   onAuthStateChange,
   getUserProfile,
   initializePersistence,
+  signOutUser,
 } from '@/services/firebaseAuth';
 
 interface AuthContextType {
@@ -18,6 +19,7 @@ interface AuthContextType {
   loading: boolean;
   isAuthenticated: boolean;
   error: string | null;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -59,12 +61,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return unsubscribe;
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      await signOutUser();
+    } catch (err) {
+      console.error('Logout failed:', err);
+      throw err;
+    }
+  };
+
   const value: AuthContextType = {
     user,
     userProfile,
     loading,
     isAuthenticated: !!user,
     error,
+    logout: handleLogout,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -73,7 +85,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth must be used within AuthProvider');
   }
   return context;
+}
+
+/**
+ * Logout hook
+ */
+export async function logout() {
+  try {
+    await signOutUser();
+  } catch (error) {
+    console.error('Logout failed:', error);
+    throw error;
+  }
 }
