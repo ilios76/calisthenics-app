@@ -1,9 +1,10 @@
 // CallistheniX – Music Player Component
-// Genre selector with play/pause and volume controls
+// HTML5 Audio player with genre selector and controls
+// Real audio playback with royalty-free music
 // ============================================================
 
 import React, { useState, useEffect } from 'react';
-import { Music, Play, Pause, Volume2, VolumeX } from 'lucide-react';
+import { Music, Play, Pause, Volume2, VolumeX, SkipForward, SkipBack } from 'lucide-react';
 import { musicService, MUSIC_GENRES, MusicGenre } from '@/services/musicService';
 
 interface MusicPlayerProps {
@@ -16,6 +17,8 @@ export function MusicPlayer({ compact = false, onGenreChange }: MusicPlayerProps
   const [volume, setVolume] = useState(70);
   const [selectedGenre, setSelectedGenre] = useState<MusicGenre | null>(null);
   const [showGenreSelector, setShowGenreSelector] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
 
   useEffect(() => {
     // Load saved preferences
@@ -26,14 +29,12 @@ export function MusicPlayer({ compact = false, onGenreChange }: MusicPlayerProps
         if (genre) {
           setSelectedGenre(genre);
         } else {
-          // Default to pop if saved genre not found
           const popGenre = musicService.getGenre('pop');
           if (popGenre) {
             setSelectedGenre(popGenre);
           }
         }
       } else {
-        // Default to pop
         const popGenre = musicService.getGenre('pop');
         if (popGenre) {
           setSelectedGenre(popGenre);
@@ -42,17 +43,36 @@ export function MusicPlayer({ compact = false, onGenreChange }: MusicPlayerProps
       setVolume(prefs?.volume || 70);
     } catch (error) {
       console.error('Error loading music preferences:', error);
-      // Default to pop
       const popGenre = musicService.getGenre('pop');
       if (popGenre) {
         setSelectedGenre(popGenre);
       }
     }
+
+    // Subscribe to music state changes
+    const unsubscribe = musicService.subscribe((state) => {
+      setIsPlaying(state.isPlaying);
+      setVolume(state.volume);
+      if (state.genre) {
+        setSelectedGenre(state.genre);
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  // Update playback time
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(musicService.getCurrentTime());
+      setDuration(musicService.getDuration());
+    }, 100);
+
+    return () => clearInterval(interval);
   }, []);
 
   const handlePlayPause = async () => {
     if (!selectedGenre) {
-      // Play default genre (Pop)
       const popGenre = musicService.getGenre('pop');
       if (popGenre) {
         setSelectedGenre(popGenre);
@@ -61,7 +81,6 @@ export function MusicPlayer({ compact = false, onGenreChange }: MusicPlayerProps
       }
     } else {
       musicService.toggleMusic();
-      setIsPlaying(!isPlaying);
     }
   };
 
@@ -78,11 +97,41 @@ export function MusicPlayer({ compact = false, onGenreChange }: MusicPlayerProps
     musicService.setVolume(newVolume);
   };
 
+  const handlePrevious = () => {
+    const genres = MUSIC_GENRES;
+    const currentIndex = genres.findIndex(g => g.id === selectedGenre?.id);
+    const previousIndex = currentIndex > 0 ? currentIndex - 1 : genres.length - 1;
+    handleGenreSelect(genres[previousIndex]);
+  };
+
+  const handleNext = () => {
+    const genres = MUSIC_GENRES;
+    const currentIndex = genres.findIndex(g => g.id === selectedGenre?.id);
+    const nextIndex = currentIndex < genres.length - 1 ? currentIndex + 1 : 0;
+    handleGenreSelect(genres[nextIndex]);
+  };
+
+  const formatTime = (seconds: number) => {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
   if (compact) {
     // Compact mode for floating player
     return (
       <div className="fixed bottom-6 right-6 z-40">
-        <div className="bg-gradient-to-br from-primary to-primary/80 rounded-full shadow-lg p-4 flex items-center gap-4">
+        <div className="bg-gradient-to-br from-primary to-primary/80 rounded-full shadow-lg p-4 flex items-center gap-3">
+          {/* Previous Button */}
+          <button
+            onClick={handlePrevious}
+            className="text-white hover:opacity-80 transition-opacity"
+            title="Previous genre"
+          >
+            <SkipBack className="w-5 h-5" />
+          </button>
+
           {/* Play/Pause Button */}
           <button
             onClick={handlePlayPause}
@@ -95,11 +144,20 @@ export function MusicPlayer({ compact = false, onGenreChange }: MusicPlayerProps
             )}
           </button>
 
+          {/* Next Button */}
+          <button
+            onClick={handleNext}
+            className="text-white hover:opacity-80 transition-opacity"
+            title="Next genre"
+          >
+            <SkipForward className="w-5 h-5" />
+          </button>
+
           {/* Current Genre Display */}
           {selectedGenre && (
             <div className="flex items-center gap-2 text-white">
               <span className="text-xl">{selectedGenre.icon}</span>
-              <span className="text-sm font-medium">{selectedGenre.name}</span>
+              <span className="text-sm font-medium hidden sm:inline">{selectedGenre.name}</span>
             </div>
           )}
 
@@ -116,7 +174,7 @@ export function MusicPlayer({ compact = false, onGenreChange }: MusicPlayerProps
               max="100"
               value={volume}
               onChange={(e) => handleVolumeChange(Number(e.target.value))}
-              className="w-20 h-1 bg-white/30 rounded-full appearance-none cursor-pointer"
+              className="w-16 h-1 bg-white/30 rounded-full appearance-none cursor-pointer"
               style={{
                 background: `linear-gradient(to right, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.3) ${volume}%, rgba(255,255,255,0.1) ${volume}%, rgba(255,255,255,0.1) 100%)`
               }}
@@ -134,7 +192,7 @@ export function MusicPlayer({ compact = false, onGenreChange }: MusicPlayerProps
 
         {/* Genre Selector Dropdown */}
         {showGenreSelector && (
-          <div className="absolute bottom-20 right-0 bg-popover border border-border rounded-lg shadow-lg p-3 w-64">
+          <div className="absolute bottom-20 right-0 bg-popover border border-border rounded-lg shadow-lg p-3 w-64 max-h-80 overflow-y-auto">
             <p className="text-sm font-semibold mb-3">Choose Music Genre</p>
             <div className="grid grid-cols-2 gap-2">
               {MUSIC_GENRES && MUSIC_GENRES.length > 0 ? (
@@ -187,12 +245,60 @@ export function MusicPlayer({ compact = false, onGenreChange }: MusicPlayerProps
       {selectedGenre && (
         <div className="bg-accent/50 rounded-lg p-4 flex items-center gap-3">
           <span className="text-4xl">{selectedGenre.icon}</span>
-          <div>
+          <div className="flex-1">
             <p className="font-semibold">{selectedGenre.name}</p>
             <p className="text-sm text-muted-foreground">{selectedGenre.description}</p>
           </div>
         </div>
       )}
+
+      {/* Playback Progress */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <input
+            type="range"
+            min="0"
+            max={duration || 0}
+            value={currentTime}
+            onChange={(e) => musicService.seek(Number(e.target.value))}
+            className="flex-1 h-2 bg-accent rounded-lg appearance-none cursor-pointer"
+          />
+        </div>
+        <div className="flex justify-between text-xs text-muted-foreground">
+          <span>{formatTime(currentTime)}</span>
+          <span>{formatTime(duration)}</span>
+        </div>
+      </div>
+
+      {/* Playback Controls */}
+      <div className="flex items-center justify-center gap-4">
+        <button
+          onClick={handlePrevious}
+          className="text-primary hover:text-primary/80 transition-colors"
+          title="Previous genre"
+        >
+          <SkipBack className="w-5 h-5" />
+        </button>
+
+        <button
+          onClick={handlePlayPause}
+          className="bg-primary text-white rounded-full p-4 hover:bg-primary/90 transition-colors"
+        >
+          {isPlaying ? (
+            <Pause className="w-6 h-6 fill-white" />
+          ) : (
+            <Play className="w-6 h-6 fill-white" />
+          )}
+        </button>
+
+        <button
+          onClick={handleNext}
+          className="text-primary hover:text-primary/80 transition-colors"
+          title="Next genre"
+        >
+          <SkipForward className="w-5 h-5" />
+        </button>
+      </div>
 
       {/* Volume Control */}
       <div className="space-y-2">
