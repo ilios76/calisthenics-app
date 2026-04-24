@@ -18,6 +18,10 @@ import { useWorkoutCompletion } from '@/contexts/WorkoutCompletionContext';
 
 type Phase = 'preview' | 'exercise' | 'rest' | 'complete';
 
+interface WakeLockSentinel {
+  release(): Promise<void>;
+}
+
 export default function TrainerPage() {
   const { selectedProgram, setCurrentView, completedSessions, setCompletedSessions } = useUser();
   const { generatePreWorkoutMessage, generatePostWorkoutMessage } = useCoach();
@@ -30,6 +34,29 @@ export default function TrainerPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [showTips, setShowTips] = useState(false);
   const [currentQuote, setCurrentQuote] = useState(getRandomQuoteWithVariety());
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+  
+  // Request screen wake lock when entering trainer
+  useEffect(() => {
+    const requestWakeLock = async () => {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
+        }
+      } catch (err) {
+        console.log('Wake lock request failed:', err);
+      }
+    };
+    
+    requestWakeLock();
+    
+    // Release wake lock when leaving trainer
+    return () => {
+      if (wakeLockRef.current) {
+        wakeLockRef.current.release().catch(() => {});
+      }
+    };
+  }, []);
 
   if (!selectedProgram) {
     return (

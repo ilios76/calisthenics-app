@@ -4,15 +4,32 @@ import { X, MessageCircle, Zap } from 'lucide-react';
 
 interface CoachWidgetProps {
   isVisible?: boolean;
+  position?: 'bottom-right' | 'bottom-left';
 }
+
+const MOTIVATIONAL_MESSAGES = [
+  "Rest up—you've earned it!",
+  "Your effort today builds tomorrow's strength.",
+  "Every rep counts. You're crushing it.",
+  "Recovery is part of the journey.",
+  "You're stronger than yesterday.",
+  "Keep pushing. You've got this.",
+];
 
 export const CoachWidget: React.FC<CoachWidgetProps> = ({
   isVisible = true,
+  position = 'bottom-right',
 }) => {
   const { dailyMessage, getDailyChallenge } = useCoach();
   const [isOpen, setIsOpen] = useState(false);
   const [currentMessage, setCurrentMessage] = useState(dailyMessage);
   const [showChallenge, setShowChallenge] = useState(false);
+  const [motivationalMessage, setMotivationalMessage] = useState('');
+  
+  useEffect(() => {
+    const randomMsg = MOTIVATIONAL_MESSAGES[Math.floor(Math.random() * MOTIVATIONAL_MESSAGES.length)];
+    setMotivationalMessage(randomMsg);
+  }, [isOpen]);
 
   useEffect(() => {
     if (dailyMessage) {
@@ -30,43 +47,42 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
 
   return (
     <>
-      {/* Vertical tab - permanently fixed on right side */}
+      {/* Round floating button - AI Coach */}
       <div
-        className="fixed top-1/2 right-0 z-40 flex flex-col"
+        className="fixed z-40 flex items-center justify-center shadow-lg"
         style={{
-          transform: 'translateY(-50%)',
+          [position === 'bottom-right' ? 'right' : 'left']: '24px',
+          bottom: '24px',
+          width: '64px',
+          height: '64px',
         }}
       >
-        {/* Vertical tab button - compact size */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="px-1 py-3 rounded-l-lg flex items-center justify-center gap-1 shadow-lg transition-all hover:scale-105 font-bold text-xs self-end"
+          className="w-full h-full rounded-full flex items-center justify-center font-bold transition-all hover:scale-110 shadow-lg"
           style={{
             background: 'oklch(0.68 0.18 142)',
             color: 'oklch(0.10 0.005 285)',
             fontFamily: 'Barlow Condensed, sans-serif',
-            writingMode: 'vertical-rl',
-            textOrientation: 'mixed',
-            transform: 'rotate(180deg)',
-            pointerEvents: 'auto',
+            fontSize: '24px',
             cursor: 'pointer',
-            letterSpacing: '1px',
-            fontSize: '10px',
-            minHeight: '60px',
-            minWidth: '24px',
+            border: '3px solid oklch(0.68 0.18 142)',
+            boxShadow: '0 0 20px rgba(132, 204, 22, 0.4)',
           }}
           title="AI Coach"
         >
-          AI COACH
+          💬
         </button>
       </div>
 
-      {/* Chat bubble - slides in from right */}
-      {isOpen && currentMessage && (
+      {/* Chat bubble - slides in from bottom */}
+      {isOpen && (
         <div
-          className="fixed top-1/3 right-0 z-40 flex flex-col gap-3"
+          className="fixed z-40 flex flex-col gap-3"
           style={{
-            animation: 'slideInRight 0.3s ease-out forwards',
+            [position === 'bottom-right' ? 'right' : 'left']: '24px',
+            bottom: '100px',
+            animation: 'slideUp 0.3s ease-out forwards',
             pointerEvents: 'auto',
           }}
         >
@@ -76,11 +92,10 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
             style={{
               background: 'oklch(0.15 0.006 285)',
               border: '1px solid oklch(0.68 0.18 142)',
-              marginRight: '1rem',
             }}
           >
             <div className="flex items-start justify-between mb-3">
-              <span style={{ fontSize: '1.5rem' }}>{currentMessage.emoji}</span>
+              <span style={{ fontSize: '1.5rem' }}>💪</span>
               <button
                 onClick={() => setIsOpen(false)}
                 className="p-1 hover:opacity-70 transition-opacity"
@@ -97,34 +112,32 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
                 marginBottom: '12px',
               }}
             >
-              {currentMessage.content}
+              {motivationalMessage}
             </p>
-            {!showChallenge && (
-              <button
-                onClick={handleGetChallenge}
-                className="w-full py-2 rounded text-sm transition-all flex items-center justify-center gap-2"
-                style={{
-                  background: 'oklch(0.68 0.18 142)',
-                  color: 'oklch(0.10 0.005 285)',
-                  fontFamily: 'Barlow Condensed, sans-serif',
-                  fontWeight: 700,
-                }}
-              >
-                <Zap size={14} /> Today's Challenge
-              </button>
-            )}
+            <button
+              onClick={() => setMotivationalMessage(MOTIVATIONAL_MESSAGES[Math.floor(Math.random() * MOTIVATIONAL_MESSAGES.length)])}
+              className="w-full py-2 rounded text-sm transition-all flex items-center justify-center gap-2"
+              style={{
+                background: 'oklch(0.68 0.18 142)',
+                color: 'oklch(0.10 0.005 285)',
+                fontFamily: 'Barlow Condensed, sans-serif',
+                fontWeight: 700,
+              }}
+            >
+              <Zap size={14} /> New Message
+            </button>
           </div>
         </div>
       )}
 
       <style>{`
-        @keyframes slideInRight {
+        @keyframes slideUp {
           from {
-            transform: translateX(100%);
+            transform: translateY(20px);
             opacity: 0;
           }
           to {
-            transform: translateX(0);
+            transform: translateY(0);
             opacity: 1;
           }
         }

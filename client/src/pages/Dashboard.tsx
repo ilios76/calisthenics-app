@@ -337,6 +337,60 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Calendar Progress */}
+        {topProgram && (
+          <div className="mt-10 mb-10">
+            <h2 className="cx-section-title text-2xl mb-4" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
+              YOUR PROGRAM CALENDAR
+            </h2>
+            <div className="cx-card p-6">
+              <div className="grid grid-cols-7 gap-2 mb-4">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                  <div key={day} className="text-center">
+                    <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.7rem', color: 'oklch(0.55 0.008 80)', textTransform: 'uppercase', fontWeight: 600 }}>
+                      {day}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-2">
+                {Array.from({ length: 35 }).map((_, i) => {
+                  const dayNum = i + 1;
+                  const today = new Date().getDate();
+                  const isToday = dayNum === today;
+                  const isActive = dayNum <= topProgram.durationWeeks * 7;
+                  
+                  return (
+                    <div
+                      key={i}
+                      className="aspect-square flex items-center justify-center rounded"
+                      style={{
+                        background: isToday ? 'oklch(0.68 0.18 142)' : isActive ? 'oklch(0.68 0.18 142 / 20%)' : 'oklch(0.12 0.005 285)',
+                        border: isToday ? '2px solid oklch(0.68 0.18 142)' : '1px solid oklch(1 0 0 / 8%)',
+                        color: isToday ? 'oklch(0.10 0.005 285)' : 'oklch(0.65 0.008 80)',
+                      }}
+                    >
+                      <span style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '0.9rem', fontWeight: 700 }}>
+                        {dayNum <= 31 ? dayNum : ''}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-4 flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded" style={{ background: 'oklch(0.68 0.18 142)' }} />
+                  <span style={{ color: 'oklch(0.65 0.008 80)', fontFamily: 'DM Sans, sans-serif' }}>Today</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded" style={{ background: 'oklch(0.68 0.18 142 / 20%)' }} />
+                  <span style={{ color: 'oklch(0.65 0.008 80)', fontFamily: 'DM Sans, sans-serif' }}>Program Days</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Today's workout preview */}
         {topProgram && (
           <div className="mt-10">

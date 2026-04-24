@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 
 interface CoachFigureProps {
   message?: string;
-  type?: 'greeting' | 'guidance' | 'celebration' | 'rest';
+  type?: 'greeting' | 'guidance' | 'celebration' | 'rest' | 'finished';
   showMessage?: boolean;
   celebrationImage?: string;
 }
@@ -19,6 +19,9 @@ export const CoachFigure: React.FC<CoachFigureProps> = ({
     "https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/advise_2f88be24.png"
   ];
   
+  // Use tablet coach for finished sessions
+  const finishedCoachImage = "https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/coach3gif_e6c14fc4.gif";
+  
   const selectedCoachImage = useMemo(() => {
     return coachImages[Math.floor(Math.random() * coachImages.length)];
   }, []);
@@ -27,11 +30,11 @@ export const CoachFigure: React.FC<CoachFigureProps> = ({
       {/* Coach Figure Image */}
       <div className="relative w-48 h-64">
         <img
-          src={type === 'celebration' && celebrationImage ? celebrationImage : selectedCoachImage}
+          src={type === 'finished' ? finishedCoachImage : (type === 'celebration' && celebrationImage ? celebrationImage : selectedCoachImage)}
           alt="Coach"
           className="w-full h-full object-contain"
           style={{
-            filter: type === 'celebration' ? 'drop-shadow(0 0 20px rgba(132, 204, 22, 0.5))' : 'drop-shadow(0 0 10px rgba(132, 204, 22, 0.3))'
+            filter: type === 'celebration' ? 'drop-shadow(0 0 20px rgba(132, 204, 22, 0.5))' : type === 'finished' ? 'drop-shadow(0 0 15px rgba(132, 204, 22, 0.4))' : 'drop-shadow(0 0 10px rgba(132, 204, 22, 0.3))'
           }}
         />
       </div>
@@ -61,7 +64,7 @@ export const CoachFigure: React.FC<CoachFigureProps> = ({
       )}
 
       {/* Animated indicator for active coaching */}
-      {type !== 'rest' && (
+      {type !== 'rest' && type !== 'finished' && (
         <div className="flex gap-1">
           {[0, 1, 2].map(i => (
             <div
