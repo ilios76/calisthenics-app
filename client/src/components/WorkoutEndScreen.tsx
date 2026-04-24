@@ -115,7 +115,7 @@ export const WorkoutEndScreen: React.FC<WorkoutEndScreenProps> = ({ onContinue }
         <div className="mb-8">
           <CoachFigure
             type="celebration"
-            message="Amazing work! 💪 You crushed it today! Remember: hydrate well, eat nutritious food, and get quality sleep. Your body needs rest to rebuild stronger. See you tomorrow!"
+            message="Amazing work! 💪 You crushed it today! Remember: hydrate well, eat nutritious food, and get quality sleep. Your body needs rest to rebuild stronger. See you on the next session."
             showMessage={true}
             celebrationImage="https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/Congrats_7d13e948.png"
           />

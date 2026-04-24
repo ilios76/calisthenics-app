@@ -2,10 +2,10 @@
 // CallistheniX – Dashboard Page
 // Scoreboard-style overview: stats, recommended program, quick actions
 // ============================================================
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { getRecommendedPrograms, getDietPlan, calculateBMI, getBMICategory, getGoalLabel } from '@/lib/data';
-import { Flame, Zap, Target, ChevronRight, Play, Utensils, TrendingUp } from 'lucide-react';
+import { Flame, Zap, Target, ChevronRight, Play, Utensils, TrendingUp, AlertCircle } from 'lucide-react';
 import { RewardedAdWidget } from '@/components/RewardedAdWidget';
 
 const WORKOUT_BG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/workout-bg-4n6t43em9tdbWJH7YCcGcZ.webp';
@@ -15,6 +15,16 @@ const HERO_FEMALE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/ca
 export default function DashboardPage() {
   const { profile, setCurrentView, setSelectedProgram, completedSessions } = useUser();
   const [activeTab, setActiveTab] = useState<'program' | 'nutrition'>('program');
+  const [showRestWarning, setShowRestWarning] = useState(false);
+  const [lastWorkoutTime, setLastWorkoutTime] = useState<number | null>(null);
+  
+  useEffect(() => {
+    const stored = localStorage.getItem('lastWorkoutTime');
+    if (stored) {
+      setLastWorkoutTime(parseInt(stored));
+    }
+  }, []);
+  
   if (!profile) return null;
 
   const programs = getRecommendedPrograms(profile.sex, profile.age, profile.weight, profile.goal);
@@ -27,12 +37,57 @@ export default function DashboardPage() {
 
   const startProgram = (program: typeof topProgram) => {
     if (!program) return;
+    
+    if (lastWorkoutTime) {
+      const now = Date.now();
+      const hoursSinceLastWorkout = (now - lastWorkoutTime) / (1000 * 60 * 60);
+      
+      if (hoursSinceLastWorkout < 12) {
+        setShowRestWarning(true);
+        return;
+      }
+    }
+    
     setSelectedProgram(program);
     setCurrentView('trainer');
   };
 
   return (
     <div className="min-h-screen" style={{ background: 'oklch(0.10 0.005 285)' }}>
+      {/* 12-Hour Rest Warning Modal */}
+      {showRestWarning && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-lg p-8 max-w-sm w-full" style={{ background: 'oklch(0.12 0.005 285)', border: '1px solid oklch(0.68 0.18 142 / 30%)' }}>
+            <div className="flex items-center gap-3 mb-4">
+              <AlertCircle size={24} style={{ color: 'oklch(0.68 0.18 142)' }} />
+              <h2 style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '1.2rem', color: 'oklch(0.96 0.008 80)', textTransform: 'uppercase' }}>Rest Recommended</h2>
+            </div>
+            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.95rem', color: 'oklch(0.85 0.008 80)', lineHeight: 1.6, marginBottom: '24px' }}>
+              Rest is recommended for at least 12 hours between sessions. Otherwise, you risk injury.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowRestWarning(false)}
+                className="flex-1 px-4 py-2 rounded"
+                style={{ background: 'oklch(0.68 0.18 142)', color: 'oklch(0.10 0.005 285)', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, textTransform: 'uppercase', cursor: 'pointer' }}
+              >
+                Understand
+              </button>
+              <button
+                onClick={() => {
+                  setShowRestWarning(false);
+                  setSelectedProgram(topProgram);
+                  setCurrentView('trainer');
+                }}
+                className="flex-1 px-4 py-2 rounded"
+                style={{ background: 'oklch(0.68 0.18 142 / 20%)', border: '1px solid oklch(0.68 0.18 142)', color: 'oklch(0.68 0.18 142)', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, textTransform: 'uppercase', cursor: 'pointer' }}
+              >
+                Continue Anyway
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Hero banner */}
       <div className="relative overflow-hidden" style={{ minHeight: '340px' }}>
         <img

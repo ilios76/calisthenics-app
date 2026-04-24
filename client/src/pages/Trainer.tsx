@@ -89,6 +89,7 @@ export default function TrainerPage() {
         } else {
           setPhase('complete');
           setCompletedSessions(completedSessions + 1);
+          localStorage.setItem('lastWorkoutTime', Date.now().toString());
           const coachMsg = generatePostWorkoutMessage(30, 50, completion.streak);
           toast.custom((t) => (
             <div
@@ -125,6 +126,7 @@ export default function TrainerPage() {
           // Workout complete
           setPhase('complete');
           setCompletedSessions(completedSessions + 1);
+          localStorage.setItem('lastWorkoutTime', Date.now().toString());
           const coachMsg = generatePostWorkoutMessage(30, 50, completion.streak);
           toast.custom((t) => (
             <div
