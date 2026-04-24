@@ -348,6 +348,13 @@ export default function TrainerPage() {
                   "{currentQuote}"
                 </p>
               </div>
+              <div className="mt-4 flex justify-center">
+                <img
+                  src="https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/break_2cd1ad76.png"
+                  alt="Coach motivation"
+                  style={{ width: '120px', height: 'auto', borderRadius: '8px' }}
+                />
+              </div>
             </div>
           )}
 
