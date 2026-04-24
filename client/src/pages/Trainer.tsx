@@ -107,11 +107,40 @@ export default function TrainerPage() {
         }
       }
     } else if (phase === 'rest') {
-      setSetNumber(s => s + 1);
-      setPhase('exercise');
-      if (isTimeBased && currentEx?.durationSeconds) {
-        setTimeLeft(currentEx.durationSeconds);
-        setIsRunning(true);
+      if (setNumber < totalSets) {
+        // Continue with next set of same exercise
+        setSetNumber(s => s + 1);
+        setPhase('preview');
+        setIsRunning(false);
+        setCurrentQuote(getRandomQuote());
+      } else {
+        // All sets done, move to next exercise
+        if (exIndex < totalExercises - 1) {
+          setExIndex(i => i + 1);
+          setSetNumber(1);
+          setPhase('preview');
+          setIsRunning(false);
+          setCurrentQuote(getRandomQuote());
+        } else {
+          // Workout complete
+          setPhase('complete');
+          setCompletedSessions(completedSessions + 1);
+          const coachMsg = generatePostWorkoutMessage(30, 50, completion.streak);
+          toast.custom((t) => (
+            <div
+              style={{
+                background: 'oklch(0.68 0.18 142)',
+                color: 'oklch(0.10 0.005 285)',
+                padding: '12px 16px',
+                borderRadius: '8px',
+                fontFamily: 'DM Sans, sans-serif',
+                fontSize: '0.9rem',
+              }}
+            >
+              {coachMsg.emoji} {coachMsg.content}
+            </div>
+          ));
+        }
       }
     }
   }, [phase, setNumber, totalSets, currentEx, exIndex, totalExercises, completedSessions, isTimeBased]);
@@ -334,6 +363,13 @@ export default function TrainerPage() {
                   style={{ background: 'oklch(0.68 0.18 142 / 15%)', border: '1px solid oklch(0.68 0.18 142)', color: 'oklch(0.68 0.18 142)' }}
                 >
                   {isRunning ? <Pause size={22} /> : <Play size={22} />}
+                </button>
+                <button
+                  onClick={() => handleTimerEnd()}
+                  className="w-14 h-14 rounded-full flex items-center justify-center"
+                  style={{ background: 'oklch(0.68 0.18 142)', color: 'oklch(0.10 0.005 285)' }}
+                >
+                  <SkipForward size={22} />
                 </button>
               </div>
             </>

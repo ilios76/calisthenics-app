@@ -4,19 +4,21 @@ interface CoachFigureProps {
   message?: string;
   type?: 'greeting' | 'guidance' | 'celebration' | 'rest';
   showMessage?: boolean;
+  celebrationImage?: string;
 }
 
 export const CoachFigure: React.FC<CoachFigureProps> = ({ 
   message, 
   type = 'guidance',
-  showMessage = true 
+  showMessage = true,
+  celebrationImage
 }) => {
   return (
     <div className="flex flex-col items-center justify-center gap-6 py-8">
       {/* Coach Figure Image */}
       <div className="relative w-48 h-64">
         <img
-          src="https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/coachgif_5213a416.gif"
+          src={type === 'celebration' && celebrationImage ? celebrationImage : "https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/coachgif_5213a416.gif"}
           alt="Coach"
           className="w-full h-full object-contain"
           style={{
