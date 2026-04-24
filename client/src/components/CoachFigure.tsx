@@ -16,7 +16,7 @@ export const CoachFigure: React.FC<CoachFigureProps> = ({
       {/* Coach Figure Image */}
       <div className="relative w-48 h-64">
         <img
-          src="https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/1_404bf839.png"
+          src="https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/coachgif_5213a416.gif"
           alt="Coach"
           className="w-full h-full object-contain"
           style={{

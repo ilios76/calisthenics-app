@@ -57,7 +57,7 @@ export default function DashboardPage() {
       <div className="container pb-16 -mt-4">
         {/* Mental Trigger Banner */}
         <div className="mb-8 p-6 rounded-lg" style={{ background: 'oklch(0.68 0.18 142 / 10%)', border: '1px solid oklch(0.68 0.18 142 / 30%)' }}>
-          <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.9rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'oklch(0.68 0.18 142)', marginBottom: '4px' }}>🔥 Key Message</p>
+          <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.9rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'oklch(0.68 0.18 142)', marginBottom: '4px' }}>🔥 You are getting close</p>
           <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '1rem', color: 'oklch(0.96 0.008 80)', lineHeight: 1.6 }}>
             Your training adapts to you after every workout. Stay consistent with streaks, levels and push further with real progress.
           </p>
