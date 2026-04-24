@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 interface CoachFigureProps {
   message?: string;
@@ -13,12 +13,21 @@ export const CoachFigure: React.FC<CoachFigureProps> = ({
   showMessage = true,
   celebrationImage
 }) => {
+  // Randomly select between two coach images for variety
+  const coachImages = [
+    "https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/coachgif_5213a416.gif",
+    "https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/advise_2f88be24.png"
+  ];
+  
+  const selectedCoachImage = useMemo(() => {
+    return coachImages[Math.floor(Math.random() * coachImages.length)];
+  }, []);
   return (
     <div className="flex flex-col items-center justify-center gap-6 py-8">
       {/* Coach Figure Image */}
       <div className="relative w-48 h-64">
         <img
-          src={type === 'celebration' && celebrationImage ? celebrationImage : "https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/coachgif_5213a416.gif"}
+          src={type === 'celebration' && celebrationImage ? celebrationImage : selectedCoachImage}
           alt="Coach"
           className="w-full h-full object-contain"
           style={{
