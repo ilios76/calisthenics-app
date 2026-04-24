@@ -4,11 +4,31 @@
 // ============================================================
 
 export const motivationalQuotes = [
+  // Form & Technique Focus
+  "Respect the tempo, own every inch of the rep.",
+  "Make the muscle do the work, not the momentum.",
+  "Lock in your posture—stability is the foundation of strength.",
+  "Precision pays off. Keep those movements deliberate.",
+  "Don't just move the weight; feel the contraction.",
+  
+  // Breathing & Rhythm
+  "Match your breath to your movement—find your rhythm.",
+  "Deep exhales on the effort. Stay fueled by oxygen.",
+  "Find your pace and protect it. Don't redline too early.",
+  "Control the breath, control the burn.",
+  "Inhale for power, exhale for the finish.",
+  
+  // Intensity & Effort
+  "Empty the tank. This is where the change happens.",
+  "Challenge the fatigue; your body has more to give.",
+  "Finish strong—don't let the last rep be your weakest.",
+  "This is the set you'll remember tomorrow. Dig in.",
+  "One more for the version of you that started today.",
+  
   // General motivation
   "Your body can stand almost anything. It's your mind you need to convince.",
   "The pain you feel today will be the strength you feel tomorrow.",
   "Every rep is a choice. Choose to be stronger.",
-  "Sweat is just your fat crying.",
   "Don't count the days. Make the days count.",
   "Your only limit is you.",
   "Discipline is choosing between what you want now and what you want most.",
@@ -67,6 +87,30 @@ export const motivationalQuotes = [
 
 export function getRandomQuote(): string {
   return motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
+}
+
+// Get a random quote excluding recently used ones (for variety)
+let lastUsedIndices: number[] = [];
+export function getRandomQuoteWithVariety(): string {
+  let availableIndices = motivationalQuotes
+    .map((_, i) => i)
+    .filter(i => !lastUsedIndices.includes(i));
+  
+  // If we've used most quotes, reset the list
+  if (availableIndices.length < motivationalQuotes.length / 3) {
+    lastUsedIndices = [];
+    availableIndices = motivationalQuotes.map((_, i) => i);
+  }
+  
+  const randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+  lastUsedIndices.push(randomIndex);
+  
+  // Keep only last 10 used indices to avoid repetition
+  if (lastUsedIndices.length > 10) {
+    lastUsedIndices.shift();
+  }
+  
+  return motivationalQuotes[randomIndex];
 }
 
 export function getQuoteByIndex(index: number): string {

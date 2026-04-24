@@ -7,7 +7,7 @@ import { useUser } from '@/contexts/UserContext';
 import { useProgress } from '@/contexts/ProgressContext';
 import { getExercisesByIds } from '@/lib/data';
 import { getExerciseGifUrl } from '@/lib/gifUrls';
-import { getRandomQuote } from '@/lib/quotes';
+import { getRandomQuote, getRandomQuoteWithVariety } from '@/lib/quotes';
 import { playDoubleBeepSound } from '@/lib/soundUtils';
 import { Play, Pause, SkipForward, ChevronLeft, CheckCircle, Info } from 'lucide-react';
 import { toast } from 'sonner';
@@ -29,7 +29,7 @@ export default function TrainerPage() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [showTips, setShowTips] = useState(false);
-  const [currentQuote, setCurrentQuote] = useState(getRandomQuote());
+  const [currentQuote, setCurrentQuote] = useState(getRandomQuoteWithVariety());
 
   if (!selectedProgram) {
     return (
@@ -77,7 +77,7 @@ export default function TrainerPage() {
         setPhase('rest');
         setTimeLeft(currentEx?.restSeconds ?? 60);
         setIsRunning(true);
-        setCurrentQuote(getRandomQuote());
+        setCurrentQuote(getRandomQuoteWithVariety());
       } else {
         // Move to next exercise
         if (exIndex < totalExercises - 1) {
@@ -85,7 +85,7 @@ export default function TrainerPage() {
           setSetNumber(1);
           setPhase('preview');
           setIsRunning(false);
-          setCurrentQuote(getRandomQuote());
+          setCurrentQuote(getRandomQuoteWithVariety());
         } else {
           setPhase('complete');
           setCompletedSessions(completedSessions + 1);
@@ -112,7 +112,7 @@ export default function TrainerPage() {
         setSetNumber(s => s + 1);
         setPhase('preview');
         setIsRunning(false);
-        setCurrentQuote(getRandomQuote());
+        setCurrentQuote(getRandomQuoteWithVariety());
       } else {
         // All sets done, move to next exercise
         if (exIndex < totalExercises - 1) {
@@ -120,7 +120,7 @@ export default function TrainerPage() {
           setSetNumber(1);
           setPhase('preview');
           setIsRunning(false);
-          setCurrentQuote(getRandomQuote());
+          setCurrentQuote(getRandomQuoteWithVariety());
         } else {
           // Workout complete
           setPhase('complete');
