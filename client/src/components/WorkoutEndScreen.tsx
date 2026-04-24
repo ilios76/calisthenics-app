@@ -3,6 +3,7 @@ import { Trophy, Zap, Flame, Star, ArrowRight } from 'lucide-react';
 import { useWorkoutCompletion } from '@/contexts/WorkoutCompletionContext';
 import { useUser } from '@/contexts/UserContext';
 import { notificationService } from '@/services/notificationService';
+import { CoachFigure } from './CoachFigure';
 import { PricingModal } from './PricingModal';
 
 interface WorkoutEndScreenProps {
@@ -110,6 +111,15 @@ export const WorkoutEndScreen: React.FC<WorkoutEndScreenProps> = ({ onContinue }
 
       {/* Main content */}
       <div className="relative z-10 max-w-md w-full text-center">
+        {/* Coach Figure - Post-workout celebration */}
+        <div className="mb-8">
+          <CoachFigure
+            type="celebration"
+            message="Amazing work! 💪 You crushed it today! Remember: hydrate well, eat nutritious food, and get quality sleep. Your body needs rest to rebuild stronger. See you tomorrow!"
+            showMessage={true}
+          />
+        </div>
+
         {/* Trophy icon */}
         <div className="mb-6 flex justify-center">
           <div

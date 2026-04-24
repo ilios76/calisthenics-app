@@ -12,6 +12,7 @@ import { playDoubleBeepSound } from '@/lib/soundUtils';
 import { Play, Pause, SkipForward, ChevronLeft, CheckCircle, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { WorkoutEndScreen } from '@/components/WorkoutEndScreen';
+import { CoachFigure } from '@/components/CoachFigure';
 import { useCoach } from '@/contexts/CoachContext';
 import { useWorkoutCompletion } from '@/contexts/WorkoutCompletionContext';
 
@@ -209,6 +210,17 @@ export default function TrainerPage() {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
+        {/* Coach Figure - Pre-workout guidance */}
+        {phase === 'preview' && (
+          <div className="mb-8 w-full max-w-md">
+            <CoachFigure
+              type="guidance"
+              message={`Ready to crush ${currentEx?.name}? Focus on form, breathe steadily, and give it your best effort!`}
+              showMessage={true}
+            />
+          </div>
+        )}
+
         {/* Exercise video/GIF */}
         <div className="relative w-full max-w-2xl mb-8" style={{ aspectRatio: '16/9', background: 'oklch(0.12 0.005 285)', borderRadius: '8px', overflow: 'hidden', border: '1px solid oklch(1 0 0 / 8%)' }}>
           {phase === 'preview' ? (
