@@ -13,39 +13,19 @@ export const CoachFigure: React.FC<CoachFigureProps> = ({
 }) => {
   return (
     <div className="flex flex-col items-center justify-center gap-6 py-8">
-      {/* Coach Figure SVG - Upper body silhouette */}
-      <div className="relative w-32 h-48">
-        <svg
-          viewBox="0 0 100 150"
-          className="w-full h-full"
+      {/* Coach Figure Image */}
+      <div className="relative w-48 h-64">
+        <img
+          src="https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/1_404bf839.png"
+          alt="Coach"
+          className="w-full h-full object-contain"
           style={{
             filter: type === 'celebration' ? 'drop-shadow(0 0 20px rgba(132, 204, 22, 0.5))' : 'drop-shadow(0 0 10px rgba(132, 204, 22, 0.3))'
           }}
-        >
-          {/* Head */}
-          <circle cx="50" cy="25" r="15" fill="oklch(0.68 0.18 142)" />
-          
-          {/* Shoulders & Chest */}
-          <ellipse cx="50" cy="55" rx="20" ry="18" fill="oklch(0.68 0.18 142)" />
-          
-          {/* Arms */}
-          <line x1="30" y1="50" x2="15" y2="70" stroke="oklch(0.68 0.18 142)" strokeWidth="6" strokeLinecap="round" />
-          <line x1="70" y1="50" x2="85" y2="70" stroke="oklch(0.68 0.18 142)" strokeWidth="6" strokeLinecap="round" />
-          
-          {/* Torso */}
-          <rect x="40" y="70" width="20" height="30" fill="oklch(0.68 0.18 142)" rx="4" />
-          
-          {/* Motivation indicator */}
-          {type === 'celebration' && (
-            <>
-              <circle cx="35" cy="20" r="3" fill="oklch(0.96 0.008 80)" opacity="0.8" />
-              <circle cx="65" cy="18" r="3" fill="oklch(0.96 0.008 80)" opacity="0.8" />
-            </>
-          )}
-        </svg>
+        />
       </div>
 
-      {/* Coach Message */}
+      {/* Coach Message with Quotes */}
       {showMessage && message && (
         <div className="max-w-sm text-center">
           <div className="inline-block px-6 py-4 rounded-lg" 
@@ -63,7 +43,7 @@ export const CoachFigure: React.FC<CoachFigureProps> = ({
               color: 'oklch(0.96 0.008 80)',
               lineHeight: 1.6
             }}>
-              {message}
+              "{message}"
             </p>
           </div>
         </div>
