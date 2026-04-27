@@ -311,6 +311,7 @@ export default function DashboardPage() {
             {[
               { label: 'Browse Programs', desc: 'Find your perfect program', icon: <Zap size={18} />, view: 'programs' as const },
               { label: 'View Diet Plans', desc: 'Detailed nutrition guide', icon: <Utensils size={18} />, view: 'diet' as const },
+              { label: 'Workout Statistics', desc: 'Track your progress', icon: <TrendingUp size={18} />, view: 'stats' as const },
             ].map(action => (
               <button
                 key={action.label}
@@ -337,59 +338,49 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Calendar Progress */}
-        {topProgram && (
-          <div className="mt-10 mb-10">
-            <h2 className="cx-section-title text-2xl mb-4" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
-              YOUR PROGRAM CALENDAR
-            </h2>
-            <div className="cx-card p-6">
-              <div className="grid grid-cols-7 gap-2 mb-4">
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                  <div key={day} className="text-center">
-                    <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.7rem', color: 'oklch(0.55 0.008 80)', textTransform: 'uppercase', fontWeight: 600 }}>
-                      {day}
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <div className="grid grid-cols-7 gap-2">
-                {Array.from({ length: 35 }).map((_, i) => {
-                  const dayNum = i + 1;
-                  const today = new Date().getDate();
-                  const isToday = dayNum === today;
-                  const isActive = dayNum <= topProgram.durationWeeks * 7;
-                  
-                  return (
-                    <div
-                      key={i}
-                      className="aspect-square flex items-center justify-center rounded"
-                      style={{
-                        background: isToday ? 'oklch(0.68 0.18 142)' : isActive ? 'oklch(0.68 0.18 142 / 20%)' : 'oklch(0.12 0.005 285)',
-                        border: isToday ? '2px solid oklch(0.68 0.18 142)' : '1px solid oklch(1 0 0 / 8%)',
-                        color: isToday ? 'oklch(0.10 0.005 285)' : 'oklch(0.65 0.008 80)',
-                      }}
-                    >
-                      <span style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '0.9rem', fontWeight: 700 }}>
-                        {dayNum <= 31 ? dayNum : ''}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="mt-4 flex items-center gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded" style={{ background: 'oklch(0.68 0.18 142)' }} />
-                  <span style={{ color: 'oklch(0.65 0.008 80)', fontFamily: 'DM Sans, sans-serif' }}>Today</span>
+        {/* Program Completion Date Card */}
+        {topProgram && (() => {
+          const today = new Date();
+          const completionDate = new Date(today.getTime() + topProgram.durationWeeks * 7 * 24 * 60 * 60 * 1000);
+          const monthNames = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+          const dayNames = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+          
+          return (
+            <div className="mt-10 mb-10">
+              <div className="cx-card p-8 text-center" style={{ background: 'linear-gradient(135deg, oklch(0.15 0.006 285), oklch(0.12 0.005 285))', border: '2px solid oklch(0.68 0.18 142 / 30%)' }}>
+                {/* Calendar-style header */}
+                <div style={{ background: 'oklch(0.68 0.18 142)', padding: '12px', borderRadius: '8px 8px 0 0', marginBottom: '24px', marginLeft: '-32px', marginRight: '-32px', marginTop: '-32px' }}>
+                  <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: '0.75rem', color: 'oklch(0.10 0.005 285)', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: 700, margin: 0 }}>
+                    Completion Date
+                  </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded" style={{ background: 'oklch(0.68 0.18 142 / 20%)' }} />
-                  <span style={{ color: 'oklch(0.65 0.008 80)', fontFamily: 'DM Sans, sans-serif' }}>Program Days</span>
+                
+                {/* Month and Date */}
+                <div className="mb-6">
+                  <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: '0.9rem', color: 'oklch(0.65 0.008 80)', textTransform: 'uppercase', letterSpacing: '1px', margin: '0 0 8px 0' }}>
+                    {monthNames[completionDate.getMonth()]}
+                  </p>
+                  <p style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '4rem', fontWeight: 700, color: 'oklch(0.68 0.18 142)', margin: '0 0 8px 0', lineHeight: 1 }}>
+                    {String(completionDate.getDate()).padStart(2, '0')}
+                  </p>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.9rem', color: 'oklch(0.70 0.008 80)', textTransform: 'uppercase', letterSpacing: '1px', margin: 0 }}>
+                    {dayNames[completionDate.getDay()]}
+                  </p>
+                </div>
+                
+                {/* Motivational message */}
+                <div style={{ borderTop: '1px solid oklch(1 0 0 / 10%)', paddingTop: '16px' }}>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '1rem', color: 'oklch(0.90 0.008 80)', lineHeight: 1.6, margin: 0 }}>
+                    The day of the new version of yourself!
+                  </p>
+                  <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: '0.85rem', color: 'oklch(0.68 0.18 142)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700, marginTop: '8px', margin: '8px 0 0 0' }}>
+                    Start today
+                  </p>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Today's workout preview */}
         {topProgram && (
