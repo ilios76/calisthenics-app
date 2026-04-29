@@ -5,9 +5,10 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { getRecommendedPrograms, getDietPlan, calculateBMI, getBMICategory, getGoalLabel } from '@/lib/data';
-import { Flame, Zap, Target, ChevronRight, Play, Utensils, TrendingUp, AlertCircle } from 'lucide-react';
+import { Flame, Zap, Target, ChevronRight, Play, Utensils, TrendingUp, AlertCircle, ChevronLeft } from 'lucide-react';
 import { RewardedAdWidget } from '@/components/RewardedAdWidget';
 import { WorkoutCalendar } from '@/components/WorkoutCalendar';
+import { loseWeightWeekly, gainMuscleWeekly, staySlimWeekly } from '@/lib/weeklyMeals';
 
 const WORKOUT_BG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/workout-bg-4n6t43em9tdbWJH7YCcGcZ.webp';
 const HERO_MALE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/hero-bg-C5GENbhHcAmSh8V2dzFSZc.webp';
@@ -18,6 +19,7 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<'program' | 'nutrition'>('program');
   const [showRestWarning, setShowRestWarning] = useState(false);
   const [lastWorkoutTime, setLastWorkoutTime] = useState<number | null>(null);
+  const [dayIndex, setDayIndex] = useState(0);
   
   useEffect(() => {
     const stored = localStorage.getItem('lastWorkoutTime');
@@ -246,49 +248,131 @@ export default function DashboardPage() {
             {/* Nutrition Tab */}
             {activeTab === 'nutrition' && (
               <div>
-                {dietPlan ? (
-                  <div
-                    className="relative overflow-hidden rounded p-6"
-                    style={{ background: 'oklch(0.15 0.006 285)', border: '1px solid oklch(1 0 0 / 8%)' }}
-                  >
-                    <div className="mb-6">
-                      <span className="cx-label mb-2 block" style={{ fontSize: '0.65rem' }}>Daily Caloric Target</span>
-                      <p className="font-number text-5xl mb-1" style={{ fontFamily: 'Bebas Neue, cursive', color: 'oklch(0.68 0.18 142)' }}>
-                        {dailyCals} <span style={{ fontSize: '1.5rem', color: 'oklch(0.60 0.008 80)' }}>kcal</span>
-                      </p>
-                      <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.88rem', color: 'oklch(0.65 0.008 80)', marginTop: '8px' }}>
-                        Based on your goal: <strong>{getGoalLabel(profile.goal)}</strong>
-                      </p>
-                    </div>
-
-                    <div style={{ borderTop: '1px solid oklch(1 0 0 / 8%)', paddingTop: '20px' }}>
-                      <h3 className="cx-section-title text-lg mb-4" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
-                        Macronutrient Breakdown
-                      </h3>
-                      <div className="grid grid-cols-3 gap-4">
+                {dietPlan ? (() => {
+                  // Get the 7-day meal plan based on goal
+                  let weeklyPlan: typeof loseWeightWeekly = [];
+                  if (profile.goal === 'lose_weight') {
+                    weeklyPlan = loseWeightWeekly;
+                  } else if (profile.goal === 'gain_muscle') {
+                    weeklyPlan = gainMuscleWeekly;
+                  } else if (profile.goal === 'stay_slim') {
+                    weeklyPlan = staySlimWeekly;
+                  }
+                  
+                  const currentDay = weeklyPlan[dayIndex];
+                  const proteinG = Math.round((dailyCals * dietPlan.macros.protein / 100) / 4);
+                  const carbsG = Math.round((dailyCals * dietPlan.macros.carbs / 100) / 4);
+                  const fatG = Math.round((dailyCals * dietPlan.macros.fat / 100) / 9);
+                  
+                  const goToPreviousDay = () => {
+                    setDayIndex(prev => (prev === 0 ? 6 : prev - 1));
+                  };
+                  
+                  const goToNextDay = () => {
+                    setDayIndex(prev => (prev === 6 ? 0 : prev + 1));
+                  };
+                  
+                  return (
+                    <div>
+                      {/* Macro targets */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                         {[
-                          { label: 'Protein', pct: dietPlan.macros.protein, color: 'oklch(0.68 0.18 142)' },
-                          { label: 'Carbs', pct: dietPlan.macros.carbs, color: 'oklch(0.68 0.18 142)' },
-                          { label: 'Fat', pct: dietPlan.macros.fat, color: 'oklch(0.68 0.18 142)' },
-                        ].map(m => (
-                          <div key={m.label}>
-                            <div className="cx-progress-bar mb-2">
-                              <div className="cx-progress-fill" style={{ width: `${m.pct}%`, background: m.color }} />
-                            </div>
-                            <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.9rem', color: 'oklch(0.90 0.008 80)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                              {m.label}
-                            </p>
-                            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.75rem', color: 'oklch(0.55 0.008 80)' }}>
-                              {m.pct}%
-                            </p>
+                          { label: 'Daily Calories', value: dailyCals.toString(), unit: 'kcal', color: 'oklch(0.68 0.18 142)' },
+                          { label: 'Protein', value: proteinG.toString(), unit: 'g / day', color: 'oklch(0.68 0.18 142)' },
+                          { label: 'Carbs', value: carbsG.toString(), unit: 'g / day', color: 'oklch(0.68 0.18 142)' },
+                          { label: 'Fats', value: fatG.toString(), unit: 'g / day', color: 'oklch(0.68 0.18 142)' },
+                        ].map(s => (
+                          <div key={s.label} className="cx-card p-3">
+                            <p className="cx-label mb-1" style={{ fontSize: '0.6rem' }}>{s.label}</p>
+                            <p style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '1.8rem', color: s.color, lineHeight: 1 }}>{s.value}</p>
+                            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.65rem', color: 'oklch(0.55 0.008 80)', marginTop: '2px' }}>{s.unit}</p>
                           </div>
                         ))}
                       </div>
+                      
+                      {/* Weekly Meal Plan */}
+                      <div className="mb-6">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="cx-section-title text-lg" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
+                            WEEKLY MEAL PLAN
+                          </h3>
+                        </div>
+                        
+                        {/* Day Navigation */}
+                        <div className="cx-card p-3 mb-3">
+                          <div className="flex items-center justify-between mb-3">
+                            <button
+                              onClick={goToPreviousDay}
+                              className="w-8 h-8 rounded flex items-center justify-center"
+                              style={{ background: 'oklch(0.68 0.18 142 / 15%)', border: '1px solid oklch(0.68 0.18 142)', color: 'oklch(0.68 0.18 142)' }}
+                            >
+                              <ChevronLeft size={16} />
+                            </button>
+                            <div className="text-center flex-1">
+                              <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '1rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'oklch(0.68 0.18 142)' }}>
+                                {currentDay.day}
+                              </p>
+                              <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.7rem', color: 'oklch(0.55 0.008 80)' }}>
+                                Day {dayIndex + 1} of 7
+                              </p>
+                            </div>
+                            <button
+                              onClick={goToNextDay}
+                              className="w-8 h-8 rounded flex items-center justify-center"
+                              style={{ background: 'oklch(0.68 0.18 142 / 15%)', border: '1px solid oklch(0.68 0.18 142)', color: 'oklch(0.68 0.18 142)' }}
+                            >
+                              <ChevronRight size={16} />
+                            </button>
+                          </div>
+                          {/* Day dots navigation */}
+                          <div className="flex justify-center gap-1.5">
+                            {weeklyPlan.map((_, i) => (
+                              <button
+                                key={i}
+                                onClick={() => setDayIndex(i)}
+                                className="rounded-full transition-all"
+                                style={{
+                                  background: i === dayIndex ? 'oklch(0.68 0.18 142)' : 'oklch(0.68 0.18 142 / 30%)',
+                                  width: i === dayIndex ? '20px' : '6px',
+                                  height: '6px',
+                                }}
+                                title={weeklyPlan[i].day}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {/* Meals for the day */}
+                        <div className="space-y-2">
+                          {currentDay.meals.map((meal: any, i: number) => (
+                            <div key={meal.name} className="cx-card p-3">
+                              <div className="flex items-start gap-2 mb-2">
+                                <span style={{ fontFamily: 'Bebas Neue, cursive', fontSize: '1.2rem', color: 'oklch(0.68 0.18 142)', lineHeight: 1, minWidth: '20px', flexShrink: 0 }}>
+                                  {String(i + 1).padStart(2, '0')}
+                                </span>
+                                <div className="flex-1 min-w-0">
+                                  <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.9rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'oklch(0.90 0.008 80)' }}>
+                                    {meal.name}
+                                  </p>
+                                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.7rem', color: 'oklch(0.55 0.008 80)' }}>
+                                    {meal.time} — {meal.description}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex flex-wrap gap-1 ml-7">
+                                {meal.examples.map((ex: string) => (
+                                  <span key={ex} style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.65rem', color: 'oklch(0.65 0.008 80)', background: 'oklch(0.20 0.006 285)', padding: '2px 8px', borderRadius: '2px' }}>
+                                    {ex}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
-
-
-                  </div>
-                ) : (
+                  );
+                })() : (
                   <div className="cx-card p-8 text-center">
                     <p style={{ color: 'oklch(0.60 0.008 80)', fontFamily: 'DM Sans, sans-serif' }}>
                       No nutrition plan available. Please update your profile.
@@ -314,6 +398,80 @@ export default function DashboardPage() {
               QUICK ACTIONS
             </h2>
 
+            {[
+              { label: 'Browse Programs', desc: 'Find your perfect program', icon: <Zap size={18} />, view: 'programs' as const },
+              { label: 'View Diet Plans', desc: 'Detailed nutrition guide', icon: <Utensils size={18} />, view: 'diet' as const },
+              { label: 'Workout Statistics', desc: 'Track your progress', icon: <TrendingUp size={18} />, view: 'stats' as const },
+            ].map(action => (
+              <button
+                key={action.label}
+                onClick={() => setCurrentView(action.view)}
+                className="cx-card w-full p-4 flex items-center gap-4 text-left"
+              >
+                <div
+                  className="w-10 h-10 flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'oklch(0.65 0.22 40 / 15%)', borderRadius: '4px', color: 'oklch(0.68 0.18 142)' }}
+                >
+                  {action.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '1rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'oklch(0.90 0.008 80)' }}>
+                    {action.label}
+                  </p>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.78rem', color: 'oklch(0.55 0.008 80)' }}>
+                    {action.desc}
+                  </p>
+                </div>
+                <ChevronRight size={16} style={{ color: 'oklch(0.50 0.008 80)', flexShrink: 0 }} />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* START TRAINING Button - moved here */}
+        {topProgram && (
+          <div className="mt-10 mb-10">
+            <button
+              className="cx-btn-primary w-full flex items-center justify-center gap-2"
+              onClick={() => startProgram(topProgram)}
+            >
+              <Play size={18} /> START TRAINING
+            </button>
+          </div>
+        )}
+
+        {/* Today's workout preview - moved here */}
+        {topProgram && (
+          <div className="mb-10">
+            <h2 className="cx-section-title text-2xl mb-4" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
+              TODAY'S WORKOUT
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {topProgram.days[0].exercises.slice(0, 4).map((exId, i) => {
+                const exName = exId.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                return (
+                  <div key={exId} className="cx-card p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="font-number text-2xl" style={{ fontFamily: 'Bebas Neue, cursive', color: 'oklch(0.68 0.18 142)' }}>
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                    </div>
+                    <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.95rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'oklch(0.85 0.008 80)' }}>
+                      {exName}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Quick Actions - moved here */}
+        <div className="mb-10">
+          <h2 className="cx-section-title text-2xl mb-4" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
+            QUICK ACTIONS
+          </h2>
+          <div className="space-y-3">
             {[
               { label: 'Browse Programs', desc: 'Find your perfect program', icon: <Zap size={18} />, view: 'programs' as const },
               { label: 'View Diet Plans', desc: 'Detailed nutrition guide', icon: <Utensils size={18} />, view: 'diet' as const },
@@ -388,31 +546,7 @@ export default function DashboardPage() {
           );
         })()}
 
-        {/* Today's workout preview */}
-        {topProgram && (
-          <div className="mt-10">
-            <h2 className="cx-section-title text-2xl mb-4" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
-              TODAY'S WORKOUT
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {topProgram.days[0].exercises.slice(0, 4).map((exId, i) => {
-                const exName = exId.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                return (
-                  <div key={exId} className="cx-card p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="font-number text-2xl" style={{ fontFamily: 'Bebas Neue, cursive', color: 'oklch(0.68 0.18 142)' }}>
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
-                    </div>
-                    <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.95rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'oklch(0.85 0.008 80)' }}>
-                      {exName}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+
       </div>
     </div>
   );
