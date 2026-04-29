@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Trophy, Zap, Flame, Star, ArrowRight } from 'lucide-react';
 import { useWorkoutCompletion } from '@/contexts/WorkoutCompletionContext';
 import { useUser } from '@/contexts/UserContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { signInWithGoogle } from '@/services/firebaseAuth';
 import { notificationService } from '@/services/notificationService';
 import { CoachFigure } from './CoachFigure';
 import { PricingModal } from './PricingModal';
@@ -24,10 +26,12 @@ const MOTIVATION_MESSAGES = [
 export const WorkoutEndScreen: React.FC<WorkoutEndScreenProps> = ({ onContinue }) => {
   const { completion, completeWorkout } = useWorkoutCompletion();
   const { setCurrentView } = useUser();
+  const { user } = useAuth();
   const [xpGained] = useState(50);
   const [leveledUp, setLeveledUp] = useState(false);
   const [motivation, setMotivation] = useState('');
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [showSignInPrompt, setShowSignInPrompt] = useState(false);
 
   useEffect(() => {
     // Complete the workout and trigger animations
@@ -47,6 +51,11 @@ export const WorkoutEndScreen: React.FC<WorkoutEndScreenProps> = ({ onContinue }
     const dayNumber = completion.totalWorkouts + 1;
     notificationService.sendDailyNotification(dayNumber).catch(err => console.error('Notification error:', err));
 
+    // Show sign-in prompt after first workout if not authenticated
+    if (completion.totalWorkouts === 1 && !user) {
+      setTimeout(() => setShowSignInPrompt(true), 3000);
+    }
+
     // Show paywall if trial ended
     if (completion.trialDaysRemaining <= 0 && !completion.isPremium) {
       setTimeout(() => setShowPricingModal(true), 2000);
@@ -58,11 +67,22 @@ export const WorkoutEndScreen: React.FC<WorkoutEndScreenProps> = ({ onContinue }
   const xpProgress = ((completion.xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100;
 
   const handleContinue = () => {
+    setShowSignInPrompt(false);
     // Show paywall if trial ended
     if (completion.trialDaysRemaining <= 0 && !completion.isPremium) {
       setShowPricingModal(true);
     } else {
       onContinue();
+    }
+  };
+
+  const handleSignIn = async () => {
+    try {
+      await signInWithGoogle();
+      setShowSignInPrompt(false);
+      onContinue();
+    } catch (error) {
+      console.error('Sign in error:', error);
     }
   };
 
@@ -78,6 +98,36 @@ export const WorkoutEndScreen: React.FC<WorkoutEndScreenProps> = ({ onContinue }
       className="min-h-screen flex flex-col items-center justify-center px-6 py-8"
       style={{ background: 'oklch(0.10 0.005 285)' }}
     >
+      {/* Sign-In Prompt Modal */}
+      {showSignInPrompt && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-lg p-8 max-w-sm w-full" style={{ background: 'oklch(0.12 0.005 285)', border: '1px solid oklch(0.68 0.18 142 / 30%)' }}>
+            <h2 style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '1.3rem', color: 'oklch(0.96 0.008 80)', textTransform: 'uppercase', marginBottom: '8px' }}>
+              Save Your Progress
+            </h2>
+            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.95rem', color: 'oklch(0.85 0.008 80)', lineHeight: 1.6, marginBottom: '24px' }}>
+              Sign in to track your workouts, unlock achievements, and save your progress across devices.
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleSignIn}
+                className="w-full px-4 py-3 rounded flex items-center justify-center gap-2"
+                style={{ background: 'oklch(0.68 0.18 142)', color: 'oklch(0.10 0.005 285)', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, textTransform: 'uppercase', cursor: 'pointer' }}
+              >
+                <span>🔐</span> Sign In with Google
+              </button>
+              <button
+                onClick={() => setShowSignInPrompt(false)}
+                className="w-full px-4 py-3 rounded"
+                style={{ background: 'oklch(0.68 0.18 142 / 10%)', border: '1px solid oklch(0.68 0.18 142)', color: 'oklch(0.68 0.18 142)', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, textTransform: 'uppercase', cursor: 'pointer' }}
+              >
+                Continue Without Signing In
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Confetti-like animation background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div

@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { Button } from '@/components/ui/button';
-import { Menu, X, LogOut, Settings, User, LogIn, Trophy, Camera } from 'lucide-react';
+import { Menu, X, LogOut, Settings, User, LogIn, Trophy, Camera, Zap, Utensils, TrendingUp, Gift } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { signInWithGoogle } from '@/services/firebaseAuth';
 
@@ -66,6 +66,43 @@ export function TopNavigation() {
             >
               Programs
             </button>
+            
+            {/* Quick Actions Dropdown */}
+            <div className="relative group">
+              <button className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-1">
+                Quick Actions
+                <Menu size={14} />
+              </button>
+              <div className="absolute left-0 mt-0 w-48 bg-popover border border-border rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                <button onClick={() => setCurrentView('programs')} className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2">
+                  <Zap className="w-4 h-4" /> Browse Programs
+                </button>
+                <button onClick={() => setCurrentView('diet')} className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2">
+                  <Utensils className="w-4 h-4" /> View Diet Plans
+                </button>
+                <button onClick={() => setCurrentView('stats')} className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" /> Workout Statistics
+                </button>
+              </div>
+            </div>
+
+            {/* Earn Rewards Dropdown */}
+            <div className="relative group">
+              <button className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-1">
+                Earn Rewards
+                <Gift size={14} />
+              </button>
+              <div className="absolute left-0 mt-0 w-56 bg-popover border border-border rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                <div className="px-4 py-2 text-xs text-muted-foreground uppercase tracking-wide font-semibold">Watch ads to earn rewards</div>
+                <button className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2">
+                  <Zap className="w-4 h-4" /> Boost Your XP
+                </button>
+                <button className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2">
+                  <Gift className="w-4 h-4" /> Extend Your Trial
+                </button>
+              </div>
+            </div>
+
             <button 
               onClick={() => setCurrentView('dashboard')}
               className="text-sm font-medium hover:text-primary transition-colors"

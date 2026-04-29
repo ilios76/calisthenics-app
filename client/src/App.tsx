@@ -16,10 +16,21 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import AppShell from "./components/AppShell";
 import { FloatingMusicWidget } from "./components/FloatingMusicWidget";
 import { CoachProvider } from "./contexts/CoachContext";
-import { CoachWidget } from "./components/CoachWidget";
 import { ChallengeProvider } from "./contexts/ChallengeContext";
+import { useEffect } from "react";
+import { mealNotificationService } from "./services/mealNotificationService";
+import { CoachWidget } from "./components/CoachWidget";
 
 function App() {
+  useEffect(() => {
+    // Initialize meal notifications on app load
+    mealNotificationService.requestNotificationPermission().then(granted => {
+      if (granted) {
+        mealNotificationService.scheduleMealNotifications();
+      }
+    });
+  }, []);
+
   return (
     <ErrorBoundary>
       <AuthProvider>
@@ -51,9 +62,9 @@ function App() {
                 </I18nProvider>
               </ThemeProvider>
             </MusicProvider>
-          </WorkoutCompletionProvider>
-            </CoachProvider>
-          </ChallengeProvider>
+            </WorkoutCompletionProvider>
+          </CoachProvider>
+        </ChallengeProvider>
       </AuthProvider>
     </ErrorBoundary>
   );
