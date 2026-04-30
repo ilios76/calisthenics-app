@@ -15,6 +15,7 @@ import {
   signInWithRedirect,
   getRedirectResult,
   GoogleAuthProvider,
+  OAuthProvider,
   signOut,
   onAuthStateChanged,
   User,
@@ -173,7 +174,28 @@ export async function signInWithGoogle(): Promise<User | null> {
   }
 }
 
+/**
+ * Sign in with Apple
+ */
+export async function signInWithApple(): Promise<User | null> {
+  try {
+    const provider = new OAuthProvider('apple.com');
+    provider.addScope('email');
+    provider.addScope('name');
+    
+    // Configure custom parameters for Apple
+    provider.setCustomParameters({
+      'locale': 'en'
+    });
 
+    // Always use redirect to avoid popup blocking issues
+    await signInWithRedirect(auth, provider);
+    return null; // User will be redirected
+  } catch (error) {
+    console.error('Apple sign-in error:', error);
+    throw error;
+  }
+}
 
 /**
  * Sign out

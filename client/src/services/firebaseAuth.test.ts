@@ -85,4 +85,33 @@ describe('Firebase Authentication', () => {
 
     expect(signInWithRedirectSpy).toHaveBeenCalled();
   });
+
+  it('should initialize Apple sign-in with OAuthProvider', async () => {
+    const signInWithRedirectSpy = vi.spyOn(firebaseAuth, 'signInWithRedirect');
+    
+    try {
+      // Import and call signInWithApple
+      const { signInWithApple } = await import('./firebaseAuth');
+      await signInWithApple();
+    } catch (error) {
+      // Expected to throw in test environment
+    }
+
+    expect(signInWithRedirectSpy).toHaveBeenCalled();
+  });
+
+  it('should handle Apple sign-in errors', async () => {
+    const signInWithRedirectSpy = vi.spyOn(firebaseAuth, 'signInWithRedirect').mockRejectedValueOnce(
+      new Error('Apple auth error')
+    );
+
+    try {
+      const { signInWithApple } = await import('./firebaseAuth');
+      await signInWithApple();
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+    }
+
+    expect(signInWithRedirectSpy).toHaveBeenCalled();
+  });
 });

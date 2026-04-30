@@ -28,13 +28,14 @@ function AppContent() {
   const { setCurrentView } = useUser();
 
   useEffect(() => {
-    // Handle Google OAuth redirect result
+    // Handle OAuth redirect result (Google or Apple)
     const handleRedirectResult = async () => {
       try {
         const result = await getRedirectResult(auth);
         if (result?.user) {
           console.log('User signed in:', result.user.email);
-          await createOrUpdateUserProfile(result.user, 'google');
+          const authProvider = result.user.providerData[0]?.providerId.includes('apple') ? 'apple' : 'google';
+          await createOrUpdateUserProfile(result.user, authProvider);
           setCurrentView('onboarding');
         }
       } catch (error) {

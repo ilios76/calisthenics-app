@@ -9,7 +9,7 @@ import { useUser } from '@/contexts/UserContext';
 import { Button } from '@/components/ui/button';
 import { Menu, X, LogOut, Settings, User, LogIn, Trophy, Camera, Zap, Utensils, TrendingUp, Gift } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { signInWithGoogle } from '@/services/firebaseAuth';
+import { signInWithGoogle, signInWithApple } from '@/services/firebaseAuth';
 
 export function TopNavigation() {
   const { setCurrentView, hasProfile } = useUser();
@@ -31,6 +31,19 @@ export function TopNavigation() {
       setProfileMenuOpen(false);
     } catch (error) {
       console.error('Sign in error:', error);
+      // Error is handled by Firebase redirect
+    } finally {
+      setSigningIn(false);
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    setSigningIn(true);
+    try {
+      await signInWithApple();
+      setProfileMenuOpen(false);
+    } catch (error) {
+      console.error('Apple sign in error:', error);
       // Error is handled by Firebase redirect
     } finally {
       setSigningIn(false);
@@ -234,6 +247,17 @@ export function TopNavigation() {
                         />
                       </svg>
                       {signingIn ? "Signing in..." : "Sign in with Google"}
+                    </button>
+
+                    <button
+                      disabled={signingIn}
+                      onClick={handleAppleSignIn}
+                      className="w-full text-left px-4 py-3 text-sm hover:bg-accent flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed border-t border-border"
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.05 13.5c-.91 2.92.37 5.65 2.85 6.75 1.08.44 2.25.48 3.35.13 1.1-.35 2.04-1.05 2.72-1.98.68-.93 1.04-2.04.96-3.2-.08-1.16-.56-2.25-1.3-3.1-.74-.85-1.74-1.38-2.82-1.5-1.08-.12-2.19.16-3.07.78-.88.62-1.48 1.56-1.73 2.62zm-9.05-1.5c0 3.31 2.69 6 6 6s6-2.69 6-6-2.69-6-6-6-6 2.69-6 6zm12-6c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1z"/>
+                      </svg>
+                      {signingIn ? "Signing in..." : "Sign in with Apple"}
                     </button>
 
                     <div className="px-4 py-2 border-t border-border text-xs text-muted-foreground">
