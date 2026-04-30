@@ -16,6 +16,7 @@ export function TopNavigation() {
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [signingIn, setSigningIn] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -24,11 +25,15 @@ export function TopNavigation() {
   };
 
   const handleGoogleSignIn = async () => {
+    setSigningIn(true);
     try {
       await signInWithGoogle();
       setProfileMenuOpen(false);
     } catch (error) {
       console.error('Sign in error:', error);
+      // Error is handled by Firebase redirect
+    } finally {
+      setSigningIn(false);
     }
   };
 
@@ -206,8 +211,9 @@ export function TopNavigation() {
                     </div>
 
                     <button
+                      disabled={signingIn}
                       onClick={handleGoogleSignIn}
-                      className="w-full text-left px-4 py-3 text-sm hover:bg-accent flex items-center gap-2 transition-colors"
+                      className="w-full text-left px-4 py-3 text-sm hover:bg-accent flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <svg className="w-4 h-4" viewBox="0 0 24 24">
                         <path
@@ -227,7 +233,7 @@ export function TopNavigation() {
                           d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                         />
                       </svg>
-                      Sign in with Google
+                      {signingIn ? "Signing in..." : "Sign in with Google"}
                     </button>
 
                     <div className="px-4 py-2 border-t border-border text-xs text-muted-foreground">

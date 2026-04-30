@@ -18,10 +18,11 @@ import AchievementsPage from '@/pages/Achievements';
 import StatisticsPage from '@/pages/Statistics';
 import { BeforeAfterChallenge } from '@/pages/BeforeAfterChallenge';
 import { TopNavigation } from '@/components/TopNavigation';
+import { OnboardingProfile } from '@/components/OnboardingProfile';
 
 export default function AppShell() {
   const { currentView, hasProfile } = useUser();
-  const { loading } = useAuth();
+  const { loading, user } = useAuth();
 
   // Show loading screen while checking auth
   if (loading) {
@@ -35,8 +36,20 @@ export default function AppShell() {
     );
   }
 
-  // Show onboarding if no profile (guests or new users)
-  if (!hasProfile) {
+  // Show profile form if user is authenticated but has no profile
+  if (user && !hasProfile) {
+    return (
+      <div className="min-h-screen flex flex-col bg-background">
+        <TopNavigation />
+        <main className="flex-1">
+          <OnboardingProfile />
+        </main>
+      </div>
+    );
+  }
+
+  // Show onboarding if no user and no profile (guests)
+  if (!user && !hasProfile) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <TopNavigation />
