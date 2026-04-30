@@ -16,7 +16,7 @@ export const CoachFigure: React.FC<CoachFigureProps> = ({
   // Randomly select between two coach images for variety
   const coachImages = [
     "https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/coachgif_5213a416.gif",
-    "https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/advise_2f88be24.png"
+    "https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/coach4_68509773.gif"
   ];
   
   // Use tablet coach for finished sessions
