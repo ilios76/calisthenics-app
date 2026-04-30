@@ -6,7 +6,7 @@ export const FloatingMusicWidget: React.FC = () => {
   const { isPlaying, togglePlay, volume, setVolume, currentGenre, setGenre } = useMusicContext();
   const [showGenreMenu, setShowGenreMenu] = useState(false);
 
-  const genres = ['pop', 'rock', 'hiphop', 'electronic', 'epic', 'classical', 'latin', 'ambient'];
+  const genres = ['pop', 'rock'];
 
   const handleGenreSelect = (genre: string) => {
     setGenre(genre);
