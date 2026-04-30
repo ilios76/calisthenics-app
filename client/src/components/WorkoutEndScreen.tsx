@@ -56,9 +56,9 @@ export const WorkoutEndScreen: React.FC<WorkoutEndScreenProps> = ({ onContinue }
       setTimeout(() => setShowSignInPrompt(true), 3000);
     }
 
-    // Show paywall if trial ended
+    // Show paywall if trial ended (after 15 seconds to let user see congratulations)
     if (completion.trialDaysRemaining <= 0 && !completion.isPremium) {
-      setTimeout(() => setShowPricingModal(true), 2000);
+      setTimeout(() => setShowPricingModal(true), 15000);
     }
   }, []);
 

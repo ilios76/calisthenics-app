@@ -122,14 +122,28 @@ class VoiceService {
 
     utterance.lang = lang === "el" ? "el-GR" : "en-US";
     utterance.rate = 0.95;
-    utterance.pitch = 1;
+    utterance.pitch = 0.8; // Lower pitch for male voice
     utterance.volume = 1;
 
-    // Use a voice that matches the language
+    // Use a male voice that matches the language
     const voices = window.speechSynthesis.getVoices();
-    const preferredVoice = voices.find((voice) => voice.lang.startsWith(lang === "el" ? "el" : "en"));
-    if (preferredVoice) {
-      utterance.voice = preferredVoice;
+    const langCode = lang === "el" ? "el" : "en";
+    
+    // Try to find a male voice
+    const maleVoice = voices.find(
+      (voice) => voice.lang.startsWith(langCode) && 
+      (voice.name.toLowerCase().includes("male") || 
+       voice.name.toLowerCase().includes("man") ||
+       voice.name.toLowerCase().includes("guy"))
+    );
+    
+    // Fallback to any voice matching the language
+    const fallbackVoice = voices.find((voice) => voice.lang.startsWith(langCode));
+    
+    if (maleVoice) {
+      utterance.voice = maleVoice;
+    } else if (fallbackVoice) {
+      utterance.voice = fallbackVoice;
     }
 
     window.speechSynthesis.speak(utterance);
