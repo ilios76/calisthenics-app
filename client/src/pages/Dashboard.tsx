@@ -383,15 +383,6 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Rewarded Ads Section */}
-          <div className="space-y-4">
-            <h2 className="cx-section-title text-2xl mt-6" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
-              EARN REWARDS
-            </h2>
-            <RewardedAdWidget adId="xp_boost" />
-            <RewardedAdWidget adId="trial_extension" />
-          </div>
-
           {/* Quick Actions */}
           <div className="space-y-4">
             <h2 className="cx-section-title text-2xl mt-6" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
@@ -428,19 +419,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* START TRAINING Button - moved here */}
-        {topProgram && (
-          <div className="mt-10 mb-10">
-            <button
-              className="cx-btn-primary w-full flex items-center justify-center gap-2"
-              onClick={() => startProgram(topProgram)}
-            >
-              <Play size={18} /> START TRAINING
-            </button>
-          </div>
-        )}
-
-        {/* Today's workout preview - moved here */}
+        {/* Today's workout preview - before START TRAINING */}
         {topProgram && (
           <div className="mb-10">
             <h2 className="cx-section-title text-2xl mb-4" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
@@ -466,41 +445,17 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Quick Actions - moved here */}
-        <div className="mb-10">
-          <h2 className="cx-section-title text-2xl mb-4" style={{ fontFamily: 'Barlow Condensed, sans-serif', color: 'oklch(0.96 0.008 80)' }}>
-            QUICK ACTIONS
-          </h2>
-          <div className="space-y-3">
-            {[
-              { label: 'Browse Programs', desc: 'Find your perfect program', icon: <Zap size={18} />, view: 'programs' as const },
-              { label: 'View Diet Plans', desc: 'Detailed nutrition guide', icon: <Utensils size={18} />, view: 'diet' as const },
-              { label: 'Workout Statistics', desc: 'Track your progress', icon: <TrendingUp size={18} />, view: 'stats' as const },
-            ].map(action => (
-              <button
-                key={action.label}
-                onClick={() => setCurrentView(action.view)}
-                className="cx-card w-full p-4 flex items-center gap-4 text-left"
-              >
-                <div
-                  className="w-10 h-10 flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'oklch(0.65 0.22 40 / 15%)', borderRadius: '4px', color: 'oklch(0.68 0.18 142)' }}
-                >
-                  {action.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '1rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'oklch(0.90 0.008 80)' }}>
-                    {action.label}
-                  </p>
-                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.78rem', color: 'oklch(0.55 0.008 80)' }}>
-                    {action.desc}
-                  </p>
-                </div>
-                <ChevronRight size={16} style={{ color: 'oklch(0.50 0.008 80)', flexShrink: 0 }} />
-              </button>
-            ))}
+        {/* START TRAINING Button */}
+        {topProgram && (
+          <div className="mt-10 mb-10">
+            <button
+              className="cx-btn-primary w-full flex items-center justify-center gap-2"
+              onClick={() => startProgram(topProgram)}
+            >
+              <Play size={18} /> START TRAINING
+            </button>
           </div>
-        </div>
+        )}
 
         {/* Program Completion Date Card */}
         {topProgram && (() => {
@@ -545,6 +500,8 @@ export default function DashboardPage() {
             </div>
           );
         })()}
+
+
 
 
       </div>
