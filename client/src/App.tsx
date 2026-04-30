@@ -20,6 +20,7 @@ import { ChallengeProvider } from "./contexts/ChallengeContext";
 import { useEffect } from "react";
 import { mealNotificationService } from "./services/mealNotificationService";
 import { CoachWidget } from "./components/CoachWidget";
+import { VoiceCoachButton } from "./components/VoiceCoachButton";
 
 function App() {
   useEffect(() => {
@@ -56,6 +57,7 @@ function App() {
                         <AppShell />
                         <FloatingMusicWidget />
                         <CoachWidget position="bottom-right" />
+                        <VoiceCoachButton />
                       </UserProvider>
                     </ProgressProvider>
                   </TooltipProvider>
