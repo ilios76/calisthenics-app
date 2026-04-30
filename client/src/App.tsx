@@ -20,7 +20,7 @@ import { useEffect } from "react";
 import { mealNotificationService } from "./services/mealNotificationService";
 import { CoachWidget } from "./components/CoachWidget";
 import { VoiceCoachButton } from "./components/VoiceCoachButton";
-import { getRedirectResult } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import { auth, createOrUpdateUserProfile } from "./services/firebaseAuth";
 import { useUser } from "./contexts/UserContext";
 
@@ -28,22 +28,40 @@ function AppContent() {
   const { setCurrentView } = useUser();
 
   useEffect(() => {
-    // Handle OAuth redirect result (Google or Apple)
-    const handleRedirectResult = async () => {
+    // Listen to auth state changes (handles redirect results automatically)
+    console.log('🔵 App.tsx: Setting up auth state listener...');
+    
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
-        const result = await getRedirectResult(auth);
-        if (result?.user) {
-          console.log('User signed in:', result.user.email);
-          const authProvider = result.user.providerData[0]?.providerId.includes('apple') ? 'apple' : 'google';
-          await createOrUpdateUserProfile(result.user, authProvider);
+        if (user) {
+          console.log('✅ Auth state changed - User signed in:', user.email);
+          console.log('Provider data:', user.providerData);
+          console.log('🔵 Detecting auth provider...');
+          
+          const authProvider = user.providerData[0]?.providerId.includes('apple') ? 'apple' : 'google';
+          console.log('Auth provider detected:', authProvider);
+          
+          console.log('🔵 Creating/updating user profile...');
+          await createOrUpdateUserProfile(user, authProvider);
+          console.log('✅ User profile created/updated');
+          
+          console.log('🔵 Setting view to onboarding...');
           setCurrentView('onboarding');
+          console.log('✅ View set to onboarding');
+        } else {
+          console.log('ℹ️ Auth state changed - No user signed in');
         }
       } catch (error) {
-        console.error('Redirect result error:', error);
+        console.error('❌ Auth state handler error:', error);
+        if (error instanceof Error) {
+          console.error('Error message:', error.message);
+          console.error('Error code:', (error as any).code);
+        }
       }
-    };
+    });
 
-    handleRedirectResult();
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, [setCurrentView]);
 
   useEffect(() => {

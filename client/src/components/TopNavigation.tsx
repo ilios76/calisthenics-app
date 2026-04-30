@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Menu, X, LogOut, Settings, User, LogIn, Trophy, Camera, Zap, Utensils, TrendingUp, Gift } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { signInWithGoogle, signInWithApple } from '@/services/firebaseAuth';
+import { toast } from 'sonner';
 
 export function TopNavigation() {
   const { setCurrentView, hasProfile } = useUser();
@@ -27,11 +28,23 @@ export function TopNavigation() {
   const handleGoogleSignIn = async () => {
     setSigningIn(true);
     try {
+      console.log('Starting Google Sign-In...');
       await signInWithGoogle();
       setProfileMenuOpen(false);
     } catch (error) {
-      console.error('Sign in error:', error);
-      // Error is handled by Firebase redirect
+      console.error('Google Sign-In error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Google Sign-In failed';
+      
+      // Show user-friendly error messages
+      if (errorMessage.includes('unauthorized-domain')) {
+        toast.error('This domain is not authorized for Google Sign-In. Please contact support.');
+      } else if (errorMessage.includes('operation-not-allowed')) {
+        toast.error('Google Sign-In is not enabled. Please contact support.');
+      } else if (errorMessage.includes('network')) {
+        toast.error('Network error. Please check your connection and try again.');
+      } else {
+        toast.error('Sign-In failed. Please try again.');
+      }
     } finally {
       setSigningIn(false);
     }
@@ -40,11 +53,23 @@ export function TopNavigation() {
   const handleAppleSignIn = async () => {
     setSigningIn(true);
     try {
+      console.log('Starting Apple Sign-In...');
       await signInWithApple();
       setProfileMenuOpen(false);
     } catch (error) {
-      console.error('Apple sign in error:', error);
-      // Error is handled by Firebase redirect
+      console.error('Apple Sign-In error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Apple Sign-In failed';
+      
+      // Show user-friendly error messages
+      if (errorMessage.includes('unauthorized-domain')) {
+        toast.error('This domain is not authorized for Apple Sign-In. Please contact support.');
+      } else if (errorMessage.includes('operation-not-allowed')) {
+        toast.error('Apple Sign-In is not enabled. Please contact support.');
+      } else if (errorMessage.includes('network')) {
+        toast.error('Network error. Please check your connection and try again.');
+      } else {
+        toast.error('Sign-In failed. Please try again.');
+      }
     } finally {
       setSigningIn(false);
     }

@@ -73,6 +73,21 @@ try {
   db = getFirestore(firebaseApp);
 }
 
+// Enable persistence for better redirect handling
+try {
+  setPersistence(auth, browserLocalPersistence)
+    .then(() => {
+      console.log('✅ Firebase persistence enabled (LOCAL)');
+    })
+    .catch((error) => {
+      console.warn('⚠️ Firebase persistence failed:', error);
+      // Fallback to session persistence
+      return setPersistence(auth, browserSessionPersistence);
+    });
+} catch (error) {
+  console.error('❌ Error setting persistence:', error);
+}
+
 // ============================================================
 // USER PROFILE INTERFACE
 // ============================================================
@@ -152,6 +167,9 @@ export async function initializePersistence(rememberMe: boolean = true): Promise
  */
 export async function signInWithGoogle(): Promise<User | null> {
   try {
+    console.log('🔵 Google Sign-In: Initializing...');
+    console.log('Current hostname:', window.location.hostname);
+    console.log('Firebase auth initialized:', !!auth);
     const provider = new GoogleAuthProvider();
     provider.addScope('profile');
     provider.addScope('email');
@@ -166,10 +184,16 @@ export async function signInWithGoogle(): Promise<User | null> {
     }
 
     // Always use redirect to avoid popup blocking issues
+    console.log('🔵 Google Sign-In: Starting redirect...');
     await signInWithRedirect(auth, provider);
+    console.log('🔵 Google Sign-In: Redirect initiated');
     return null; // User will be redirected
   } catch (error) {
-    console.error('Google sign-in error:', error);
+    console.error('❌ Google sign-in error:', error);
+    if (error instanceof Error) {
+      console.error('Error code:', (error as any).code);
+      console.error('Error message:', error.message);
+    }
     throw error;
   }
 }
