@@ -86,6 +86,23 @@ class VoiceService {
   }
 
   /**
+   * Clean text for natural speech (remove markdown, symbols, etc.)
+   */
+  private cleanTextForSpeech(text: string): string {
+    return text
+      .replace(/\*/g, "") // Remove asterisks (*)
+      .replace(/\*\*/g, "") // Remove bold markers
+      .replace(/_/g, "") // Remove underscores
+      .replace(/`/g, "") // Remove backticks
+      .replace(/\[([^\]]+)\]/g, "$1") // Replace [text] with text
+      .replace(/\(([^)]+)\)/g, "$1") // Replace (text) with text
+      .replace(/#+\s/g, "") // Remove markdown headers
+      .replace(/[-•]\s/g, "") // Remove bullet points
+      .replace(/\n+/g, " ") // Replace newlines with space
+      .trim();
+  }
+
+  /**
    * Speak text using text-to-speech
    * @param text - Text to speak
    * @param language - Optional language override
@@ -100,7 +117,8 @@ class VoiceService {
     window.speechSynthesis.cancel();
 
     const lang = language || this.detectLanguage(text);
-    const utterance = new SpeechSynthesisUtterance(text);
+    const cleanText = this.cleanTextForSpeech(text);
+    const utterance = new SpeechSynthesisUtterance(cleanText);
 
     utterance.lang = lang === "el" ? "el-GR" : "en-US";
     utterance.rate = 0.95;
