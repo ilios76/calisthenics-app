@@ -7,10 +7,12 @@
 import React, { useState } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { Button } from '@/components/ui/button';
-import { Menu, X, LogOut, Settings, User, LogIn, Trophy, Camera, Zap, Utensils, TrendingUp, Gift } from 'lucide-react';
+import { Menu, X, LogOut, Settings, User, LogIn, Trophy, Camera, Zap, Utensils, TrendingUp, Gift, Music, Calendar } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { signInWithGoogle, signInWithApple } from '@/services/firebaseAuth';
 import { toast } from 'sonner';
+import { FloatingMusicWidget } from '@/components/FloatingMusicWidget';
+import { WorkoutCalendar } from '@/components/WorkoutCalendar';
 
 export function TopNavigation() {
   const { setCurrentView, hasProfile } = useUser();
@@ -323,14 +325,34 @@ export function TopNavigation() {
               Programs
             </button>
             <button 
-              onClick={() => {
-                setCurrentView('dashboard');
+              onClick={() => {setCurrentView('dashboard');
                 setMobileMenuOpen(false);
               }}
               className="block w-full text-left px-4 py-2 hover:bg-accent rounded-lg transition-colors"
             >
               About
             </button>
+            
+            {/* Music Widget in Menu */}
+            <div className="px-4 py-3 border-t border-border">
+              <div className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-2">
+                <Music className="w-4 h-4" /> Workout Music
+              </div>
+              <FloatingMusicWidget />
+            </div>
+            
+            {/* Calendar in Menu */}
+            {user && hasProfile && (
+              <div className="px-4 py-3 border-t border-border">
+                <div className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-2">
+                  <Calendar className="w-4 h-4" /> Workout Schedule
+                </div>
+                <div className="bg-card rounded-lg p-3 max-h-96 overflow-y-auto">
+                  <WorkoutCalendar />
+                </div>
+              </div>
+            )}
+            
             {!user && (
               <Button
                 onClick={() => {

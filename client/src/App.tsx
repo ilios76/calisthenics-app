@@ -45,9 +45,8 @@ function AppContent() {
           await createOrUpdateUserProfile(user, authProvider);
           console.log('✅ User profile created/updated');
           
-          console.log('🔵 Setting view to onboarding...');
-          setCurrentView('onboarding');
-          console.log('✅ View set to onboarding');
+          // Don't force onboarding - let AppShell handle the view based on hasProfile
+          console.log('✅ Auth state listener complete - AppShell will handle view routing');
         } else {
           console.log('ℹ️ Auth state changed - No user signed in');
         }
@@ -86,7 +85,6 @@ function AppContent() {
         }}
       />
       <AppShell />
-      <FloatingMusicWidget />
       <CoachWidget position="bottom-right" />
       <VoiceCoachButton />
     </>

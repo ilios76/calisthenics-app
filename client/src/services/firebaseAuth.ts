@@ -92,6 +92,17 @@ try {
 // USER PROFILE INTERFACE
 // ============================================================
 
+export interface SmartWatchData {
+  date: string; // YYYY-MM-DD format
+  steps: number;
+  heartRate?: number; // average BPM
+  calories: number;
+  distance: number; // in meters
+  sleep?: number; // in minutes
+  activityScore: number; // 0-100 composite score
+  syncedAt: Timestamp;
+}
+
 export interface UserProfile {
   uid: string;
   email: string;
@@ -107,6 +118,12 @@ export interface UserProfile {
   updatedAt: Timestamp;
   authProvider: 'google' | 'apple' | 'email';
   lastLoginAt: Timestamp;
+  // Google Fit Integration
+  googleFitConnected?: boolean;
+  googleFitAccessToken?: string;
+  googleFitRefreshToken?: string;
+  lastSmartWatchSync?: Timestamp;
+  smartWatchDataEnabled?: boolean;
 }
 
 export interface WorkoutProgress {
