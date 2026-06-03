@@ -191,17 +191,14 @@ export async function signInWithGoogle(): Promise<User | null> {
     provider.addScope('profile');
     provider.addScope('email');
     
-    // Configure custom domain for development
-    const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (isDevelopment) {
-      // For localhost development, we need to configure the provider
-      provider.setCustomParameters({
-        'prompt': 'select_account'
-      });
-    }
+    // Always show account picker to let user select their Google account
+    provider.setCustomParameters({
+      'prompt': 'select_account'
+    });
 
-    // Always use redirect to avoid popup blocking issues
+    // Use redirect to handle OAuth properly
     console.log('🔵 Google Sign-In: Starting redirect...');
+    console.log('Provider custom params:', provider);
     await signInWithRedirect(auth, provider);
     console.log('🔵 Google Sign-In: Redirect initiated');
     return null; // User will be redirected
@@ -210,8 +207,10 @@ export async function signInWithGoogle(): Promise<User | null> {
     if (error instanceof Error) {
       console.error('Error code:', (error as any).code);
       console.error('Error message:', error.message);
+      console.error('Full error:', error);
     }
-    throw error;
+    // Don't throw - let the UI handle the error
+    return null;
   }
 }
 
