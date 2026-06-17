@@ -8,6 +8,7 @@ vi.mock('firebase/auth', () => ({
   initializeApp: vi.fn(),
   getApp: vi.fn(),
   getAuth: vi.fn(),
+  signInWithPopup: vi.fn(),
   signInWithRedirect: vi.fn(),
   signOut: vi.fn(),
   onAuthStateChanged: vi.fn(),
@@ -34,16 +35,39 @@ describe('Firebase Authentication', () => {
     vi.clearAllMocks();
   });
 
-  it('should initialize Google sign-in', async () => {
-    const signInWithRedirectSpy = vi.spyOn(firebaseAuth, 'signInWithRedirect');
-    
-    try {
-      await signInWithGoogle();
-    } catch (error) {
-      // Expected to throw in test environment
-    }
+  it('should try signInWithPopup first', async () => {
+    const mockUser = { uid: 'test-uid', displayName: 'Test User' };
+    vi.mocked(firebaseAuth.signInWithPopup).mockResolvedValueOnce({
+      user: mockUser as any,
+    } as any);
 
-    expect(signInWithRedirectSpy).toHaveBeenCalled();
+    const result = await signInWithGoogle();
+
+    expect(firebaseAuth.signInWithPopup).toHaveBeenCalled();
+    expect(result).toEqual(mockUser);
+  });
+
+  it('should fallback to redirect when popup is blocked', async () => {
+    const popupError = new Error('Popup blocked');
+    (popupError as any).code = 'auth/popup-blocked';
+
+    vi.mocked(firebaseAuth.signInWithPopup).mockRejectedValueOnce(popupError);
+    vi.mocked(firebaseAuth.signInWithRedirect).mockResolvedValueOnce(undefined);
+
+    const result = await signInWithGoogle();
+
+    expect(firebaseAuth.signInWithPopup).toHaveBeenCalled();
+    expect(firebaseAuth.signInWithRedirect).toHaveBeenCalled();
+    expect(result).toBeNull();
+  });
+
+  it('should throw error for non-fallback errors', async () => {
+    const networkError = new Error('Network error');
+    (networkError as any).code = 'auth/network-request-failed';
+
+    vi.mocked(firebaseAuth.signInWithPopup).mockRejectedValueOnce(networkError);
+
+    await expect(signInWithGoogle()).rejects.toThrow('Network error');
   });
 
   it('should handle sign out', async () => {

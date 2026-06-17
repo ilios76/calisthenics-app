@@ -180,37 +180,41 @@ export async function initializePersistence(rememberMe: boolean = true): Promise
 }
 
 /**
- * Sign in with Google
+ * Sign in with Google.
+ * Tries signInWithPopup first (shows the account picker immediately).
+ * Falls back to signInWithRedirect only when popups are blocked
+ * (e.g. Capacitor WebView or certain browsers).
  */
 export async function signInWithGoogle(): Promise<User | null> {
-  try {
-    console.log('🔵 Google Sign-In: Initializing...');
-    console.log('Current hostname:', window.location.hostname);
-    console.log('Firebase auth initialized:', !!auth);
-    const provider = new GoogleAuthProvider();
-    provider.addScope('profile');
-    provider.addScope('email');
-    
-    // Always show account picker to let user select their Google account
-    provider.setCustomParameters({
-      'prompt': 'select_account'
-    });
+  const provider = new GoogleAuthProvider();
+  provider.addScope('profile');
+  provider.addScope('email');
+  provider.setCustomParameters({ prompt: 'select_account' });
 
-    // Use redirect to handle OAuth properly
-    console.log('🔵 Google Sign-In: Starting redirect...');
-    console.log('Provider custom params:', provider);
-    await signInWithRedirect(auth, provider);
-    console.log('🔵 Google Sign-In: Redirect initiated');
-    return null; // User will be redirected
-  } catch (error) {
-    console.error('❌ Google sign-in error:', error);
-    if (error instanceof Error) {
-      console.error('Error code:', (error as any).code);
-      console.error('Error message:', error.message);
-      console.error('Full error:', error);
+  try {
+    console.log('🔵 Google Sign-In: trying popup...');
+    const result = await signInWithPopup(auth, provider);
+    console.log('✅ Google Sign-In: popup success', result.user.displayName);
+    return result.user;
+  } catch (popupError: any) {
+    const code = popupError?.code ?? '';
+    console.warn('⚠️ Popup failed, code:', code, popupError?.message);
+
+    // These codes mean the environment blocks popups → fall back to redirect
+    const shouldFallback =
+      code === 'auth/popup-blocked' ||
+      code === 'auth/popup-closed-by-user' ||
+      code === 'auth/cancelled-popup-request' ||
+      code === 'auth/operation-not-supported-in-this-environment';
+
+    if (shouldFallback) {
+      console.log('🔵 Google Sign-In: falling back to redirect...');
+      await signInWithRedirect(auth, provider);
+      return null; // Page will reload; result handled in LoginPage useEffect
     }
-    // Don't throw - let the UI handle the error
-    return null;
+
+    // Any other error (misconfiguration, network, etc.) — surface it to the UI
+    throw popupError;
   }
 }
 
