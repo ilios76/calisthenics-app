@@ -7,10 +7,12 @@
 import React, { useState } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { Button } from '@/components/ui/button';
-import { Menu, X, LogOut, Settings, User, LogIn, Zap, TrendingUp, Music, Calendar } from 'lucide-react';
+import { Menu, X, LogOut, Settings, User, LogIn, Trophy, Camera, Zap, Utensils, TrendingUp, Gift, Music, Calendar } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { signInWithGoogle, signInWithApple } from '@/services/firebaseAuth';
 import { toast } from 'sonner';
+import { FloatingMusicWidget } from '@/components/FloatingMusicWidget';
+import { WorkoutCalendar } from '@/components/WorkoutCalendar';
 
 export function TopNavigation() {
   const { setCurrentView, hasProfile } = useUser();
@@ -18,8 +20,6 @@ export function TopNavigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [signingIn, setSigningIn] = useState(false);
-  const [showAchievements, setShowAchievements] = useState(false);
-  const [showChallenge, setShowChallenge] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -122,14 +122,31 @@ export function TopNavigation() {
                 <button onClick={() => setCurrentView('programs')} className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2">
                   <Zap className="w-4 h-4" /> Browse Programs
                 </button>
-
+                <button onClick={() => setCurrentView('diet')} className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2">
+                  <Utensils className="w-4 h-4" /> View Diet Plans
+                </button>
                 <button onClick={() => setCurrentView('stats')} className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2">
                   <TrendingUp className="w-4 h-4" /> Workout Statistics
                 </button>
               </div>
             </div>
 
-
+            {/* Earn Rewards Dropdown */}
+            <div className="relative group">
+              <button className="text-sm font-medium hover:text-primary transition-colors flex items-center gap-1">
+                Earn Rewards
+                <Gift size={14} />
+              </button>
+              <div className="absolute left-0 mt-0 w-56 bg-popover border border-border rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                <div className="px-4 py-2 text-xs text-muted-foreground uppercase tracking-wide font-semibold">Watch ads to earn rewards</div>
+                <button className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2">
+                  <Zap className="w-4 h-4" /> Boost Your XP
+                </button>
+                <button className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2">
+                  <Gift className="w-4 h-4" /> Extend Your Trial
+                </button>
+              </div>
+            </div>
 
             <button 
               onClick={() => setCurrentView('dashboard')}
@@ -171,7 +188,26 @@ export function TopNavigation() {
                       <User className="w-4 h-4" />
                       Dashboard
                     </button>
-
+                    <button
+                      onClick={() => {
+                        setCurrentView('achievements');
+                        setProfileMenuOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2"
+                    >
+                      <Trophy className="w-4 h-4" />
+                      Achievements
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCurrentView('challenge');
+                        setProfileMenuOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2"
+                    >
+                      <Camera className="w-4 h-4" />
+                      Before/After Challenge
+                    </button>
                     <button
                       onClick={() => {
                         setCurrentView('settings');
@@ -182,29 +218,6 @@ export function TopNavigation() {
                       <Settings className="w-4 h-4" />
                       Settings
                     </button>
-
-                    <button
-                      onClick={() => {
-                        setShowAchievements(true);
-                        setProfileMenuOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2"
-                    >
-                      <Zap className="w-4 h-4" />
-                      Achievements
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setShowChallenge(true);
-                        setProfileMenuOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2"
-                    >
-                      <TrendingUp className="w-4 h-4" />
-                      Before/After Challenge
-                    </button>
-
                     <div className="border-t border-border my-2"></div>
                     <button
                       onClick={handleLogout}
@@ -355,91 +368,6 @@ export function TopNavigation() {
           </div>
         )}
       </div>
-
-      {/* Achievements Modal */}
-      {showAchievements && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-lg max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold flex items-center gap-2">
-                <Zap className="w-5 h-5 text-primary" />
-                Achievements
-              </h2>
-              <button
-                onClick={() => setShowAchievements(false)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="space-y-3">
-              <div className="p-3 bg-accent/50 rounded-lg">
-                <p className="font-semibold text-sm">🏆 First Workout</p>
-                <p className="text-xs text-muted-foreground mt-1">Complete your first workout session</p>
-              </div>
-              <div className="p-3 bg-accent/50 rounded-lg">
-                <p className="font-semibold text-sm">🔥 7-Day Streak</p>
-                <p className="text-xs text-muted-foreground mt-1">Work out 7 days in a row</p>
-              </div>
-              <div className="p-3 bg-accent/50 rounded-lg">
-                <p className="font-semibold text-sm">💪 100 Workouts</p>
-                <p className="text-xs text-muted-foreground mt-1">Complete 100 workout sessions</p>
-              </div>
-            </div>
-            <button
-              onClick={() => setShowAchievements(false)}
-              className="w-full mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Before/After Challenge Modal */}
-      {showChallenge && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-card border border-border rounded-lg max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-primary" />
-                Before/After Challenge
-              </h2>
-              <button
-                onClick={() => setShowChallenge(false)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="space-y-3">
-              <p className="text-sm text-muted-foreground">
-                Track your transformation with before and after photos. Document your progress over 30, 60, or 90 days.
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="p-3 bg-accent/50 rounded-lg text-center">
-                  <p className="font-semibold text-sm">📸 Before</p>
-                  <p className="text-xs text-muted-foreground mt-1">Upload starting photo</p>
-                </div>
-                <div className="p-3 bg-accent/50 rounded-lg text-center">
-                  <p className="font-semibold text-sm">📸 After</p>
-                  <p className="text-xs text-muted-foreground mt-1">Upload progress photo</p>
-                </div>
-              </div>
-              <div className="p-3 bg-primary/10 rounded-lg">
-                <p className="text-xs font-semibold text-primary">💡 Tip</p>
-                <p className="text-xs text-muted-foreground mt-1">Take photos in the same location and lighting for best comparison</p>
-              </div>
-            </div>
-            <button
-              onClick={() => setShowChallenge(false)}
-              className="w-full mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </nav>
   );
 }

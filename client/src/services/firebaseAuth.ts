@@ -180,41 +180,38 @@ export async function initializePersistence(rememberMe: boolean = true): Promise
 }
 
 /**
- * Sign in with Google.
- * Tries signInWithPopup first (shows the account picker immediately).
- * Falls back to signInWithRedirect only when popups are blocked
- * (e.g. Capacitor WebView or certain browsers).
+ * Sign in with Google
  */
 export async function signInWithGoogle(): Promise<User | null> {
-  const provider = new GoogleAuthProvider();
-  provider.addScope('profile');
-  provider.addScope('email');
-  provider.setCustomParameters({ prompt: 'select_account' });
-
   try {
-    console.log('🔵 Google Sign-In: trying popup...');
-    const result = await signInWithPopup(auth, provider);
-    console.log('✅ Google Sign-In: popup success', result.user.displayName);
-    return result.user;
-  } catch (popupError: any) {
-    const code = popupError?.code ?? '';
-    console.warn('⚠️ Popup failed, code:', code, popupError?.message);
-
-    // These codes mean the environment blocks popups → fall back to redirect
-    const shouldFallback =
-      code === 'auth/popup-blocked' ||
-      code === 'auth/popup-closed-by-user' ||
-      code === 'auth/cancelled-popup-request' ||
-      code === 'auth/operation-not-supported-in-this-environment';
-
-    if (shouldFallback) {
-      console.log('🔵 Google Sign-In: falling back to redirect...');
-      await signInWithRedirect(auth, provider);
-      return null; // Page will reload; result handled in LoginPage useEffect
+    console.log('🔵 Google Sign-In: Initializing...');
+    console.log('Current hostname:', window.location.hostname);
+    console.log('Firebase auth initialized:', !!auth);
+    const provider = new GoogleAuthProvider();
+    provider.addScope('profile');
+    provider.addScope('email');
+    
+    // Configure custom domain for development
+    const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isDevelopment) {
+      // For localhost development, we need to configure the provider
+      provider.setCustomParameters({
+        'prompt': 'select_account'
+      });
     }
 
-    // Any other error (misconfiguration, network, etc.) — surface it to the UI
-    throw popupError;
+    // Always use redirect to avoid popup blocking issues
+    console.log('🔵 Google Sign-In: Starting redirect...');
+    await signInWithRedirect(auth, provider);
+    console.log('🔵 Google Sign-In: Redirect initiated');
+    return null; // User will be redirected
+  } catch (error) {
+    console.error('❌ Google sign-in error:', error);
+    if (error instanceof Error) {
+      console.error('Error code:', (error as any).code);
+      console.error('Error message:', error.message);
+    }
+    throw error;
   }
 }
 

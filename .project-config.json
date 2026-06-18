@@ -1,0 +1,48 @@
+{
+  "build_command": "pnpm run build",
+  "capabilities": [
+    "db",
+    "server",
+    "user"
+  ],
+  "dev_command": "pnpm run dev",
+  "env_vars": {
+    "DATABASE_URL": "mysql://32y8h2EU2BUhzKT.43434afd1865:T6n5aOiF7s4JVsw30xut@gateway05.us-east-1.prod.aws.tidbcloud.com:4000/caJNdno7UCGz8MCuABbtpL?ssl={\"rejectUnauthorized\":true}"
+  },
+  "experiments": null,
+  "git_remote": {
+    "repo_url": "s3://vida-prod-gitrepo/webdev-git/310519663480765519/caJNdno7UCGz8MCuABbtpL",
+    "access_key_id": "ASIAZV3A2ECZGG57JULT",
+    "secret_access_key": "7R8hmCLyRaDIgVJO3etBmoULe7Qe5NxEG26RV7V8",
+    "session_token": "IQoJb3JpZ2luX2VjEM7//////////wEaCXVzLWVhc3QtMSJGMEQCIFHkgAw0YfaeFzNYST702cvIZST/lt6zyJyqIaEN0JpDAiACopI3OY4qnAZGyXk3EjO/C2yIEQwNTJtgU93FEdIsqCr+AwiW//////////8BEAQaDDY2NTM4NjA5ODg2NiIMTdrBdopS8u9CE/kAKtIDwQgMB6Aq7Axl4QCdatDiAEZLiDLcnI4pyOqIrSWl8zsx6vlH5rRd2YuwSVVTGIx0oCP8lt54zuNfCGTeck1Ixfl3n1DMlHz24IfrcW5aVdBgTOpvkqFAPzSIGdfO3s1e1PeUW0gUUjCLRMAWifSCyaNq4yMn3yalzVy0+ZyogmWw4CVT3AYd2/5LAMi8xRumA3VCILrAl9FidVDFBF6VLuM7aELslPR23giEeoW/YjC7Jsa/Pd6XJnhohTfADSVqVcy+3SKgYJI8ZKi4F6wcarVLoUOVd+DP+ciOnml87Nz4GtbXg2i4X3tFqnQF9WNJ5YQ9ak7Fb17A3J9K9bX8kX8bEz/w6w9d2qq4Rf8A7Sct7xOub5gIEu5ezfCZMDONcl4gsp7pgKeJZJ93C4yZSfVCRG4YfPcD5HhnnGwKY8aPqUDvAu76XmwBqTchHe6qmAn45LJrIgMVRLVcbspnvLSs2GFth6vXY8VU4Whft24QCu9dFPNXP0OfCUMJzeTPd2okZF3DXGKW/wurIm9dWiLuXtJvxBdq5wdPQcstXp5LUHeHUd/EMBfDLHMlcJS1KWuUHsu+elCT+NETw3E/+P3VwHxbWbajJ1Brd6/ezmLWJzCTnczRBjqeAULSl0OZbrzHOo8v6vY9l2ROQgHiQ14B6Z8uInyFRq4CRhC7AcMPIxAWF3JAGRY7xT4yCZe5eJb2UlrKJ/sG1w+TnRaJv4sV/OFRBgEz4aqYGAJLjdXYW8tsK6dqqcEb+bqkowWfWt2jgNnqCWmDAvpfexuWusdi4zlvKWd7STuJT0JvXNPRHnqbUxJilL4DGmOA/7FkhOloULsSA9re",
+    "expiration": "2026-06-18T09:16:03.000Z"
+  },
+  "name": "calisthenics-app",
+  "path": "/home/ubuntu/calisthenics-app",
+  "port": 3000,
+  "secrets": {
+    "BUILT_IN_FORGE_API_KEY": "VTm3yUk8RaHNpBwWdUV6cX",
+    "BUILT_IN_FORGE_API_URL": "https://forge.manus.ai",
+    "GROQ_API_KEY": "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",
+    "JWT_SECRET": "CRSPWYgRm2uSNTRMakU5q8",
+    "OAUTH_SERVER_URL": "https://api.manus.im",
+    "OWNER_NAME": "Ioannis Liosis",
+    "OWNER_OPEN_ID": "WgSNghWtHne53QKtzNLQxc",
+    "VITE_ANALYTICS_ENDPOINT": "https://manus-analytics.com",
+    "VITE_ANALYTICS_WEBSITE_ID": "aa8b798b-4955-41c2-b39d-2ed2a879c2df",
+    "VITE_APP_ID": "caJNdno7UCGz8MCuABbtpL",
+    "VITE_APP_LOGO": "https://files.manuscdn.com/user_upload_by_module/web_dev_logo/310519663480765519/BSYMrCqRyijHXSQv.png",
+    "VITE_APP_TITLE": "CallistheniX – Your Personal Calisthenics Trainer",
+    "VITE_FIREBASE_API_KEY": "AIzaSyAoXRGEe5X32rbGH-iWwkKgDaEYIOVo4p4",
+    "VITE_FIREBASE_APP_ID": "1:236823176042:web:3b18c06632d76b67237b13",
+    "VITE_FIREBASE_AUTH_DOMAIN": "callisthenix-a7431.firebaseapp.com",
+    "VITE_FIREBASE_MESSAGING_SENDER_ID": "236823176042",
+    "VITE_FIREBASE_PROJECT_ID": "callisthenix-a7431",
+    "VITE_FIREBASE_STORAGE_BUCKET": "callisthenix-a7431.firebasestorage.app",
+    "VITE_FRONTEND_FORGE_API_KEY": "NuP8XPMez5ykyV59AtvXUF",
+    "VITE_FRONTEND_FORGE_API_URL": "https://forge.manus.ai",
+    "VITE_OAUTH_PORTAL_URL": "https://manus.im"
+  },
+  "template_id": "web-db-user",
+  "test_command": "pnpm test"
+}

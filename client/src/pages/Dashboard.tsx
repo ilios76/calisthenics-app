@@ -7,7 +7,7 @@ import { useUser } from '@/contexts/UserContext';
 import { getRecommendedPrograms, getDietPlan, calculateBMI, getBMICategory, getGoalLabel } from '@/lib/data';
 import { Flame, Zap, Target, ChevronRight, Play, Utensils, TrendingUp, AlertCircle, ChevronLeft } from 'lucide-react';
 import { RewardedAdWidget } from '@/components/RewardedAdWidget';
-
+import { WorkoutCalendar } from '@/components/WorkoutCalendar';
 import { loseWeightWeekly, gainMuscleWeekly, staySlimWeekly } from '@/lib/weeklyMeals';
 
 const WORKOUT_BG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/workout-bg-4n6t43em9tdbWJH7YCcGcZ.webp';
@@ -219,7 +219,10 @@ export default function DashboardPage() {
                         ))}
                       </div>
 
-
+                  {/* Workout Calendar */}
+                  <div className="mb-6 pt-4" style={{ borderTop: '1px solid oklch(1 0 0 / 8%)' }}>
+                    <WorkoutCalendar sessionsPerWeek={topProgram.sessionsPerWeek} />
+                  </div>
 
                   <button
                     className="cx-btn-primary flex items-center gap-2"
