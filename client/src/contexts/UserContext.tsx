@@ -4,6 +4,7 @@
 // ============================================================
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { Goal, Sex, WorkoutProgram, DietPlan } from '@/lib/data';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface UserProfile {
   name: string;
@@ -44,19 +45,38 @@ const UserContext = createContext<UserContextType | null>(null);
 const STORAGE_KEY = 'callisthenix_user';
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
+  const { userProfile: authUserProfile } = useAuth();
   const [profile, setProfileState] = useState<UserProfile | null>(null);
   const [selectedProgram, setSelectedProgram] = useState<WorkoutProgram | null>(null);
   const [activeSession, setActiveSession] = useState<WorkoutSession | null>(null);
   const [completedSessions, setCompletedSessions] = useState(0);
   const [currentView, setCurrentView] = useState<AppView>('onboarding');
 
-  // Load from localStorage on mount
+  // Sync with AuthContext userProfile
+  useEffect(() => {
+    if (authUserProfile) {
+      // Convert AuthContext profile to UserProfile format
+      const userProfile: UserProfile = {
+        name: authUserProfile.name || '',
+        sex: authUserProfile.sex as Sex,
+        age: authUserProfile.age || 0,
+        weight: authUserProfile.weight || 0,
+        height: authUserProfile.height || 0,
+        goal: authUserProfile.goal as Goal,
+        fitnessLevel: authUserProfile.fitnessLevel || 'beginner',
+      };
+      setProfileState(userProfile);
+      setCurrentView('dashboard');
+    }
+  }, [authUserProfile]);
+
+  // Load from localStorage on mount (fallback)
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const data = JSON.parse(stored);
-        if (data.profile) {
+        if (data.profile && !authUserProfile) {
           setProfileState(data.profile);
           setCurrentView('dashboard');
         }
@@ -66,7 +86,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         }
       }
     } catch {}
-  }, []);
+  }, [authUserProfile]);
 
   const setProfile = (p: UserProfile) => {
     setProfileState(p);
@@ -74,7 +94,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...existing, profile: p }));
     } catch {}
-    setCurrentView('dashboard');
+    // Don't change view here - let AppShell handle it
   };
 
   return (
@@ -89,7 +109,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       setCompletedSessions,
       currentView,
       setCurrentView,
-      hasProfile: !!profile,
+      hasProfile: !!profile || !!authUserProfile,
     }}>
       {children}
     </UserContext.Provider>

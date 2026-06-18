@@ -7,12 +7,12 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { updateUserProfile } from '@/services/firebaseAuth';
-import { useUser } from '@/contexts/UserContext';
+import { useUser, type UserProfile } from '@/contexts/UserContext';
 import { toast } from 'sonner';
 
 export const OnboardingProfile: React.FC = () => {
   const { user } = useAuth();
-  const { setCurrentView, setHasProfile } = useUser();
+  const { setProfile, setCurrentView } = useUser();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     age: 25,
@@ -49,16 +49,37 @@ export const OnboardingProfile: React.FC = () => {
         goal: formData.goal,
       });
 
+      // Update local profile state
+      const newProfile: UserProfile = {
+        name: user.displayName || '',
+        age: formData.age,
+        weight: formData.weight,
+        height: formData.height,
+        sex: formData.sex as 'male' | 'female',
+        goal: formData.goal,
+        fitnessLevel: 'beginner',
+      };
+      setProfile(newProfile);
+
       toast.success('Profile created successfully!');
-      setHasProfile(true);
-      setCurrentView('dashboard');
     } catch (error) {
       console.error('Profile update error:', error);
       toast.error('Failed to save profile. Please try again.');
+      setLoading(false);
     } finally {
       setLoading(false);
     }
   };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
+        <div className="text-center">
+          <p className="text-muted-foreground">Please sign in to continue</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
@@ -76,7 +97,7 @@ export const OnboardingProfile: React.FC = () => {
         {/* User Info Display */}
         <div className="bg-card border border-border rounded-lg p-4 mb-6">
           <p className="text-sm text-muted-foreground">Signed in as</p>
-          <p className="font-semibold">{user?.displayName || user?.email}</p>
+          <p className="font-semibold">{user.displayName || user.email}</p>
         </div>
 
         {/* Form */}
