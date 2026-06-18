@@ -1419,6 +1419,7 @@ export default function ComponentsShowcase() {
                       "How to use tRPC?",
                       "Best practices for web development",
                     ]}
+                    coachAvatarGif="/manus-storage/coach-speaking_e42bcd64.gif"
                   />
                 </div>
               </CardContent>
