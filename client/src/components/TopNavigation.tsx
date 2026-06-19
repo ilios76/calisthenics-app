@@ -119,6 +119,9 @@ export function TopNavigation() {
                 <Menu size={14} />
               </button>
               <div className="absolute left-0 mt-0 w-48 bg-popover border border-border rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                <button onClick={() => setCurrentView('progress')} className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" /> View Progress
+                </button>
                 <button onClick={() => setCurrentView('programs')} className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2">
                   <Zap className="w-4 h-4" /> Browse Programs
                 </button>
@@ -207,6 +210,16 @@ export function TopNavigation() {
                     >
                       <Camera className="w-4 h-4" />
                       Before/After Challenge
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCurrentView('subscription');
+                        setProfileMenuOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-accent flex items-center gap-2"
+                    >
+                      <Zap className="w-4 h-4" />
+                      Upgrade to Pro
                     </button>
                     <button
                       onClick={() => {
