@@ -1,8 +1,7 @@
 // ============================================================
 // CallistheniX – AI Coach Button
-// Floating button with "AI COACH" label and microphone icon
+// Floating button with AI Coach circular badge design
 // ============================================================
-import { Mic } from 'lucide-react';
 import { useState } from 'react';
 
 interface AICoacButtonProps {
@@ -15,54 +14,44 @@ export const AICoacButton: React.FC<AICoacButtonProps> = ({ onClick, isActive = 
 
   return (
     <div className="relative">
-      {/* Label background */}
-      <div
-        className="absolute -top-12 left-1/2 transform -translate-x-1/2 px-3 py-1 rounded-full whitespace-nowrap transition-all duration-300"
-        style={{
-          background: 'oklch(0.68 0.18 142)',
-          color: 'oklch(0.10 0.005 285)',
-          fontSize: '0.7rem',
-          fontFamily: 'Barlow Condensed, sans-serif',
-          fontWeight: 700,
-          letterSpacing: '1px',
-          textTransform: 'uppercase',
-          opacity: isHovered ? 1 : 0.8,
-          pointerEvents: 'none',
-        }}
-      >
-        AI COACH
-      </div>
-
-      {/* Main button */}
+      {/* Main button with AI Coach badge image */}
       <button
         onClick={onClick}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className="flex items-center justify-center rounded-full shadow-lg transition-all duration-300 hover:scale-110 relative"
+        className="flex items-center justify-center rounded-full shadow-lg transition-all duration-300 hover:scale-110 relative overflow-hidden"
         style={{
-          width: '64px',
-          height: '64px',
-          background: isActive 
-            ? 'oklch(0.68 0.18 142)' 
-            : 'oklch(0.68 0.18 142 / 80%)',
-          border: '2px solid oklch(0.68 0.18 142)',
-          color: 'oklch(0.10 0.005 285)',
+          width: '120px',
+          height: '120px',
+          background: 'transparent',
+          border: 'none',
           boxShadow: isActive 
-            ? '0 0 20px oklch(0.68 0.18 142 / 60%)' 
-            : '0 4px 12px rgba(0, 0, 0, 0.3)',
+            ? '0 0 30px oklch(0.68 0.18 142 / 60%)' 
+            : '0 4px 16px rgba(0, 0, 0, 0.4)',
+          transform: isHovered ? 'scale(1.08)' : 'scale(1)',
         }}
         title="AI Coach - Ask me anything about calisthenics!"
       >
-        <Mic className="w-7 h-7" />
+        {/* AI Coach Badge Image */}
+        <img
+          src="/manus-storage/ai-coach-button_baccde05.png"
+          alt="AI Coach"
+          className="w-full h-full object-contain"
+          style={{
+            filter: isActive ? 'brightness(1.1)' : 'brightness(1)',
+            transition: 'filter 0.3s ease',
+          }}
+        />
       </button>
 
       {/* Pulse animation when active */}
       {isActive && (
         <div
-          className="absolute inset-0 rounded-full animate-pulse"
+          className="absolute inset-0 rounded-full"
           style={{
-            border: '2px solid oklch(0.68 0.18 142)',
+            border: '3px solid oklch(0.68 0.18 142)',
             animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            pointerEvents: 'none',
           }}
         />
       )}
