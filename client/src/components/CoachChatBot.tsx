@@ -4,8 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Send, X } from "lucide-react";
+import { Loader2, Send, X, Mic, MicOff, MessageSquare } from "lucide-react";
 import { Streamdown } from "streamdown";
+import { voiceService } from "@/services/voiceService";
+import { toast } from "sonner";
 
 interface Message {
   role: "user" | "assistant";
@@ -27,6 +29,9 @@ export function CoachChatBot({ open, onOpenChange }: CoachChatBotProps) {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [useVoice, setUseVoice] = useState(true);
+  const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const chatMutation = trpc.coach.chat.useMutation();
 
@@ -37,11 +42,49 @@ export function CoachChatBot({ open, onOpenChange }: CoachChatBotProps) {
     }
   }, [messages]);
 
+  const startVoiceInput = () => {
+    if (!voiceService.isRecognitionSupported()) {
+      toast.error("Voice input not supported in your browser");
+      setUseVoice(false);
+      return;
+    }
+
+    setIsListening(true);
+    setTranscript("");
+    voiceService.updateConfig({
+      onTranscript: (text) => {
+        setTranscript(text);
+      },
+      onError: (error) => {
+        toast.error(`Voice error: ${error}`);
+        setIsListening(false);
+      },
+      onListening: (listening) => {
+        setIsListening(listening);
+      },
+    });
+    voiceService.startListening("el");
+  };
+
+  const stopVoiceInput = () => {
+    voiceService.stopListening();
+    setIsListening(false);
+    if (transcript.trim()) {
+      setInput(transcript);
+      setTranscript("");
+    }
+  };
+
   const handleSendMessage = async () => {
-    if (!input.trim()) return;
+    let messageText = input;
+    if (isListening && transcript.trim()) {
+      messageText = transcript;
+      stopVoiceInput();
+    }
+    if (!messageText.trim()) return;
 
     // Add user message
-    const userMessage: Message = { role: "user", content: input };
+    const userMessage: Message = { role: "user", content: messageText };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
@@ -70,6 +113,7 @@ export function CoachChatBot({ open, onOpenChange }: CoachChatBotProps) {
         ]);
       }
     } catch (error) {
+      if (isListening) stopVoiceInput();
       console.error("Chat error:", error);
       setMessages((prev) => [
         ...prev,
@@ -81,6 +125,11 @@ export function CoachChatBot({ open, onOpenChange }: CoachChatBotProps) {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const toggleVoiceMode = () => {
+    if (isListening) stopVoiceInput();
+    setUseVoice(!useVoice);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -147,22 +196,92 @@ export function CoachChatBot({ open, onOpenChange }: CoachChatBotProps) {
 
         {/* Input Area */}
         <div className="border-t border-slate-700 p-4 bg-slate-900">
-          <div className="flex gap-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Ask me anything..."
-              disabled={isLoading}
-              className="bg-slate-800 border-slate-700 text-white placeholder-slate-500 focus:border-green-500 focus:ring-green-500"
-            />
-            <Button
-              onClick={handleSendMessage}
-              disabled={isLoading || !input.trim()}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
+          <div className="flex flex-col gap-3">
+            {/* Voice/Text Toggle */}
+            <div className="flex gap-2">
+              <Button
+                onClick={toggleVoiceMode}
+                variant="outline"
+                size="sm"
+                className={`flex-1 ${
+                  useVoice
+                    ? "bg-green-600 border-green-500 text-white hover:bg-green-700"
+                    : "bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600"
+                }`}
+              >
+                {useVoice ? (
+                  <>
+                    <Mic className="w-4 h-4 mr-2" />
+                    Voice
+                  </>
+                ) : (
+                  <>
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Text
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {/* Voice Input */}
+            {useVoice ? (
+              <div className="flex gap-2">
+                <Button
+                  onClick={isListening ? stopVoiceInput : startVoiceInput}
+                  disabled={isLoading}
+                  className={`flex-1 ${
+                    isListening
+                      ? "bg-red-600 hover:bg-red-700"
+                      : "bg-green-600 hover:bg-green-700"
+                  } text-white`}
+                >
+                  {isListening ? (
+                    <>
+                      <MicOff className="w-4 h-4 mr-2" />
+                      Stop
+                    </>
+                  ) : (
+                    <>
+                      <Mic className="w-4 h-4 mr-2" />
+                      Speak
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={handleSendMessage}
+                  disabled={isLoading || (!input.trim() && !transcript.trim())}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : (
+              /* Text Input */
+              <div className="flex gap-2">
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Ask me anything..."
+                  disabled={isLoading}
+                  className="bg-slate-800 border-slate-700 text-white placeholder-slate-500 focus:border-green-500 focus:ring-green-500"
+                />
+                <Button
+                  onClick={handleSendMessage}
+                  disabled={isLoading || !input.trim()}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <Send className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+
+            {/* Transcript Display */}
+            {isListening && transcript && (
+              <div className="text-xs text-slate-400 px-3 py-2 bg-slate-800 rounded border border-slate-700">
+                <span className="text-green-400 font-semibold">Hearing:</span> {transcript}
+              </div>
+            )}
           </div>
         </div>
       </DialogContent>
