@@ -11,7 +11,7 @@ import { Menu, X, LogOut, Settings, User, LogIn, Trophy, Camera, Zap, Utensils, 
 import { useAuth } from '@/contexts/AuthContext';
 import { signInWithGoogle, signInWithApple } from '@/services/firebaseAuth';
 import { toast } from 'sonner';
-import { FloatingMusicWidget } from '@/components/FloatingMusicWidget';
+
 import { WorkoutCalendar } from '@/components/WorkoutCalendar';
 
 export function TopNavigation() {
@@ -346,13 +346,6 @@ export function TopNavigation() {
               About
             </button>
             
-            {/* Music Widget in Menu */}
-            <div className="px-4 py-3 border-t border-border">
-              <div className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-2">
-                <Music className="w-4 h-4" /> Workout Music
-              </div>
-              <FloatingMusicWidget />
-            </div>
             
             {/* Calendar in Menu */}
             {user && hasProfile && (
