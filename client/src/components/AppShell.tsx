@@ -18,7 +18,6 @@ import ProfilePage    from '@/pages/Profile';
 import ProgressPage   from '@/pages/Progress';
 import ProgressDashboard from '@/pages/ProgressDashboard';
 import SettingsPage   from '@/pages/Settings';
-import SubscriptionPage from '@/pages/Subscription';
 import AchievementsPage from '@/pages/Achievements';
 import StatisticsPage from '@/pages/Statistics';
 import { BeforeAfterChallenge } from '@/pages/BeforeAfterChallenge';
@@ -63,7 +62,6 @@ export default function AppShell() {
         {currentView === 'challenge'     && <BeforeAfterChallenge />}
         {currentView === 'settings'      && <SettingsPage />}
         {currentView === 'stats'         && <StatisticsPage />}
-        {currentView === 'subscription'  && <SubscriptionPage />}
       </main>
     </div>
   );
