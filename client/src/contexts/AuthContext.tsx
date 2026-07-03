@@ -9,6 +9,7 @@ import type { UserProfile } from '@/services/firebaseAuth';
 import {
   onAuthStateChange,
   getUserProfile,
+  createOrUpdateUserProfile,
   initializePersistence,
   signOutUser,
 } from '@/services/firebaseAuth';
@@ -44,7 +45,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setError(null);
 
         if (authUser) {
-          // Fetch user profile
+          // Upsert profile in Firestore (handles first-time Google sign-in)
+          const provider = authUser.providerData[0]?.providerId.includes('apple') ? 'apple' : 'google';
+          await createOrUpdateUserProfile(authUser, provider).catch(console.error);
+          // Fetch updated profile
           const profile = await getUserProfile(authUser.uid);
           setUserProfile(profile);
         } else {

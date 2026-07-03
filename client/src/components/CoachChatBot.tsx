@@ -15,9 +15,10 @@ interface Message {
 interface CoachChatBotProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  embedded?: boolean; // when true, renders inline (no Dialog wrapper)
 }
 
-export function CoachChatBot({ open, onOpenChange }: CoachChatBotProps) {
+export function CoachChatBot({ open, onOpenChange, embedded = false }: CoachChatBotProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -90,25 +91,9 @@ export function CoachChatBot({ open, onOpenChange }: CoachChatBotProps) {
     }
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full max-w-md h-[600px] flex flex-col p-0 gap-0 bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-700">
-        <DialogHeader className="border-b border-slate-700 px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-bold text-sm">
-                💪
-              </div>
-              <DialogTitle className="text-white">CallistheniX Coach</DialogTitle>
-            </div>
-            <button
-              onClick={() => onOpenChange(false)}
-              className="text-slate-400 hover:text-white transition"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </DialogHeader>
+  // Shared inner content (used in both embedded and dialog modes)
+  const chatContent = (
+    <>
 
         {/* Messages Area */}
         <ScrollArea className="flex-1 px-4 py-4">
@@ -165,6 +150,21 @@ export function CoachChatBot({ open, onOpenChange }: CoachChatBotProps) {
             </Button>
           </div>
         </div>
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <div className="flex flex-col h-full" style={{ minHeight: '400px' }}>
+        {chatContent}
+      </div>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="w-full max-w-md h-[600px] flex flex-col p-0 gap-0 bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-700">
+        {chatContent}
       </DialogContent>
     </Dialog>
   );

@@ -20,48 +20,10 @@ import { useEffect } from "react";
 import { mealNotificationService } from "./services/mealNotificationService";
 import { CoachWidget } from "./components/CoachWidget";
 
-import { onAuthStateChanged } from "firebase/auth";
-import { auth, createOrUpdateUserProfile } from "./services/firebaseAuth";
+// Auth state is handled entirely by AuthContext — no duplicate listener needed here
 import { useUser } from "./contexts/UserContext";
 
 function AppContent() {
-  const { setCurrentView } = useUser();
-
-  useEffect(() => {
-    // Listen to auth state changes (handles redirect results automatically)
-    console.log('🔵 App.tsx: Setting up auth state listener...');
-    
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      try {
-        if (user) {
-          console.log('✅ Auth state changed - User signed in:', user.email);
-          console.log('Provider data:', user.providerData);
-          console.log('🔵 Detecting auth provider...');
-          
-          const authProvider = user.providerData[0]?.providerId.includes('apple') ? 'apple' : 'google';
-          console.log('Auth provider detected:', authProvider);
-          
-          console.log('🔵 Creating/updating user profile...');
-          await createOrUpdateUserProfile(user, authProvider);
-          console.log('✅ User profile created/updated');
-          
-          // Don't force onboarding - let AppShell handle the view based on hasProfile
-          console.log('✅ Auth state listener complete - AppShell will handle view routing');
-        } else {
-          console.log('ℹ️ Auth state changed - No user signed in');
-        }
-      } catch (error) {
-        console.error('❌ Auth state handler error:', error);
-        if (error instanceof Error) {
-          console.error('Error message:', error.message);
-          console.error('Error code:', (error as any).code);
-        }
-      }
-    });
-
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
-  }, [setCurrentView]);
 
   useEffect(() => {
     // Initialize meal notifications on app load
