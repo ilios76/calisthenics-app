@@ -52,22 +52,36 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [completedSessions, setCompletedSessions] = useState(0);
   const [currentView, setCurrentView] = useState<AppView>('onboarding');
 
-  // Sync with AuthContext userProfile
+  // Sync with AuthContext userProfile (Firebase)
   useEffect(() => {
-    if (authUserProfile) {
-      // Convert AuthContext profile to UserProfile format
-      const userProfile: UserProfile = {
-        name: authUserProfile.name || '',
-        sex: authUserProfile.sex as Sex,
-        age: authUserProfile.age || 0,
-        weight: authUserProfile.weight || 0,
-        height: authUserProfile.height || 0,
-        goal: authUserProfile.goal as Goal,
-        fitnessLevel: authUserProfile.fitnessLevel || 'beginner',
-      };
-      setProfileState(userProfile);
-      setCurrentView('dashboard');
-    }
+    if (!authUserProfile) return;
+
+    // Check if the Firebase profile has enough data to skip onboarding.
+    // A "complete" profile has age > 0 (set during onboarding).
+    // New Google sign-ins get age: 0 from createOrUpdateUserProfile defaults,
+    // so they correctly land on onboarding to fill in their details.
+    const isComplete = (authUserProfile.age ?? 0) > 0;
+
+    const userProfile: UserProfile = {
+      // Firebase stores displayName, not name
+      name: (authUserProfile as any).displayName || (authUserProfile as any).name || '',
+      sex: (authUserProfile.sex as Sex) || 'male',
+      age: authUserProfile.age || 0,
+      weight: authUserProfile.weight || 0,
+      height: authUserProfile.height || 0,
+      goal: (authUserProfile.goal as Goal) || 'stay_slim',
+      // fitnessLevel is a local concept — read from localStorage if not in Firestore
+      fitnessLevel: (authUserProfile as any).fitnessLevel || (() => {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          return stored ? JSON.parse(stored)?.profile?.fitnessLevel || 'beginner' : 'beginner';
+        } catch { return 'beginner'; }
+      })(),
+    };
+
+    setProfileState(userProfile);
+    // Only go to dashboard if the profile is complete
+    if (isComplete) setCurrentView('dashboard');
   }, [authUserProfile]);
 
   // Load from localStorage on mount (fallback)

@@ -118,6 +118,7 @@ export interface UserProfile {
   updatedAt: Timestamp;
   authProvider: 'google' | 'apple' | 'email';
   lastLoginAt: Timestamp;
+  fitnessLevel?: 'beginner' | 'intermediate' | 'advanced';
   // Google Fit Integration
   googleFitConnected?: boolean;
   googleFitAccessToken?: string;
@@ -290,7 +291,7 @@ export async function createOrUpdateUserProfile(
 
       userProfile = userSnap.data() as UserProfile;
     } else {
-      // Create new user profile
+      // Create new user profile — age: 0 signals onboarding is not complete
       userProfile = {
         uid: firebaseUser.uid,
         email: firebaseUser.email || '',
@@ -299,9 +300,10 @@ export async function createOrUpdateUserProfile(
         tier: 'free',
         goal: 'stay_slim',
         sex: 'male',
-        weight: 70,
-        age: 25,
-        height: 175,
+        weight: 0,
+        age: 0,        // 0 = onboarding not completed yet
+        height: 0,
+        fitnessLevel: 'beginner',
         createdAt: serverTimestamp() as Timestamp,
         updatedAt: serverTimestamp() as Timestamp,
         authProvider,

@@ -3,7 +3,6 @@
 // ============================================================
 
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -11,41 +10,65 @@ import { Label } from '@/components/ui/label';
 import {
   signInWithGoogle,
   initializePersistence,
+  createOrUpdateUserProfile,
 } from '@/services/firebaseAuth';
 import { getRedirectResult } from 'firebase/auth';
 import { auth } from '@/services/firebaseAuth';
+import { useUser } from '@/contexts/UserContext';
 
 export function LoginPage() {
-  const [, navigate] = useLocation();
+  const { setCurrentView } = useUser();
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Handle redirect result on page load
+  // Handle redirect result when Google sends the user back
   useEffect(() => {
+    let cancelled = false;
     const handleRedirectResult = async () => {
       try {
+        setIsLoading(true);
         const result = await getRedirectResult(auth);
+        if (cancelled) return;
+
         if (result?.user) {
-          console.log('✓ Successfully signed in after redirect:', result.user.displayName);
-          navigate('/setup');
+          console.log('✓ Redirect sign-in success:', result.user.displayName);
+          const provider = result.user.providerData[0]?.providerId.includes('apple') ? 'apple' : 'google';
+          await createOrUpdateUserProfile(result.user, provider);
+          // UserContext will detect the auth state change and route automatically.
+          // But we also explicitly go to onboarding for new users — UserContext
+          // will redirect to dashboard if profile is already complete.
+          setCurrentView('onboarding');
         }
-      } catch (err) {
+      } catch (err: any) {
+        if (cancelled) return;
+        const code = err?.code ?? '';
+        // Ignore "no redirect pending" — happens on every normal page load
+        if (code === 'auth/no-auth-event' || code === 'auth/redirect-cancelled-by-user') return;
         console.error('Redirect result error:', err);
         setError('Failed to complete sign-in. Please try again.');
+      } finally {
+        if (!cancelled) setIsLoading(false);
       }
     };
-
     handleRedirectResult();
-  }, [navigate]);
+    return () => { cancelled = true; };
+  }, []);
 
   async function handleGoogleSignIn() {
     try {
       setIsLoading(true);
       setError(null);
       await initializePersistence(rememberMe);
-      await signInWithGoogle();
-      // User will be redirected to Google, then back to this page
+      // signInWithGoogle uses popup first, redirect as fallback
+      const user = await signInWithGoogle();
+      // If popup succeeded (user returned immediately)
+      if (user) {
+        const provider = user.providerData[0]?.providerId.includes('apple') ? 'apple' : 'google';
+        await createOrUpdateUserProfile(user, provider);
+        setCurrentView('onboarding'); // UserContext will upgrade to 'dashboard' if profile complete
+      }
+      // If null → redirect flow initiated, page will reload and useEffect handles it
     } catch (err) {
       console.error('Google sign-in error:', err);
       setError('Failed to sign in with Google. Please try again.');
