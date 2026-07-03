@@ -13,13 +13,13 @@ import { MusicProvider } from "./contexts/MusicContext";
 import { WorkoutCompletionProvider } from "./contexts/WorkoutCompletionContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AppShell from "./components/AppShell";
-import { FloatingMusicWidget } from "./components/FloatingMusicWidget";
+
 import { CoachProvider } from "./contexts/CoachContext";
 import { ChallengeProvider } from "./contexts/ChallengeContext";
 import { useEffect } from "react";
 import { mealNotificationService } from "./services/mealNotificationService";
 import { CoachWidget } from "./components/CoachWidget";
-import { VoiceCoachButton } from "./components/VoiceCoachButton";
+
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, createOrUpdateUserProfile } from "./services/firebaseAuth";
 import { useUser } from "./contexts/UserContext";
@@ -86,7 +86,6 @@ function AppContent() {
       />
       <AppShell />
       <CoachWidget position="bottom-right" />
-      <VoiceCoachButton />
     </>
   );
 }

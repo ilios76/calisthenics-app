@@ -340,3 +340,4 @@
 .animate-cx-slide-up    { animation: cx-slide-in-up 0.35s ease forwards; }
 .animate-cx-fade        { animation: cx-fade-in 0.3s ease forwards; }
 .animate-cx-pulse       { animation: cx-pulse-scale 1s ease-in-out infinite; }
+.animate-fadeIn         { animation: cx-fade-in 0.4s ease forwards; }

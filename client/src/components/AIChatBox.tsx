@@ -57,6 +57,11 @@ export type AIChatBoxProps = {
    * Click to send directly
    */
   suggestedPrompts?: string[];
+
+  /**
+   * Coach avatar GIF URL to display when AI is responding
+   */
+  coachAvatarGif?: string;
 };
 
 /**
@@ -119,6 +124,7 @@ export function AIChatBox({
   height = "600px",
   emptyStateMessage = "Start a conversation with AI",
   suggestedPrompts,
+  coachAvatarGif,
 }: AIChatBoxProps) {
   const [input, setInput] = useState("");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -247,7 +253,7 @@ export function AIChatBox({
                     }
                   >
                     {message.role === "assistant" && (
-                      <div className="size-8 shrink-0 mt-1 rounded-full bg-primary/10 flex items-center justify-center">
+                      <div className="size-8 shrink-0 mt-1 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <Sparkles className="size-4 text-primary" />
                       </div>
                     )}
@@ -272,7 +278,7 @@ export function AIChatBox({
                     </div>
 
                     {message.role === "user" && (
-                      <div className="size-8 shrink-0 mt-1 rounded-full bg-secondary flex items-center justify-center">
+                      <div className="size-8 shrink-0 mt-1 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
                         <User className="size-4 text-secondary-foreground" />
                       </div>
                     )}
@@ -289,12 +295,24 @@ export function AIChatBox({
                       : undefined
                   }
                 >
-                  <div className="size-8 shrink-0 mt-1 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Sparkles className="size-4 text-primary" />
-                  </div>
-                  <div className="rounded-lg bg-muted px-4 py-2.5">
-                    <Loader2 className="size-4 animate-spin text-muted-foreground" />
-                  </div>
+                  {coachAvatarGif ? (
+                    <div className="shrink-0 mt-1 flex items-center justify-center animate-fadeIn">
+                      <img
+                        src={coachAvatarGif}
+                        alt="Coach speaking"
+                        className="w-32 h-40 object-cover rounded-lg"
+                      />
+                    </div>
+                  ) : (
+                    <div className="size-8 shrink-0 mt-1 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Sparkles className="size-4 text-primary" />
+                    </div>
+                  )}
+                  {!coachAvatarGif && (
+                    <div className="rounded-lg bg-muted px-4 py-2.5">
+                      <Loader2 className="size-4 animate-spin text-muted-foreground" />
+                    </div>
+                  )}
                 </div>
               )}
             </div>

@@ -4,7 +4,7 @@
 // ============================================================
 
 import { useState, useEffect } from 'react';
-import { Moon, Sun, Bell, Clock } from 'lucide-react';
+import { Moon, Sun, Bell, Clock, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -13,6 +13,7 @@ import { useI18n } from '@/contexts/I18nContext';
 import { notificationService } from '@/lib/notificationService';
 import { reminderScheduler, WorkoutReminder } from '@/lib/reminderScheduler';
 import { toast } from 'sonner';
+import * as pushNotifications from '@/services/pushNotifications';
 
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -22,6 +23,9 @@ export default function Settings() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(notificationService.isEnabled());
   const [reminders, setReminders] = useState<WorkoutReminder[]>(reminderScheduler.getReminders());
   const [showReminderForm, setShowReminderForm] = useState(false);
+  const [pushNotificationsEnabled, setPushNotificationsEnabled] = useState(pushNotifications.arePushNotificationsEnabled());
+  const [reminderHour, setReminderHour] = useState(8);
+  const [reminderMinute, setReminderMinute] = useState(0);
   const [newReminder, setNewReminder] = useState({
     programName: '',
     dayOfWeek: 1,
@@ -77,6 +81,29 @@ export default function Settings() {
         enabled: !reminder.enabled,
       });
       setReminders(reminderScheduler.getReminders());
+    }
+  };
+
+  const handleEnablePushNotifications = async () => {
+    const granted = await pushNotifications.enablePushNotifications();
+    if (granted) {
+      setPushNotificationsEnabled(true);
+      toast.success('Push notifications enabled! Daily reminders at ' + reminderHour.toString().padStart(2, '0') + ':' + reminderMinute.toString().padStart(2, '0'));
+    } else {
+      toast.error('Push notification permission denied');
+    }
+  };
+
+  const handleDisablePushNotifications = () => {
+    pushNotifications.disablePushNotifications();
+    setPushNotificationsEnabled(false);
+    toast.success('Push notifications disabled');
+  };
+
+  const handleUpdateReminderTime = () => {
+    if (pushNotificationsEnabled) {
+      pushNotifications.scheduleWorkoutReminder(reminderHour, reminderMinute);
+      toast.success('Reminder time updated to ' + reminderHour.toString().padStart(2, '0') + ':' + reminderMinute.toString().padStart(2, '0'));
     }
   };
 
@@ -144,6 +171,80 @@ export default function Settings() {
               <p>✓ Achievement notifications</p>
               <p>✓ Personal record alerts</p>
               <p>✓ Streak milestones</p>
+            </div>
+          )}
+        </Card>
+
+        {/* Push Notifications Section */}
+        <Card className="p-6 border border-border bg-card">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Zap className="w-6 h-6 text-primary" />
+              <div>
+                <h3 className="font-semibold text-lg">Push Notifications</h3>
+                <p className="text-sm text-muted-foreground">
+                  {pushNotificationsEnabled ? 'Enabled - Daily reminders active' : 'Disabled'}
+                </p>
+              </div>
+            </div>
+            {!pushNotificationsEnabled ? (
+              <Button
+                onClick={handleEnablePushNotifications}
+                className="bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                Enable
+              </Button>
+            ) : (
+              <Button
+                onClick={handleDisablePushNotifications}
+                variant="outline"
+                className="text-destructive"
+              >
+                Disable
+              </Button>
+            )}
+          </div>
+
+          {pushNotificationsEnabled && (
+            <div className="space-y-4">
+              <div className="p-4 bg-muted rounded-lg">
+                <p className="text-sm font-medium mb-3">Daily Reminder Time</p>
+                <div className="flex gap-3 items-center">
+                  <div className="flex-1">
+                    <label className="text-xs text-muted-foreground">Hour</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="23"
+                      value={reminderHour}
+                      onChange={(e) => setReminderHour(Math.max(0, Math.min(23, parseInt(e.target.value) || 0)))}
+                      className="w-full px-3 py-2 bg-background border border-border rounded text-foreground"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-xs text-muted-foreground">Minute</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="59"
+                      value={reminderMinute}
+                      onChange={(e) => setReminderMinute(Math.max(0, Math.min(59, parseInt(e.target.value) || 0)))}
+                      className="w-full px-3 py-2 bg-background border border-border rounded text-foreground"
+                    />
+                  </div>
+                  <Button
+                    onClick={handleUpdateReminderTime}
+                    className="mt-5 bg-primary text-primary-foreground hover:bg-primary/90"
+                  >
+                    Update
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p>✓ Daily workout reminders</p>
+                <p>✓ Streak milestone notifications</p>
+                <p>✓ Motivation messages</p>
+              </div>
             </div>
           )}
         </Card>
