@@ -181,38 +181,32 @@ export async function initializePersistence(rememberMe: boolean = true): Promise
 }
 
 /**
- * Sign in with Google
+ * Sign in with Google.
+ * Uses popup (shows account picker immediately).
+ * Falls back to redirect only if popup is blocked.
  */
 export async function signInWithGoogle(): Promise<User | null> {
-  try {
-    console.log('🔵 Google Sign-In: Initializing...');
-    console.log('Current hostname:', window.location.hostname);
-    console.log('Firebase auth initialized:', !!auth);
-    const provider = new GoogleAuthProvider();
-    provider.addScope('profile');
-    provider.addScope('email');
-    
-    // Configure custom domain for development
-    const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (isDevelopment) {
-      // For localhost development, we need to configure the provider
-      provider.setCustomParameters({
-        'prompt': 'select_account'
-      });
-    }
+  const provider = new GoogleAuthProvider();
+  provider.addScope('profile');
+  provider.addScope('email');
+  provider.setCustomParameters({ prompt: 'select_account' });
 
-    // Always use redirect to avoid popup blocking issues
-    console.log('🔵 Google Sign-In: Starting redirect...');
-    await signInWithRedirect(auth, provider);
-    console.log('🔵 Google Sign-In: Redirect initiated');
-    return null; // User will be redirected
-  } catch (error) {
-    console.error('❌ Google sign-in error:', error);
-    if (error instanceof Error) {
-      console.error('Error code:', (error as any).code);
-      console.error('Error message:', error.message);
+  try {
+    const result = await signInWithPopup(auth, provider);
+    return result.user;
+  } catch (popupError: any) {
+    const code = popupError?.code ?? '';
+    const shouldFallback =
+      code === 'auth/popup-blocked' ||
+      code === 'auth/popup-closed-by-user' ||
+      code === 'auth/cancelled-popup-request' ||
+      code === 'auth/operation-not-supported-in-this-environment';
+
+    if (shouldFallback) {
+      await signInWithRedirect(auth, provider);
+      return null; // page will reload; redirect result handled in LoginPage
     }
-    throw error;
+    throw popupError;
   }
 }
 

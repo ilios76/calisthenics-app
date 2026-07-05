@@ -50,7 +50,17 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [selectedProgram, setSelectedProgram] = useState<WorkoutProgram | null>(null);
   const [activeSession, setActiveSession] = useState<WorkoutSession | null>(null);
   const [completedSessions, setCompletedSessions] = useState(0);
-  const [currentView, setCurrentView] = useState<AppView>('onboarding');
+  // Start at onboarding unless localStorage already has a complete profile
+  const [currentView, setCurrentView] = useState<AppView>(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const data = JSON.parse(stored);
+        if (data.profile?.age > 0) return 'dashboard';
+      }
+    } catch {}
+    return 'onboarding';
+  });
 
   // Sync with AuthContext userProfile (Firebase)
   useEffect(() => {
@@ -80,8 +90,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     };
 
     setProfileState(userProfile);
-    // Only go to dashboard if the profile is complete
-    if (isComplete) setCurrentView('dashboard');
+    setCurrentView(isComplete ? 'dashboard' : 'onboarding');
   }, [authUserProfile]);
 
   // Load from localStorage on mount (fallback)
@@ -90,7 +99,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const data = JSON.parse(stored);
-        if (data.profile && !authUserProfile) {
+        if (data.profile?.age > 0 && !authUserProfile) {
           setProfileState(data.profile);
           setCurrentView('dashboard');
         }
@@ -108,7 +117,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...existing, profile: p }));
     } catch {}
-    // Don't change view here - let AppShell handle it
+    setCurrentView('dashboard');
   };
 
   return (
