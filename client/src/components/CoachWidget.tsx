@@ -1,12 +1,12 @@
 // ============================================================
-// CallistheniX – Coach Widget (FIXED v2)
+// CallistheniX – Coach Widget (FIXED v3 - Draggable)
 //
-// The floating AI Coach button now opens a UNIFIED modal that
-// has BOTH voice AND text — not two separate components.
-// Voice tab uses VoiceCoachButton logic inline.
-// Text tab uses CoachChatBot.
+// The floating AI Coach button now:
+// - Opens a UNIFIED modal with BOTH voice AND text modes
+// - Is DRAGGABLE around the screen
+// - Saves position to localStorage
 // ============================================================
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CoachChatBot } from './CoachChatBot';
 import { AICoacButton } from './AICoacButton';
 import { VoiceCoachButton } from './VoiceCoachButton';
@@ -14,24 +14,99 @@ import { X, Mic, MessageSquare } from 'lucide-react';
 
 interface CoachWidgetProps {
   isVisible?: boolean;
-  position?: 'bottom-right' | 'bottom-left';
+}
+
+const STORAGE_KEY = 'coachWidgetPosition';
+
+interface Position {
+  x: number;
+  y: number;
 }
 
 export const CoachWidget: React.FC<CoachWidgetProps> = ({
   isVisible = true,
-  position = 'bottom-right',
 }) => {
-  const [open, setOpen]       = useState(false);
-  const [mode, setMode]       = useState<'voice' | 'text'>('voice');
+  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<'voice' | 'text'>('voice');
+  const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const buttonRef = useRef<HTMLDivElement>(null);
+
+  // Load position from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        setPosition(JSON.parse(saved));
+      } catch {
+        // Default position if parsing fails
+        setPosition({ x: window.innerWidth - 74, y: window.innerHeight - 74 });
+      }
+    } else {
+      // Default: bottom-right corner
+      setPosition({ x: window.innerWidth - 74, y: window.innerHeight - 74 });
+    }
+  }, []);
+
+  // Handle mouse down on button
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
+      setIsDragging(true);
+    }
+  };
+
+  // Handle mouse move
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const newX = e.clientX - dragOffset.x;
+      const newY = e.clientY - dragOffset.y;
+
+      // Constrain to viewport
+      const constrainedX = Math.max(0, Math.min(newX, window.innerWidth - 50));
+      const constrainedY = Math.max(0, Math.min(newY, window.innerHeight - 50));
+
+      setPosition({ x: constrainedX, y: constrainedY });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      // Save position to localStorage
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(position));
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, dragOffset, position]);
 
   if (!isVisible) return null;
 
-  const side = position === 'bottom-right' ? { right: '24px' } : { left: '24px' };
-
   return (
     <>
-      {/* ── Floating Button ───────────────────────────────── */}
-      <div className="fixed z-40 flex items-center justify-center" style={{ ...side, bottom: '24px' }}>
+      {/* ── Draggable Floating Button ───────────────────────────────── */}
+      <div
+        ref={buttonRef}
+        className="fixed z-40 flex items-center justify-center"
+        style={{
+          left: `${position.x}px`,
+          top: `${position.y}px`,
+          cursor: isDragging ? 'grabbing' : 'grab',
+          userSelect: 'none',
+        }}
+        onMouseDown={handleMouseDown}
+      >
         <AICoacButton onClick={() => setOpen(o => !o)} isActive={open} />
       </div>
 
@@ -40,8 +115,8 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
         <div
           className="fixed z-50 flex flex-col"
           style={{
-            ...side,
-            bottom: '160px',
+            left: `${Math.max(12, Math.min(position.x - 155, window.innerWidth - 372))}px`,
+            top: `${Math.max(12, position.y - 400)}px`,
             width: '360px',
             maxHeight: '70vh',
             background: 'oklch(0.14 0.006 285)',
@@ -69,7 +144,7 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
                 className="flex items-center gap-1 px-3 py-1 rounded text-xs font-semibold transition-all"
                 style={{
                   background: mode === 'voice' ? 'oklch(0.68 0.18 142)' : 'transparent',
-                  color:      mode === 'voice' ? 'oklch(0.10 0.005 285)' : 'oklch(0.60 0.008 80)',
+                  color: mode === 'voice' ? 'oklch(0.10 0.005 285)' : 'oklch(0.60 0.008 80)',
                 }}
               >
                 <Mic size={12} /> Voice
@@ -79,7 +154,7 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
                 className="flex items-center gap-1 px-3 py-1 rounded text-xs font-semibold transition-all"
                 style={{
                   background: mode === 'text' ? 'oklch(0.68 0.18 142)' : 'transparent',
-                  color:      mode === 'text' ? 'oklch(0.10 0.005 285)' : 'oklch(0.60 0.008 80)',
+                  color: mode === 'text' ? 'oklch(0.10 0.005 285)' : 'oklch(0.60 0.008 80)',
                 }}
               >
                 <MessageSquare size={12} /> Text
@@ -126,9 +201,9 @@ import { MicOff, Volume2, Loader2 } from 'lucide-react';
 
 function VoiceCoachInline() {
   const [isListening, setIsListening] = useVState(false);
-  const [isSpeaking, setIsSpeaking]   = useVState(false);
-  const [transcript, setTranscript]   = useVState('');
-  const [response, setResponse]       = useVState('');
+  const [isSpeaking, setIsSpeaking] = useVState(false);
+  const [transcript, setTranscript] = useVState('');
+  const [response, setResponse] = useVState('');
   const chatMutation = trpc.coach.chat.useMutation();
 
   useVEffect(() => {
