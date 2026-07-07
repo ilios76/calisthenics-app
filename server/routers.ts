@@ -5,6 +5,7 @@ import { publicProcedure, router } from "./_core/trpc";
 import { coachRouter } from "./routers/coach";
 import { paymentRouter } from "./routers/payments";
 import { streakRouter } from "./routers/streaks";
+import { sharingRouter } from "./routers/sharing";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -12,6 +13,7 @@ export const appRouter = router({
   coach: coachRouter,
   payment: paymentRouter,
   streak: streakRouter,
+  sharing: sharingRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {

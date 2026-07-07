@@ -8,6 +8,7 @@ import { getRecommendedPrograms, getDietPlan, calculateBMI, getBMICategory, getG
 import { Flame, Zap, Target, ChevronRight, Play, Utensils, TrendingUp, AlertCircle, ChevronLeft } from 'lucide-react';
 import { RewardedAdWidget } from '@/components/RewardedAdWidget';
 import { WorkoutCalendar } from '@/components/WorkoutCalendar';
+import { StreakCounter } from '@/components/StreakCounter';
 import { loseWeightWeekly, gainMuscleWeekly, staySlimWeekly } from '@/lib/weeklyMeals';
 
 const WORKOUT_BG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663480765519/caJNdno7UCGz8MCuABbtpL/workout-bg-4n6t43em9tdbWJH7YCcGcZ.webp';
@@ -113,6 +114,11 @@ export default function DashboardPage() {
       </div>
 
       <div className="container pb-16 -mt-4">
+        {/* Streak Counter */}
+        <div className="mb-8">
+          <StreakCounter />
+        </div>
+
         {/* Mental Trigger Banner */}
         <div className="mb-8 p-6 rounded-lg" style={{ background: 'oklch(0.68 0.18 142 / 10%)', border: '1px solid oklch(0.68 0.18 142 / 30%)' }}>
           <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.9rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'oklch(0.68 0.18 142)', marginBottom: '4px' }}>🔥 You are getting close</p>
