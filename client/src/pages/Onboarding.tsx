@@ -15,6 +15,7 @@ import { useState, useEffect } from 'react';
 import { useUser, type UserProfile as LocalUserProfile } from '@/contexts/UserContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { updateUserProfile } from '@/services/firebaseAuth';
+import { trpc } from '@/lib/trpc';
 import type { Goal, Sex } from '@/lib/data';
 import { getGoalDescription } from '@/lib/data';
 import { ChevronRight, ChevronLeft, Dumbbell, Zap, Target, Flame, Hourglass } from 'lucide-react';
@@ -118,7 +119,19 @@ export default function OnboardingPage() {
       // ① Always save locally (used by program/diet recommendation engine)
       setProfile(localProfile);  // also calls setCurrentView('dashboard')
 
-      // ② If the user is authenticated, also persist to Firebase
+      // ② Save to database via tRPC (if authenticated)
+      if (user) {
+        await trpc.profile.updateProfile.mutate({
+          sex: form.sex as Sex,
+          age: parseInt(form.age),
+          weight: parseFloat(form.weight),
+          height: parseFloat(form.height),
+          goal: form.goal as Goal,
+          fitnessLevel: form.fitnessLevel as 'beginner' | 'intermediate' | 'advanced',
+        });
+      }
+
+      // ③ Also persist to Firebase for backward compatibility
       if (user) {
         await updateUserProfile(user.uid, {
           displayName: form.name,

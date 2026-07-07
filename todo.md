@@ -39,9 +39,18 @@
 - [x] Add tracking for shared content (analytics)
 - [x] Implement referral tracking from shares
 
+## Profile Persistence & Navigation (COMPLETED)
+- [x] Extend users table with profile fields (sex, age, weight, height, goal, fitnessLevel)
+- [x] Create profile management backend endpoints
+- [x] Update Onboarding to save profile to database via tRPC
+- [x] Fix logo click to redirect to Dashboard when profile is complete
+- [x] Prevent re-entry to Onboarding for authenticated users
+
 ## Bug Fixes & Technical Debt
 - [ ] Fix Web Speech API TypeScript errors in voiceService.ts
 - [ ] Add proper type definitions for SpeechRecognition
+- [ ] Implement Stripe webhook handler for payment confirmations
+- [ ] Add subscription checks to protected features
 - [ ] Optimize bundle size
 - [ ] Add error boundary improvements
 - [ ] Improve mobile responsiveness

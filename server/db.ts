@@ -89,6 +89,28 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+export async function updateUserProfile(userId: number, profileData: {
+  sex?: string;
+  age?: number;
+  weight?: number;
+  height?: number;
+  goal?: string;
+  fitnessLevel?: string;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update profile: database not available");
+    return;
+  }
+
+  const updateData: Record<string, any> = {
+    profileCompleted: true,
+    ...profileData,
+  };
+
+  await db.update(users).set(updateData).where(eq(users.id, userId));
+}
+
 // ============================================================
 // Subscription queries
 // ============================================================

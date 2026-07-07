@@ -82,6 +82,17 @@ export function TopNavigation() {
     setMobileMenuOpen(false);
   };
 
+  const handleLogoClick = () => {
+    // If user is logged in and has profile, go to dashboard
+    // Otherwise go to onboarding
+    if (user && hasProfile) {
+      setCurrentView('dashboard');
+    } else {
+      setCurrentView('onboarding');
+    }
+    setMobileMenuOpen(false);
+  };
+
   return (
     <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -89,7 +100,7 @@ export function TopNavigation() {
           {/* Logo */}
           <div 
             className="flex items-center gap-3 cursor-pointer"
-            onClick={() => handleNavigation('onboarding')}
+            onClick={handleLogoClick}
           >
             <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/60 rounded-lg flex items-center justify-center">
               <span className="text-xl font-bold text-white">💪</span>
