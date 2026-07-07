@@ -96,10 +96,21 @@ export default function Subscription() {
 
     setIsProcessing(true);
     try {
-      // TODO: Integrate with Stripe
-      // This would call your backend to create a Stripe checkout session
-      toast.success('Redirecting to payment...');
-      // window.location.href = `/api/checkout?tier=${tierId}`;
+      // Call backend to create Stripe checkout session
+      const response = await fetch('/api/trpc/payment.createCheckoutSession', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan: tierId,
+          returnUrl: window.location.href,
+        }),
+      });
+      const data = await response.json();
+      if (data.result?.data?.url) {
+        window.location.href = data.result.data.url;
+      } else {
+        toast.error('Failed to create checkout session');
+      }
     } catch (error) {
       toast.error('Failed to process upgrade');
     } finally {

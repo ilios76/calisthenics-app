@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, subscriptions, payments, streaks, Subscription, InsertSubscription, Payment, InsertPayment, Streak, InsertStreak } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,156 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// ============================================================
+// Subscription queries
+// ============================================================
+
+export async function getUserSubscription(userId: number): Promise<Subscription | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(subscriptions)
+    .where(eq(subscriptions.userId, userId))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getStripeCustomerId(userId: number): Promise<string | undefined> {
+  const subscription = await getUserSubscription(userId);
+  return subscription?.stripeCustomerId;
+}
+
+export async function saveStripeCustomerId(userId: number, stripeCustomerId: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  const existing = await getUserSubscription(userId);
+  if (existing) {
+    await db
+      .update(subscriptions)
+      .set({ stripeCustomerId })
+      .where(eq(subscriptions.userId, userId));
+  } else {
+    await db.insert(subscriptions).values({
+      userId,
+      stripeCustomerId,
+      plan: "free",
+      status: "active",
+    });
+  }
+}
+
+export async function saveSubscription(data: Omit<InsertSubscription, 'createdAt' | 'updatedAt'>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  const existing = await getUserSubscription(data.userId);
+  if (existing) {
+    await db
+      .update(subscriptions)
+      .set(data)
+      .where(eq(subscriptions.userId, data.userId));
+  } else {
+    await db.insert(subscriptions).values(data as InsertSubscription);
+  }
+}
+
+export async function cancelSubscription(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db
+    .update(subscriptions)
+    .set({
+      status: "cancelled",
+      cancelledAt: new Date(),
+    })
+    .where(eq(subscriptions.userId, userId));
+}
+
+// ============================================================
+// Payment queries
+// ============================================================
+
+export async function savePayment(data: Omit<InsertPayment, 'createdAt' | 'updatedAt'>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.insert(payments).values(data as InsertPayment);
+}
+
+export async function getPaymentHistory(userId: number): Promise<Payment[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(payments)
+    .where(eq(payments.userId, userId));
+}
+
+// ============================================================
+// Streak queries
+// ============================================================
+
+export async function getUserStreak(userId: number): Promise<Streak | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(streaks)
+    .where(eq(streaks.userId, userId))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updateStreak(userId: number, currentStreak: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  const existing = await getUserStreak(userId);
+  const longestStreak = existing ? Math.max(existing.longestStreak, currentStreak) : currentStreak;
+
+  if (existing) {
+    await db
+      .update(streaks)
+      .set({
+        currentStreak,
+        longestStreak,
+        lastActivityDate: new Date(),
+      })
+      .where(eq(streaks.userId, userId));
+  } else {
+    await db.insert(streaks).values({
+      userId,
+      currentStreak,
+      longestStreak,
+      lastActivityDate: new Date(),
+    });
+  }
+}
+
+export async function recordMilestone(userId: number, milestone: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  const existing = await getUserStreak(userId);
+  if (!existing) return;
+
+  const milestones = existing.milestonesReached
+    ? existing.milestonesReached.split(",").map(Number)
+    : [];
+
+  if (!milestones.includes(milestone)) {
+    milestones.push(milestone);
+    await db
+      .update(streaks)
+      .set({ milestonesReached: milestones.join(",") })
+      .where(eq(streaks.userId, userId));
+  }
+}

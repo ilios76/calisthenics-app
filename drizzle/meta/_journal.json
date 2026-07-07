@@ -8,6 +8,20 @@
       "when": 1777558484831,
       "tag": "0000_brainy_nighthawk",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1783456195979,
+      "tag": "0001_fantastic_nuke",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1783456323568,
+      "tag": "0002_green_jigsaw",
+      "breakpoints": true
     }
   ]
 }
