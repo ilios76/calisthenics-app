@@ -1,10 +1,11 @@
 // ============================================================
-// CallistheniX – Coach Widget (FIXED v3 - Draggable)
+// CallistheniX – Coach Widget (FIXED v4 - Touch Support)
 //
 // The floating AI Coach button now:
 // - Opens a UNIFIED modal with BOTH voice AND text modes
-// - Is DRAGGABLE around the screen
+// - Is DRAGGABLE around the screen (mouse + touch)
 // - Saves position to localStorage
+// - Supports smooth touch drag on mobile devices
 // ============================================================
 import React, { useState, useEffect, useRef } from 'react';
 import { CoachChatBot } from './CoachChatBot';
@@ -41,16 +42,19 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
         setPosition(JSON.parse(saved));
       } catch {
         // Default position if parsing fails
-        setPosition({ x: window.innerWidth - 74, y: window.innerHeight - 74 });
+        setPosition({ x: window.innerWidth - 104, y: window.innerHeight - 104 });
       }
     } else {
-      // Default: bottom-right corner
-      setPosition({ x: window.innerWidth - 74, y: window.innerHeight - 74 });
+      // Default: bottom-right corner (80px button + 24px margin)
+      setPosition({ x: window.innerWidth - 104, y: window.innerHeight - 104 });
     }
   }, []);
 
   // Handle mouse down on button
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Prevent context menu
+    e.preventDefault();
+    
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       setDragOffset({
@@ -61,7 +65,23 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
     }
   };
 
-  // Handle mouse move
+  // Handle touch start on button
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    // Prevent default touch behavior (context menu, etc)
+    e.preventDefault();
+    
+    if (buttonRef.current && e.touches.length > 0) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const touch = e.touches[0];
+      setDragOffset({
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top,
+      });
+      setIsDragging(true);
+    }
+  };
+
+  // Handle mouse/touch move
   useEffect(() => {
     if (!isDragging) return;
 
@@ -70,10 +90,24 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
       const newY = e.clientY - dragOffset.y;
 
       // Constrain to viewport
-      const constrainedX = Math.max(0, Math.min(newX, window.innerWidth - 50));
-      const constrainedY = Math.max(0, Math.min(newY, window.innerHeight - 50));
+      const constrainedX = Math.max(0, Math.min(newX, window.innerWidth - 80));
+      const constrainedY = Math.max(0, Math.min(newY, window.innerHeight - 80));
 
       setPosition({ x: constrainedX, y: constrainedY });
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        const newX = touch.clientX - dragOffset.x;
+        const newY = touch.clientY - dragOffset.y;
+
+        // Constrain to viewport
+        const constrainedX = Math.max(0, Math.min(newX, window.innerWidth - 80));
+        const constrainedY = Math.max(0, Math.min(newY, window.innerHeight - 80));
+
+        setPosition({ x: constrainedX, y: constrainedY });
+      }
     };
 
     const handleMouseUp = () => {
@@ -82,12 +116,22 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
       localStorage.setItem(STORAGE_KEY, JSON.stringify(position));
     };
 
+    const handleTouchEnd = () => {
+      setIsDragging(false);
+      // Save position to localStorage
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(position));
+    };
+
     window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
     window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('touchend', handleTouchEnd);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('touchend', handleTouchEnd);
     };
   }, [isDragging, dragOffset, position]);
 
@@ -95,7 +139,7 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
 
   return (
     <>
-      {/* ── Draggable Floating Button ───────────────────────────────── */}
+      {/* ── Draggable Floating Button (Mouse + Touch) ───────────────────────────────── */}
       <div
         ref={buttonRef}
         className="fixed z-40 flex items-center justify-center"
@@ -104,8 +148,13 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
           top: `${position.y}px`,
           cursor: isDragging ? 'grabbing' : 'grab',
           userSelect: 'none',
+          WebkitUserSelect: 'none',
+          WebkitTouchCallout: 'none',
+          touchAction: 'none',
         }}
         onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
+        onContextMenu={(e) => e.preventDefault()}
       >
         <AICoacButton onClick={() => setOpen(o => !o)} isActive={open} />
       </div>
@@ -115,7 +164,7 @@ export const CoachWidget: React.FC<CoachWidgetProps> = ({
         <div
           className="fixed z-50 flex flex-col"
           style={{
-            left: `${Math.max(12, Math.min(position.x - 155, window.innerWidth - 372))}px`,
+            left: `${Math.max(12, Math.min(position.x - 140, window.innerWidth - 372))}px`,
             top: `${Math.max(12, position.y - 400)}px`,
             width: '360px',
             maxHeight: '70vh',

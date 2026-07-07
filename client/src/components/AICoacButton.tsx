@@ -21,8 +21,8 @@ export const AICoacButton: React.FC<AICoacButtonProps> = ({ onClick, isActive = 
         onMouseLeave={() => setIsHovered(false)}
         className="flex items-center justify-center rounded-full shadow-lg transition-all duration-300 hover:scale-110 relative overflow-hidden"
         style={{
-          width: '50px',
-          height: '50px',
+          width: '80px',
+          height: '80px',
           background: 'transparent',
           border: 'none',
           boxShadow: isActive 
