@@ -1,50 +1,38 @@
 // ============================================================
-// WorkoutCalendar Component
+// WorkoutCalendar Component (FIXED)
 // Interactive calendar showing current month with workout plan
-// Users can select/change workout days
+// Users can select individual dates (not all occurrences of a weekday)
 // ============================================================
 
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Dumbbell } from 'lucide-react';
 
-interface WorkoutDay {
-  date: number;
-  hasWorkout: boolean;
-}
-
 interface WorkoutCalendarProps {
   sessionsPerWeek: number;
-  onDaysChange?: (workoutDays: number[]) => void;
+  onDaysChange?: (workoutDates: string[]) => void;
 }
 
 export function WorkoutCalendar({ sessionsPerWeek, onDaysChange }: WorkoutCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [workoutDays, setWorkoutDays] = useState<Set<number>>(new Set());
+  const [workoutDates, setWorkoutDates] = useState<Set<string>>(new Set());
 
-  // Load saved workout days from localStorage
+  // Load saved workout dates from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('workoutDays');
+    const saved = localStorage.getItem('workoutDates');
     if (saved) {
-      setWorkoutDays(new Set(JSON.parse(saved)));
+      setWorkoutDates(new Set(JSON.parse(saved)));
     } else {
-      // Default: Mon, Wed, Fri, Sat for 4 sessions/week
-      const defaultDays = new Set<number>();
-      if (sessionsPerWeek >= 1) defaultDays.add(1); // Monday
-      if (sessionsPerWeek >= 2) defaultDays.add(3); // Wednesday
-      if (sessionsPerWeek >= 3) defaultDays.add(5); // Friday
-      if (sessionsPerWeek >= 4) defaultDays.add(6); // Saturday
-      if (sessionsPerWeek >= 5) defaultDays.add(2); // Tuesday
-      setWorkoutDays(defaultDays);
+      setWorkoutDates(new Set());
     }
-  }, [sessionsPerWeek]);
+  }, []);
 
-  // Save workout days to localStorage
+  // Save workout dates to localStorage
   useEffect(() => {
-    localStorage.setItem('workoutDays', JSON.stringify(Array.from(workoutDays)));
+    localStorage.setItem('workoutDates', JSON.stringify(Array.from(workoutDates)));
     if (onDaysChange) {
-      onDaysChange(Array.from(workoutDays));
+      onDaysChange(Array.from(workoutDates));
     }
-  }, [workoutDays, onDaysChange]);
+  }, [workoutDates, onDaysChange]);
 
   const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -62,16 +50,21 @@ export function WorkoutCalendar({ sessionsPerWeek, onDaysChange }: WorkoutCalend
   const today = new Date();
   const isCurrentMonth = currentDate.getMonth() === today.getMonth() && currentDate.getFullYear() === today.getFullYear();
 
-  const toggleWorkoutDay = (dayOfWeek: number) => {
-    const newDays = new Set(workoutDays);
-    if (newDays.has(dayOfWeek)) {
-      newDays.delete(dayOfWeek);
+  const formatDate = (year: number, month: number, day: number): string => {
+    return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  };
+
+  const toggleWorkoutDate = (day: number) => {
+    const dateStr = formatDate(currentDate.getFullYear(), currentDate.getMonth(), day);
+    const newDates = new Set(workoutDates);
+    if (newDates.has(dateStr)) {
+      newDates.delete(dateStr);
     } else {
-      if (newDays.size < sessionsPerWeek) {
-        newDays.add(dayOfWeek);
+      if (newDates.size < sessionsPerWeek) {
+        newDates.add(dateStr);
       }
     }
-    setWorkoutDays(newDays);
+    setWorkoutDates(newDates);
   };
 
   const handlePrevMonth = () => {
@@ -100,7 +93,7 @@ export function WorkoutCalendar({ sessionsPerWeek, onDaysChange }: WorkoutCalend
             {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
           </p>
           <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.85rem', color: 'oklch(0.60 0.008 80)', margin: '4px 0 0 0' }}>
-            Select {sessionsPerWeek} workout days per week
+            Select {sessionsPerWeek} workout dates this month
           </p>
         </div>
         <div className="flex gap-2">
@@ -141,14 +134,14 @@ export function WorkoutCalendar({ sessionsPerWeek, onDaysChange }: WorkoutCalend
             return <div key={`empty-${idx}`} />;
           }
 
-          const dayOfWeek = (firstDay + day - 1) % 7;
-          const hasWorkout = workoutDays.has(dayOfWeek);
+          const dateStr = formatDate(currentDate.getFullYear(), currentDate.getMonth(), day);
+          const hasWorkout = workoutDates.has(dateStr);
           const isToday = isCurrentMonth && day === today.getDate();
 
           return (
             <button
               key={day}
-              onClick={() => toggleWorkoutDay(dayOfWeek)}
+              onClick={() => toggleWorkoutDate(day)}
               className="aspect-square rounded flex items-center justify-center text-sm font-bold transition-all relative"
               style={{
                 background: hasWorkout ? 'oklch(0.68 0.18 142)' : isToday ? 'oklch(0.68 0.18 142 / 20%)' : 'oklch(0.12 0.005 285)',
@@ -176,7 +169,7 @@ export function WorkoutCalendar({ sessionsPerWeek, onDaysChange }: WorkoutCalend
       {/* Info text */}
       <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid oklch(1 0 0 / 8%)' }}>
         <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: '0.8rem', color: 'oklch(0.60 0.008 80)', margin: 0 }}>
-          ✓ Click dates to select workout days • {workoutDays.size}/{sessionsPerWeek} selected
+          ✓ Click individual dates to select workout days • {workoutDates.size}/{sessionsPerWeek} selected
         </p>
       </div>
     </div>

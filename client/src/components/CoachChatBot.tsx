@@ -4,8 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Send, X } from "lucide-react";
+import { Loader2, Send, X, Volume2, VolumeX } from "lucide-react";
 import { Streamdown } from "streamdown";
+import { ttsService } from "@/services/ttsService";
 
 interface Message {
   role: "user" | "assistant";
@@ -28,8 +29,26 @@ export function CoachChatBot({ open, onOpenChange, embedded = false }: CoachChat
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [speakingIndex, setSpeakingIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const chatMutation = trpc.coach.chat.useMutation();
+
+  const handleSpeak = async (messageIndex: number, text: string) => {
+    try {
+      if (speakingIndex === messageIndex) {
+        ttsService.stop();
+        setSpeakingIndex(null);
+      } else {
+        ttsService.stop();
+        setSpeakingIndex(messageIndex);
+        await ttsService.speak(text, { rate: 1, pitch: 1, volume: 1 });
+        setSpeakingIndex(null);
+      }
+    } catch (error) {
+      console.error("TTS error:", error);
+      setSpeakingIndex(null);
+    }
+  };
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -110,11 +129,28 @@ export function CoachChatBot({ open, onOpenChange, embedded = false }: CoachChat
                       : "bg-slate-800 text-slate-100 rounded-bl-none border border-slate-700"
                   }`}
                 >
-                  {message.role === "assistant" ? (
-                    <Streamdown className="text-sm">{message.content}</Streamdown>
-                  ) : (
-                    <p className="text-sm">{message.content}</p>
-                  )}
+                  <div className="flex items-start gap-2">
+                    <div className="flex-1">
+                      {message.role === "assistant" ? (
+                        <Streamdown className="text-sm">{message.content}</Streamdown>
+                      ) : (
+                        <p className="text-sm">{message.content}</p>
+                      )}
+                    </div>
+                    {message.role === "assistant" && ttsService.isAvailable() && (
+                      <button
+                        onClick={() => handleSpeak(index, message.content)}
+                        className="flex-shrink-0 p-1 hover:bg-slate-700 rounded transition-colors"
+                        title="Read aloud"
+                      >
+                        {speakingIndex === index ? (
+                          <VolumeX className="w-4 h-4 text-green-400" />
+                        ) : (
+                          <Volume2 className="w-4 h-4 text-slate-400 hover:text-green-400" />
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

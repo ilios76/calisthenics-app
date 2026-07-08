@@ -9,12 +9,13 @@ import { getExercisesByIds } from '@/lib/data';
 import { getExerciseGifUrl } from '@/lib/gifUrls';
 import { getRandomQuote, getRandomQuoteWithVariety } from '@/lib/quotes';
 import { playDoubleBeepSound } from '@/lib/soundUtils';
-import { Play, Pause, SkipForward, ChevronLeft, CheckCircle, Info } from 'lucide-react';
+import { Play, Pause, SkipForward, ChevronLeft, CheckCircle, Info, Volume2, VolumeX } from 'lucide-react';
 import { toast } from 'sonner';
 import { WorkoutEndScreen } from '@/components/WorkoutEndScreen';
 import { CoachFigure } from '@/components/CoachFigure';
 import { useCoach } from '@/contexts/CoachContext';
 import { useWorkoutCompletion } from '@/contexts/WorkoutCompletionContext';
+import { ttsService } from '@/services/ttsService';
 
 type Phase = 'preview' | 'exercise' | 'rest' | 'complete';
 
@@ -34,7 +35,26 @@ export default function TrainerPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [showTips, setShowTips] = useState(false);
   const [currentQuote, setCurrentQuote] = useState(getRandomQuoteWithVariety());
+  const [speakingInstructions, setSpeakingInstructions] = useState(false);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+
+  const handleSpeakInstructions = async () => {
+    if (!currentEx) return;
+    try {
+      if (speakingInstructions) {
+        ttsService.stop();
+        setSpeakingInstructions(false);
+      } else {
+        const instructionsText = `Instructions: ${currentEx.instructions.join('. ')}. Pro Tips: ${currentEx.tips.join('. ')}`;
+        setSpeakingInstructions(true);
+        await ttsService.speak(instructionsText, { rate: 0.9, pitch: 1, volume: 1 });
+        setSpeakingInstructions(false);
+      }
+    } catch (error) {
+      console.error('TTS error:', error);
+      setSpeakingInstructions(false);
+    }
+  };
   
   // Request screen wake lock when entering trainer
   useEffect(() => {
@@ -425,13 +445,29 @@ export default function TrainerPage() {
 
           {/* Instructions */}
           <div className="mt-8">
-            <button
-              className="flex items-center gap-2 mb-3"
-              onClick={() => setShowTips(t => !t)}
-              style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.85rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'oklch(0.68 0.18 142)' }}
-            >
-              <Info size={14} /> {showTips ? 'Hide' : 'Show'} Instructions & Tips
-            </button>
+            <div className="flex items-center gap-2 mb-3">
+              <button
+                className="flex items-center gap-2"
+                onClick={() => setShowTips(t => !t)}
+                style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.85rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'oklch(0.68 0.18 142)' }}
+              >
+                <Info size={14} /> {showTips ? 'Hide' : 'Show'} Instructions & Tips
+              </button>
+              {showTips && ttsService.isAvailable() && (
+                <button
+                  onClick={handleSpeakInstructions}
+                  className="p-1 hover:bg-slate-700 rounded transition-colors"
+                  title="Read instructions aloud"
+                  style={{ color: speakingInstructions ? 'oklch(0.68 0.18 142)' : 'oklch(0.60 0.008 80)' }}
+                >
+                  {speakingInstructions ? (
+                    <VolumeX size={16} />
+                  ) : (
+                    <Volume2 size={16} />
+                  )}
+                </button>
+              )}
+            </div>
             {showTips && (
               <div className="animate-cx-slide-up" style={{ background: 'oklch(0.17 0.006 285)', border: '1px solid oklch(1 0 0 / 10%)', borderRadius: '4px', padding: '12px' }}>
                 <div style={{ marginBottom: '12px' }}>

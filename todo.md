@@ -46,6 +46,11 @@
 - [x] Fix logo click to redirect to Dashboard when profile is complete
 - [x] Prevent re-entry to Onboarding for authenticated users
 
+## UX Enhancements (COMPLETED)
+- [x] Add text-to-speech for coach quotes (speaker button in chat)
+- [x] Add text-to-speech for exercise instructions and tips
+- [x] Fix calendar to select individual dates instead of all weekday occurrences
+
 ## Bug Fixes & Technical Debt
 - [ ] Fix Web Speech API TypeScript errors in voiceService.ts
 - [ ] Add proper type definitions for SpeechRecognition
