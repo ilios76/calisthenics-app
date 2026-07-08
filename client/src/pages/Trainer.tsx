@@ -42,22 +42,8 @@ export default function TrainerPage() {
   });
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
 
-  // Save auto-play preference
-  useEffect(() => {
-    localStorage.setItem('autoPlayInstructions', JSON.stringify(autoPlayInstructions));
-  }, [autoPlayInstructions]);
-
-  // Auto-play instructions when exercise starts
-  useEffect(() => {
-    if (autoPlayInstructions && phase === 'exercise' && currentEx && !speakingInstructions) {
-      const timer = setTimeout(() => {
-        handleSpeakInstructions();
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [phase, currentEx, autoPlayInstructions, speakingInstructions]);
-
-  const handleSpeakInstructions = async () => {
+  // Handle text-to-speech for instructions (define before useEffect that calls it)
+  const handleSpeakInstructions = useCallback(async () => {
     if (!currentEx) return;
     try {
       if (speakingInstructions) {
@@ -73,7 +59,22 @@ export default function TrainerPage() {
       console.error('TTS error:', error);
       setSpeakingInstructions(false);
     }
-  };
+  }, [currentEx, speakingInstructions]);
+
+  // Save auto-play preference
+  useEffect(() => {
+    localStorage.setItem('autoPlayInstructions', JSON.stringify(autoPlayInstructions));
+  }, [autoPlayInstructions]);
+
+  // Auto-play instructions when exercise starts
+  useEffect(() => {
+    if (autoPlayInstructions && phase === 'exercise' && currentEx && !speakingInstructions) {
+      const timer = setTimeout(() => {
+        handleSpeakInstructions();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [phase, currentEx, autoPlayInstructions, speakingInstructions, handleSpeakInstructions]);
   
   // Request screen wake lock when entering trainer
   useEffect(() => {
