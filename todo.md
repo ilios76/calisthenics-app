@@ -50,6 +50,7 @@
 - [x] Add text-to-speech for coach quotes (speaker button in chat)
 - [x] Add text-to-speech for exercise instructions and tips
 - [x] Fix calendar to select individual dates instead of all weekday occurrences
+- [x] Add auto-play for exercise instructions (toggle button in trainer header)
 
 ## Bug Fixes & Technical Debt
 - [ ] Fix Web Speech API TypeScript errors in voiceService.ts

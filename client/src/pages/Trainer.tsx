@@ -36,7 +36,26 @@ export default function TrainerPage() {
   const [showTips, setShowTips] = useState(false);
   const [currentQuote, setCurrentQuote] = useState(getRandomQuoteWithVariety());
   const [speakingInstructions, setSpeakingInstructions] = useState(false);
+  const [autoPlayInstructions, setAutoPlayInstructions] = useState(() => {
+    const saved = localStorage.getItem('autoPlayInstructions');
+    return saved ? JSON.parse(saved) : false;
+  });
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+
+  // Save auto-play preference
+  useEffect(() => {
+    localStorage.setItem('autoPlayInstructions', JSON.stringify(autoPlayInstructions));
+  }, [autoPlayInstructions]);
+
+  // Auto-play instructions when exercise starts
+  useEffect(() => {
+    if (autoPlayInstructions && phase === 'exercise' && currentEx && !speakingInstructions) {
+      const timer = setTimeout(() => {
+        handleSpeakInstructions();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [phase, currentEx, autoPlayInstructions, speakingInstructions]);
 
   const handleSpeakInstructions = async () => {
     if (!currentEx) return;
@@ -256,13 +275,31 @@ export default function TrainerPage() {
       {/* Header */}
       <div style={{ background: 'oklch(0.12 0.005 285)', borderBottom: '1px solid oklch(1 0 0 / 8%)', padding: '16px 24px' }}>
         <div className="flex items-center justify-between mb-4">
-          <button
-            onClick={() => setCurrentView('programs')}
-            className="flex items-center gap-2"
-            style={{ color: 'oklch(0.68 0.18 142)', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.85rem' }}
-          >
-            <ChevronLeft size={18} /> Back
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setCurrentView('programs')}
+              className="flex items-center gap-2"
+              style={{ color: 'oklch(0.68 0.18 142)', fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.85rem' }}
+            >
+              <ChevronLeft size={18} /> Back
+            </button>
+            <button
+              onClick={() => setAutoPlayInstructions(!autoPlayInstructions)}
+              className="flex items-center gap-2 px-3 py-1 rounded transition-colors"
+              style={{
+                background: autoPlayInstructions ? 'oklch(0.68 0.18 142)' : 'oklch(0.12 0.005 285)',
+                color: autoPlayInstructions ? 'oklch(0.10 0.005 285)' : 'oklch(0.68 0.18 142)',
+                border: '1px solid oklch(0.68 0.18 142)',
+                fontFamily: 'Barlow Condensed, sans-serif',
+                fontWeight: 700,
+                fontSize: '0.75rem',
+                cursor: 'pointer'
+              }}
+              title="Toggle auto-play for instructions"
+            >
+              <Volume2 size={14} /> {autoPlayInstructions ? 'Auto-Play ON' : 'Auto-Play OFF'}
+            </button>
+          </div>
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontFamily: 'Barlow Condensed, sans-serif', fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'oklch(0.65 0.01 285)', marginBottom: '4px' }}>
               {currentDay.name}
