@@ -4,7 +4,19 @@ import { protectedProcedure, publicProcedure, router } from "../_core/trpc";
 import * as db from "../db";
 import { z } from "zod";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
+// Lazy-load Stripe to avoid initialization errors if API key is missing
+let stripeInstance: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (!stripeInstance) {
+    const apiKey = process.env.STRIPE_SECRET_KEY;
+    if (!apiKey) {
+      throw new Error("STRIPE_SECRET_KEY environment variable is not set");
+    }
+    stripeInstance = new Stripe(apiKey);
+  }
+  return stripeInstance;
+}
 
 // Pricing configuration
 const PRICING = {
@@ -34,7 +46,7 @@ export const paymentRouter = router({
         let stripeCustomerId = await db.getStripeCustomerId(ctx.user.id);
 
         if (!stripeCustomerId) {
-          const customer = await stripe.customers.create({
+          const customer = await getStripe().customers.create({
             email: ctx.user.email || undefined,
             metadata: {
               userId: ctx.user.id.toString(),
@@ -51,7 +63,7 @@ export const paymentRouter = router({
         };
 
         // Create checkout session
-        const session = await stripe.checkout.sessions.create({
+        const session = await getStripe().checkout.sessions.create({
           customer: stripeCustomerId,
           mode: "subscription",
           payment_method_types: ["card"],
@@ -95,7 +107,7 @@ export const paymentRouter = router({
     .input(z.object({ sessionId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       try {
-        const session = await stripe.checkout.sessions.retrieve(input.sessionId, {
+        const session = await getStripe().checkout.sessions.retrieve(input.sessionId, {
           expand: ["subscription"],
         });
 
@@ -142,7 +154,7 @@ export const paymentRouter = router({
         });
       }
 
-      await stripe.subscriptions.cancel(subscription.stripeSubscriptionId);
+      await getStripe().subscriptions.cancel(subscription.stripeSubscriptionId);
 
       // Update database
       await db.cancelSubscription(ctx.user.id);
