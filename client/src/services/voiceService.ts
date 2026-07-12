@@ -1,7 +1,48 @@
-/**
- * Voice Input/Output Service for CALIX Coach
+/*
+ * Voice Input/Output Service for CallistheniX Coach
  * Handles speech-to-text and text-to-speech with Greek and English support
  */
+
+// Type definitions for Web Speech API
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
+interface SpeechRecognitionResultList {
+  length: number;
+  item(index: number): SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  length: number;
+  item(index: number): SpeechRecognitionAlternative;
+  [index: number]: SpeechRecognitionAlternative;
+  isFinal: boolean;
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string;
+  confidence: number;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: ((event: Event) => void) | null;
+  onend: ((event: Event) => void) | null;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+  start(): void;
+  stop(): void;
+  abort(): void;
+}
 
 export interface VoiceServiceConfig {
   onTranscript?: (text: string) => void;
@@ -21,34 +62,36 @@ class VoiceService {
   }
 
   private initializeRecognition() {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      this.recognition = new SpeechRecognition();
-      this.recognition.continuous = false;
-      this.recognition.interimResults = false;
-      this.recognition.lang = "el-GR"; // Default to Greek
+    const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognitionAPI) {
+      this.recognition = new SpeechRecognitionAPI();
+      
+      if (this.recognition) {
+        this.recognition.continuous = false;
+        this.recognition.interimResults = false;
+        this.recognition.lang = "el-GR"; // Default to Greek
+        this.recognition.onstart = () => {
+          this.isListening = true;
+          this.config.onListening?.(true);
+        };
 
-      this.recognition.onstart = () => {
-        this.isListening = true;
-        this.config.onListening?.(true);
-      };
+        this.recognition.onend = () => {
+          this.isListening = false;
+          this.config.onListening?.(false);
+        };
 
-      this.recognition.onend = () => {
-        this.isListening = false;
-        this.config.onListening?.(false);
-      };
+        this.recognition.onresult = (event: SpeechRecognitionEvent) => {
+          let transcript = "";
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+          }
+          this.config.onTranscript?.(transcript);
+        };
 
-      this.recognition.onresult = (event: SpeechRecognitionEvent) => {
-        let transcript = "";
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript;
-        }
-        this.config.onTranscript?.(transcript);
-      };
-
-      this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        this.config.onError?.(event.error);
-      };
+        this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+          this.config.onError?.(event.error);
+        };
+      }
     }
   }
 
@@ -67,84 +110,49 @@ class VoiceService {
   }
 
   /**
-   * Stop listening for voice input
+   * Stop listening
    */
   public stopListening() {
-    if (this.recognition && this.isListening) {
+    if (this.recognition) {
+      this.recognition.stop();
+    }
+  }
+
+  /**
+   * Abort listening
+   */
+  public abort() {
+    if (this.recognition) {
       this.recognition.abort();
     }
   }
 
   /**
-   * Detect language of text (simple heuristic)
+   * Check if currently listening
    */
-  private detectLanguage(text: string): "el" | "en" {
-    // Greek characters: α-ω, Α-Ω
-    const greekPattern = /[\u0370-\u03FF]/g;
-    const greekCount = (text.match(greekPattern) || []).length;
-    return greekCount > text.length * 0.3 ? "el" : "en";
-  }
-
-  /**
-   * Clean text for natural speech (remove markdown, symbols, etc.)
-   */
-  private cleanTextForSpeech(text: string): string {
-    return text
-      .replace(/\*/g, "") // Remove asterisks (*)
-      .replace(/\*\*/g, "") // Remove bold markers
-      .replace(/_/g, "") // Remove underscores
-      .replace(/`/g, "") // Remove backticks
-      .replace(/\[([^\]]+)\]/g, "$1") // Replace [text] with text
-      .replace(/\(([^)]+)\)/g, "$1") // Replace (text) with text
-      .replace(/#+\s/g, "") // Remove markdown headers
-      .replace(/[-•]\s/g, "") // Remove bullet points
-      .replace(/\n+/g, " ") // Replace newlines with space
-      .trim();
+  public getIsListening(): boolean {
+    return this.isListening;
   }
 
   /**
    * Speak text using text-to-speech
    * @param text - Text to speak
-   * @param language - Optional language override
+   * @param language - 'el' for Greek, 'en' for English
    */
-  public speak(text: string, language?: "el" | "en") {
+  public speak(text: string, language: "el" | "en" = "el") {
     if (!("speechSynthesis" in window)) {
-      this.config.onError?.("Text-to-Speech not supported");
+      this.config.onError?.("Speech Synthesis not supported");
       return;
     }
 
-    // Stop any ongoing speech
+    // Cancel any ongoing speech
     window.speechSynthesis.cancel();
 
-    const lang = language || this.detectLanguage(text);
-    const cleanText = this.cleanTextForSpeech(text);
-    const utterance = new SpeechSynthesisUtterance(cleanText);
-
-    utterance.lang = lang === "el" ? "el-GR" : "en-US";
-    utterance.rate = 0.95;
-    utterance.pitch = 0.8; // Lower pitch for male voice
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = language === "el" ? "el-GR" : "en-US";
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
     utterance.volume = 1;
-
-    // Use a male voice that matches the language
-    const voices = window.speechSynthesis.getVoices();
-    const langCode = lang === "el" ? "el" : "en";
-    
-    // Try to find a male voice
-    const maleVoice = voices.find(
-      (voice) => voice.lang.startsWith(langCode) && 
-      (voice.name.toLowerCase().includes("male") || 
-       voice.name.toLowerCase().includes("man") ||
-       voice.name.toLowerCase().includes("guy"))
-    );
-    
-    // Fallback to any voice matching the language
-    const fallbackVoice = voices.find((voice) => voice.lang.startsWith(langCode));
-    
-    if (maleVoice) {
-      utterance.voice = maleVoice;
-    } else if (fallbackVoice) {
-      utterance.voice = fallbackVoice;
-    }
 
     window.speechSynthesis.speak(utterance);
   }
@@ -156,34 +164,6 @@ class VoiceService {
     if ("speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
-  }
-
-  /**
-   * Check if browser supports speech recognition
-   */
-  public isRecognitionSupported(): boolean {
-    return this.recognition !== null;
-  }
-
-  /**
-   * Check if browser supports speech synthesis
-   */
-  public isSynthesisSupported(): boolean {
-    return "speechSynthesis" in window;
-  }
-
-  /**
-   * Get current listening state
-   */
-  public getIsListening(): boolean {
-    return this.isListening;
-  }
-
-  /**
-   * Update config
-   */
-  public updateConfig(config: Partial<VoiceServiceConfig>) {
-    this.config = { ...this.config, ...config };
   }
 }
 

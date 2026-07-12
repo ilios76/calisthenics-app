@@ -47,8 +47,8 @@
 - [x] Prevent re-entry to Onboarding for authenticated users
 
 ## Bug Fixes & Technical Debt
-- [ ] Fix Web Speech API TypeScript errors in voiceService.ts
-- [ ] Add proper type definitions for SpeechRecognition
+- [x] Fix Web Speech API TypeScript errors in voiceService.ts
+- [x] Add proper type definitions for SpeechRecognition
 - [ ] Implement Stripe webhook handler for payment confirmations
 - [ ] Add subscription checks to protected features
 - [ ] Optimize bundle size
