@@ -7,6 +7,7 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Dumbbell, MessageSquare } from 'lucide-react';
 import { WorkoutNoteModal } from './WorkoutNoteModal';
+import { SimpleNotificationService } from '../services/simpleNotifications';
 
 interface WorkoutCalendarProps {
   sessionsPerWeek: number;
@@ -81,9 +82,30 @@ export function WorkoutCalendar({ sessionsPerWeek, onDaysChange }: WorkoutCalend
     
     if (newDates.has(dateKey)) {
       newDates.delete(dateKey);
+      const stored = localStorage.getItem('scheduledNotifications');
+      if (stored) {
+        const scheduled = JSON.parse(stored);
+        delete scheduled[dateKey];
+        localStorage.setItem('scheduledNotifications', JSON.stringify(scheduled));
+      }
     } else {
       if (newDates.size < sessionsPerWeek) {
         newDates.add(dateKey);
+        const [year, month, dayStr] = dateKey.split('-');
+        const notificationTime = new Date(`${year}-${month}-${dayStr}T08:00:00`);
+        const stored = localStorage.getItem('scheduledNotifications') || '{}';
+        const scheduled = JSON.parse(stored);
+        scheduled[dateKey] = notificationTime.toISOString();
+        localStorage.setItem('scheduledNotifications', JSON.stringify(scheduled));
+        SimpleNotificationService.scheduleNotification(
+          {
+            title: '💪 Workout Time!',
+            body: 'Time for your workout today!',
+            tag: `workout-${dateKey}`,
+            data: { date: dateKey },
+          },
+          notificationTime
+        );
       } else {
         return;
       }

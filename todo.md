@@ -62,3 +62,11 @@
 - [ ] Advanced analytics and insights
 - [ ] Offline mode support
 - [ ] Dark/Light theme toggle
+
+
+## Notifications System (COMPLETED)
+- [x] Debug and fix notification system - created Service Worker
+- [x] Auto-create notifications when calendar dates are selected
+- [x] Implemented SimpleNotificationService with browser Notification API
+- [x] Added Greek language support for notification dates
+- [x] Integrated with WorkoutCalendar for auto-notifications
