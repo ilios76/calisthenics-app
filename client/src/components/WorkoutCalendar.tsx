@@ -5,7 +5,7 @@
 // ============================================================
 
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Dumbbell, Sticky } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Dumbbell, MessageSquare } from 'lucide-react';
 import { WorkoutNoteModal } from './WorkoutNoteModal';
 
 interface WorkoutCalendarProps {
@@ -225,7 +225,7 @@ export function WorkoutCalendar({ sessionsPerWeek, onDaysChange }: WorkoutCalend
                     className="absolute bottom-0.5 right-0.5"
                     style={{ color: 'oklch(0.68 0.18 142)' }}
                   >
-                    <Sticky size={10} />
+                    <MessageSquare size={10} />
                   </div>
                 )}
               </button>
