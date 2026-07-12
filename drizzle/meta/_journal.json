@@ -29,6 +29,13 @@
       "when": 1783456963731,
       "tag": "0003_mighty_blackheart",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1783846627832,
+      "tag": "0004_slippery_zodiak",
+      "breakpoints": true
     }
   ]
 }

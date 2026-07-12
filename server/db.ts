@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, subscriptions, payments, streaks, Subscription, InsertSubscription, Payment, InsertPayment, Streak, InsertStreak } from "../drizzle/schema";
+import { InsertUser, users, subscriptions, payments, streaks, workoutNotes, Subscription, InsertSubscription, Payment, InsertPayment, Streak, InsertStreak, WorkoutNote, InsertWorkoutNote } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -263,4 +263,57 @@ export async function recordMilestone(userId: number, milestone: number): Promis
       .set({ milestonesReached: milestones.join(",") })
       .where(eq(streaks.userId, userId));
   }
+}
+
+// ============================================================
+// Workout Notes queries
+// ============================================================
+
+export async function getWorkoutNote(userId: number, date: string): Promise<WorkoutNote | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(workoutNotes)
+    .where(and(eq(workoutNotes.userId, userId), eq(workoutNotes.date, date)))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getWorkoutNotesByUser(userId: number): Promise<WorkoutNote[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(workoutNotes)
+    .where(eq(workoutNotes.userId, userId));
+}
+
+export async function saveWorkoutNote(data: Omit<InsertWorkoutNote, 'createdAt' | 'updatedAt'>): Promise<WorkoutNote | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const existing = await getWorkoutNote(data.userId, data.date);
+  if (existing) {
+    await db
+      .update(workoutNotes)
+      .set({ note: data.note })
+      .where(and(eq(workoutNotes.userId, data.userId), eq(workoutNotes.date, data.date)));
+    return { ...existing, note: data.note };
+  } else {
+    await db.insert(workoutNotes).values(data as InsertWorkoutNote);
+    return { ...data, id: 0, createdAt: new Date(), updatedAt: new Date() } as WorkoutNote;
+  }
+}
+
+export async function deleteWorkoutNote(userId: number, date: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db
+    .delete(workoutNotes)
+    .where(and(eq(workoutNotes.userId, userId), eq(workoutNotes.date, date)));
 }

@@ -83,3 +83,16 @@ export const streaks = mysqlTable("streaks", {
 
 export type Streak = typeof streaks.$inferSelect;
 export type InsertStreak = typeof streaks.$inferInsert;
+
+// Workout notes table for custom reminders/notes per date
+export const workoutNotes = mysqlTable("workoutNotes", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  date: varchar("date", { length: 10 }).notNull(), // YYYY-MM-DD format
+  note: text("note").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type WorkoutNote = typeof workoutNotes.$inferSelect;
+export type InsertWorkoutNote = typeof workoutNotes.$inferInsert;
