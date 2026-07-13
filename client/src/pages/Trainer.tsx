@@ -34,6 +34,7 @@ export default function TrainerPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [showTips, setShowTips] = useState(false);
   const [currentQuote, setCurrentQuote] = useState(getRandomQuoteWithVariety());
+  const [hasPlayedDuringExerciseAudio, setHasPlayedDuringExerciseAudio] = useState(false);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
   
   // Request screen wake lock when entering trainer
@@ -185,6 +186,11 @@ export default function TrainerPage() {
   const startExercise = () => {
     if (!currentEx) return;
     setPhase('exercise');
+    setHasPlayedDuringExerciseAudio(false); // Reset flag for new rep
+    
+    // Play during exercise audio on exercise start
+    playAudioPrompt('/manus-storage/duringexerciseprompt_9dcc2cff.mp3');
+    setHasPlayedDuringExerciseAudio(true);
     
     if (isTimeBased) {
       setTimeLeft(currentEx.durationSeconds!);
@@ -216,11 +222,6 @@ export default function TrainerPage() {
   };
 
   const completeSet = () => {
-    // Play during exercise audio prompt on first rep
-    if (setNumber === 1) {
-      playAudioPrompt('/manus-storage/duringexerciseprompt_9dcc2cff.mp3');
-    }
-    
     if (setNumber < totalSets) {
       setSetNumber(s => s + 1);
       startRest();
