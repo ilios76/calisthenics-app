@@ -186,9 +186,6 @@ export default function TrainerPage() {
     if (!currentEx) return;
     setPhase('exercise');
     
-    // Play start exercise audio prompt
-    playAudioPrompt('/manus-storage/startexerciseprompt_b2de78de.mp3');
-    
     if (isTimeBased) {
       setTimeLeft(currentEx.durationSeconds!);
       setIsRunning(true);

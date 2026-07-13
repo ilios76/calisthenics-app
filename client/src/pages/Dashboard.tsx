@@ -2,7 +2,7 @@
 // CallistheniX – Dashboard Page
 // Scoreboard-style overview: stats, recommended program, quick actions
 // ============================================================
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import { getRecommendedPrograms, getDietPlan, calculateBMI, getBMICategory, getGoalLabel } from '@/lib/data';
 import { Flame, Zap, Target, ChevronRight, Play, Utensils, TrendingUp, AlertCircle, ChevronLeft } from 'lucide-react';
@@ -26,6 +26,15 @@ export default function DashboardPage() {
     const stored = localStorage.getItem('lastWorkoutTime');
     if (stored) {
       setLastWorkoutTime(parseInt(stored));
+    }
+    
+    // Play startup audio prompt on first dashboard load
+    const hasPlayedStartupAudio = localStorage.getItem('hasPlayedStartupAudio');
+    if (!hasPlayedStartupAudio) {
+      const audio = new Audio('/manus-storage/startexerciseprompt_b2de78de.mp3');
+      audio.volume = 1;
+      audio.play().catch(err => console.error('Audio playback failed:', err));
+      localStorage.setItem('hasPlayedStartupAudio', 'true');
     }
   }, []);
   
