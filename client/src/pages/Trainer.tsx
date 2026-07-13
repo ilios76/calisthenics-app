@@ -174,9 +174,34 @@ export default function TrainerPage() {
     }
   }, [phase, setNumber, totalSets, currentEx, exIndex, totalExercises, completedSessions, isTimeBased]);
 
+  const speakCoachingPrompt = (text: string) => {
+    if (!('speechSynthesis' in window)) return;
+    
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.95;
+    utterance.pitch = 0.8; // Lower pitch for male voice
+    utterance.volume = 1;
+    
+    // Try to select male voice
+    const voices = window.speechSynthesis.getVoices();
+    const maleVoice = voices.find(v => v.name.includes('Male') || v.name.includes('male'));
+    if (maleVoice) {
+      utterance.voice = maleVoice;
+    }
+    
+    window.speechSynthesis.speak(utterance);
+  };
+
   const startExercise = () => {
     if (!currentEx) return;
     setPhase('exercise');
+    
+    // Speak coaching prompt
+    const coachingPrompt = `Ready to crush ${currentEx.name}. Focus on form, breathe steadily, and give it your best effort.`;
+    speakCoachingPrompt(coachingPrompt);
+    
     if (isTimeBased) {
       setTimeLeft(currentEx.durationSeconds!);
       setIsRunning(true);
@@ -207,6 +232,12 @@ export default function TrainerPage() {
   };
 
   const completeSet = () => {
+    // Speak exercise tips on first rep
+    if (setNumber === 1) {
+      const exerciseTips = "Dont let your hips sag, or pike up... You are doing Great! Breath in on the way down, breath out on the way up.....That's very nice!! ...Look slightly forward, not straight down....That's it...Very nice, you are doing very well, keep it up!";
+      speakCoachingPrompt(exerciseTips);
+    }
+    
     if (setNumber < totalSets) {
       setSetNumber(s => s + 1);
       startRest();

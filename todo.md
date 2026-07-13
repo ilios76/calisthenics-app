@@ -70,3 +70,9 @@
 - [x] Implemented SimpleNotificationService with browser Notification API
 - [x] Added Greek language support for notification dates
 - [x] Integrated with WorkoutCalendar for auto-notifications
+
+## Coach Auto-Speak (COMPLETED)
+- [x] Add auto-speak for coach quotes in Greek
+- [x] Add toggle button (Volume2/VolumeX icons)
+- [x] Visual indicator (green ON, gray OFF)
+- [x] Speaking state tracking
