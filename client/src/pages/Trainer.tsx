@@ -117,6 +117,7 @@ export default function TrainerPage() {
           setPhase('complete');
           setCompletedSessions(completedSessions + 1);
           localStorage.setItem('lastWorkoutTime', Date.now().toString());
+          playAudioPrompt('/manus-storage/Congratulations_ea672e28.mp3');
           const coachMsg = generatePostWorkoutMessage(30, 50, completion.streak);
           toast.custom((t) => (
             <div
@@ -154,6 +155,7 @@ export default function TrainerPage() {
           setPhase('complete');
           setCompletedSessions(completedSessions + 1);
           localStorage.setItem('lastWorkoutTime', Date.now().toString());
+          playAudioPrompt('/manus-storage/Congratulations_ea672e28.mp3');
           const coachMsg = generatePostWorkoutMessage(30, 50, completion.streak);
           toast.custom((t) => (
             <div
@@ -174,33 +176,18 @@ export default function TrainerPage() {
     }
   }, [phase, setNumber, totalSets, currentEx, exIndex, totalExercises, completedSessions, isTimeBased]);
 
-  const speakCoachingPrompt = (text: string) => {
-    if (!('speechSynthesis' in window)) return;
-    
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    utterance.rate = 0.95;
-    utterance.pitch = 0.8; // Lower pitch for male voice
-    utterance.volume = 1;
-    
-    // Try to select male voice
-    const voices = window.speechSynthesis.getVoices();
-    const maleVoice = voices.find(v => v.name.includes('Male') || v.name.includes('male'));
-    if (maleVoice) {
-      utterance.voice = maleVoice;
-    }
-    
-    window.speechSynthesis.speak(utterance);
+  const playAudioPrompt = (audioUrl: string) => {
+    const audio = new Audio(audioUrl);
+    audio.volume = 1;
+    audio.play().catch(err => console.error('Audio playback failed:', err));
   };
 
   const startExercise = () => {
     if (!currentEx) return;
     setPhase('exercise');
     
-    // Speak coaching prompt
-    const coachingPrompt = `Ready to crush ${currentEx.name}. Focus on form, breathe steadily, and give it your best effort.`;
-    speakCoachingPrompt(coachingPrompt);
+    // Play start exercise audio prompt
+    playAudioPrompt('/manus-storage/startexerciseprompt_b2de78de.mp3');
     
     if (isTimeBased) {
       setTimeLeft(currentEx.durationSeconds!);
@@ -232,10 +219,9 @@ export default function TrainerPage() {
   };
 
   const completeSet = () => {
-    // Speak exercise tips on first rep
+    // Play during exercise audio prompt on first rep
     if (setNumber === 1) {
-      const exerciseTips = "Dont let your hips sag, or pike up... You are doing Great! Breath in on the way down, breath out on the way up.....That's very nice!! ...Look slightly forward, not straight down....That's it...Very nice, you are doing very well, keep it up!";
-      speakCoachingPrompt(exerciseTips);
+      playAudioPrompt('/manus-storage/duringexerciseprompt_9dcc2cff.mp3');
     }
     
     if (setNumber < totalSets) {
