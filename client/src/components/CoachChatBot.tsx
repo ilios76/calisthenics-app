@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Send, X } from "lucide-react";
+import { Loader2, Send, X, Volume2, VolumeX } from "lucide-react";
 import { Streamdown } from "streamdown";
 
 interface Message {
@@ -28,8 +28,28 @@ export function CoachChatBot({ open, onOpenChange, embedded = false }: CoachChat
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const chatMutation = trpc.coach.chat.useMutation();
+
+  // Auto-speak coach messages
+  const speakMessage = (text: string) => {
+    if (!('speechSynthesis' in window)) return;
+    
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'el-GR';
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    
+    window.speechSynthesis.speak(utterance);
+  };
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -54,13 +74,16 @@ export function CoachChatBot({ open, onOpenChange, embedded = false }: CoachChat
       });
 
       if (response.success) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant" as const,
-            content: response.message,
-          },
-        ]);
+        const assistantMessage = {
+          role: "assistant" as const,
+          content: response.message,
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+        
+        // Auto-speak if enabled
+        if (autoSpeak) {
+          speakMessage(response.message);
+        }
       } else {
         setMessages((prev) => [
           ...prev,
@@ -132,6 +155,26 @@ export function CoachChatBot({ open, onOpenChange, embedded = false }: CoachChat
 
         {/* Input Area */}
         <div className="border-t border-slate-700 p-4 bg-slate-900">
+          <div className="flex gap-2 mb-2">
+            <Button
+              onClick={() => setAutoSpeak(!autoSpeak)}
+              variant="outline"
+              size="sm"
+              className={`flex items-center gap-1 ${
+                autoSpeak
+                  ? 'bg-green-600 hover:bg-green-700 text-white border-green-600'
+                  : 'bg-slate-800 hover:bg-slate-700 text-slate-400 border-slate-700'
+              }`}
+              title={autoSpeak ? 'Auto-speak ON' : 'Auto-speak OFF'}
+            >
+              {autoSpeak ? (
+                <Volume2 className="w-4 h-4" />
+              ) : (
+                <VolumeX className="w-4 h-4" />
+              )}
+              <span className="text-xs">{autoSpeak ? 'ON' : 'OFF'}</span>
+            </Button>
+          </div>
           <div className="flex gap-2">
             <Input
               value={input}
